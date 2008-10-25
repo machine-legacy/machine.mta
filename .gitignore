@@ -1,0 +1,15 @@
+*~
+*.user
+*.suo
+*.resharper
+*.swp
+*.sln.cache
+Build
+obj
+bin
+_ReSharper.*
+InstallUtil.InstallLog
+NDependOut
+Specifications.html
+Libraries/Machine
+Libraries/NHibernate
