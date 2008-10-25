@@ -128,7 +128,7 @@ namespace Machine.Mta.LowerLevelMessageBus
           IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
           if (transportMessage.CorrelationId != Guid.Empty)
           {
-            _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId);
+            _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId, messages);
           }
           foreach (IMessage message in messages)
           {
@@ -186,16 +186,39 @@ namespace Machine.Mta.LowerLevelMessageBus
     #endregion
   }
 
+  public class Reply
+  {
+    private readonly object _state;
+    private readonly IMessage[] _messages;
+
+    public object State
+    {
+      get { return _state; }
+    }
+
+    public IMessage[] Messages
+    {
+      get { return _messages; }
+    }
+
+    public Reply(object state, IMessage[] messages)
+    {
+      _state = state;
+      _messages = messages;
+    }
+  }
+
   public class MessageBusAsyncResult : IAsyncResult
   {
     private readonly AsyncCallback _callback;
     private readonly object _state;
     private readonly ManualResetEvent _waitHandle;
     private volatile bool _completed;
+    private Reply _reply;
 
     public object AsyncState
     {
-      get { return _state; }
+      get { return _reply; }
     }
 
     public WaitHandle AsyncWaitHandle
@@ -220,8 +243,9 @@ namespace Machine.Mta.LowerLevelMessageBus
       _waitHandle = new ManualResetEvent(false);
     }
 
-    public void Complete()
+    public void Complete(params IMessage[] messages)
     {
+      _reply = new Reply(_state, messages);
       _completed = true;
       _waitHandle.Set();
       if (_callback != null)
@@ -243,7 +267,7 @@ namespace Machine.Mta.LowerLevelMessageBus
       }
     }
 
-    public void InvokeAndRemove(Guid id)
+    public void InvokeAndRemove(Guid id, IMessage[] messages)
     {
       MessageBusAsyncResult ar;
       lock (_map)
@@ -254,7 +278,7 @@ namespace Machine.Mta.LowerLevelMessageBus
         }
         _map.Remove(id);
       }
-      ar.Complete();
+      ar.Complete(messages);
     }
   }
 }
