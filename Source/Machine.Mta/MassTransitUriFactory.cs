@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public class MassTransitUriFactory : IMassTransitUriFactory
   {

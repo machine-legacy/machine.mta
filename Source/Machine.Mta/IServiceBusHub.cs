@@ -1,6 +1,6 @@
 using MassTransit.ServiceBus;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public interface IServiceBusHub : IHostedService
   {

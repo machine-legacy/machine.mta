@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using MassTransit.ServiceBus;
 
-namespace Machine.MassTransitExtensions.LowerLevelMessageBus
+namespace Machine.Mta.LowerLevelMessageBus
 {
   public class Invoker<T> : IInvoker where T : class, IMessage
   {

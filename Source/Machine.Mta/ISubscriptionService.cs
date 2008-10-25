@@ -2,7 +2,7 @@ using System;
 
 using MassTransit.ServiceBus;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public interface ISubscriptionService : IDisposable
   {

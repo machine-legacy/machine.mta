@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.MassTransitExtensions.InterfacesAsMessages
+namespace Machine.Mta.InterfacesAsMessages
 {
   public class MessageFactory : IMessageFactory
   {

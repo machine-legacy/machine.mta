@@ -5,7 +5,7 @@ using MassTransit.ServiceBus;
 using MassTransit.ServiceBus.Internal;
 using MassTransit.ServiceBus.Threading;
 
-namespace Machine.MassTransitExtensions.LowerLevelMessageBus
+namespace Machine.Mta.LowerLevelMessageBus
 {
   public class MessageBus : IMessageBus
   {

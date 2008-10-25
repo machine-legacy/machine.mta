@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Machine.MassTransitExtensions.InterfacesAsMessages
+namespace Machine.Mta.InterfacesAsMessages
 {
   public class MessageInterfaceImplementations
   {

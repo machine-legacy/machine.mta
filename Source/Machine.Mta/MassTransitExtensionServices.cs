@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 using Machine.Container;
 using Machine.Container.Plugins;
-using Machine.MassTransitExtensions.InterfacesAsMessages;
-using Machine.MassTransitExtensions.LowerLevelMessageBus;
+using Machine.Mta.InterfacesAsMessages;
+using Machine.Mta.LowerLevelMessageBus;
 
 using MassTransit.ServiceBus.Internal;
 using MassTransit.ServiceBus.Subscriptions;
 using MassTransit.ServiceBus.Subscriptions.ServerHandlers;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public class MassTransitExtensionServices : IServiceCollection
   {

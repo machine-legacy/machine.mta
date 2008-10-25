@@ -5,7 +5,7 @@ using System.Threading;
 
 using Machine.Core.Utility;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public class MessageEndpointLookup : IMessageEndpointLookup 
   {

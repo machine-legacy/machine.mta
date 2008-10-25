@@ -1,6 +1,6 @@
 using System;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public interface IMassTransitUriFactory
   {

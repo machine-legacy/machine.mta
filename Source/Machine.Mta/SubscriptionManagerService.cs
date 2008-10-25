@@ -1,7 +1,7 @@
 using MassTransit.ServiceBus;
 using MassTransit.ServiceBus.Subscriptions;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public class SubscriptionManagerService : AbstractSubscriptionService
   {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public interface IMessageEndpointLookup
   {

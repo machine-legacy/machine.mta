@@ -6,7 +6,7 @@ using Machine.Container.Services;
 
 using MassTransit.ServiceBus;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public class MachineObjectBuilder : IObjectBuilder
   {

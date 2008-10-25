@@ -5,9 +5,9 @@ using System.Reflection;
 
 using Newtonsoft.Json;
 
-using Machine.MassTransitExtensions.LowerLevelMessageBus;
+using Machine.Mta.LowerLevelMessageBus;
 
-namespace Machine.MassTransitExtensions.InterfacesAsMessages
+namespace Machine.Mta.InterfacesAsMessages
 {
   public class MessageInterfaceTransportFormatter : ITransportMessageBodyFormatter
   {

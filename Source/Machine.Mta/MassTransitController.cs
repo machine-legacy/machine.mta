@@ -1,6 +1,6 @@
 using MassTransit.ServiceBus.Internal;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public class MassTransitController : IMassTransit
   {

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 
 using Machine.Container.Services;
-using Machine.MassTransitExtensions.LowerLevelMessageBus;
+using Machine.Mta.LowerLevelMessageBus;
 
-namespace Machine.MassTransitExtensions
+namespace Machine.Mta
 {
   public class MessageBusManager : IMessageBusManager, IDisposable
   {
