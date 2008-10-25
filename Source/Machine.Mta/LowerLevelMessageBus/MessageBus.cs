@@ -125,7 +125,7 @@ namespace Machine.Mta.LowerLevelMessageBus
       {
         using (CurrentMessageContext.Open(transportMessage))
         {
-          ICollection<IMessage> messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
+          IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
           if (transportMessage.CorrelationId != Guid.Empty)
           {
             _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId);

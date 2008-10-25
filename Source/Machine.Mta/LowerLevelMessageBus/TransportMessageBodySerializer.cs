@@ -24,13 +24,13 @@ namespace Machine.Mta.LowerLevelMessageBus
       }
     }
 
-    public ICollection<IMessage> Deserialize(byte[] body)
+    public IMessage[] Deserialize(byte[] body)
     {
       using (MemoryStream stream = new MemoryStream(body))
       {
         List<IMessage> messages = new List<IMessage>();
         messages.AddRange(_transportMessageBodyFormatter.Deserialize(stream));
-        return messages;
+        return messages.ToArray();
       }
     }
   }
