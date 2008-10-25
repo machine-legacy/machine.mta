@@ -13,30 +13,34 @@ namespace Machine.Mta.LowerLevelMessageBus
     private readonly IMassTransitUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly IEndpointResolver _endpointResolver;
-    private readonly IEndpoint _endpoint;
-    private readonly EndpointName _endpointName;
+    private readonly IEndpoint _listeningOn;
+    private readonly IEndpoint _poison;
+    private readonly EndpointName _listeningOnEndpointName;
+    private readonly EndpointName _poisonEndpointName;
     private readonly ResourceThreadPool<IEndpoint, object> _threads;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly MessageDispatcher _dispatcher;
     private readonly AsyncCallbackMap _asyncCallbackMap;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMassTransitUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher dispatcher, EndpointName endpointName)
+    public MessageBus(IEndpointResolver endpointResolver, IMassTransitUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
     {
       _endpointResolver = endpointResolver;
       _dispatcher = dispatcher;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageEndpointLookup = messageEndpointLookup;
       _uriFactory = uriFactory;
-      _endpoint = _endpointResolver.Resolve(_uriFactory.CreateUri(endpointName));
+      _listeningOn = _endpointResolver.Resolve(_uriFactory.CreateUri(listeningOnEndpointName));
+      _poison = _endpointResolver.Resolve(_uriFactory.CreateUri(poisonEndpointName));
+      _listeningOnEndpointName = listeningOnEndpointName;
+      _poisonEndpointName = poisonEndpointName;
       _messageEndpointLookup = messageEndpointLookup;
-      _endpointName = endpointName;
-      _threads = new ResourceThreadPool<IEndpoint, object>(_endpoint, EndpointReader, EndpointDispatcher, 10, 1, 1);
+      _threads = new ResourceThreadPool<IEndpoint, object>(_listeningOn, EndpointReader, EndpointDispatcher, 10, 1, 1);
       _asyncCallbackMap = new AsyncCallbackMap();
     }
 
     public EndpointName Address
     {
-      get { return _endpointName; }
+      get { return _listeningOnEndpointName; }
     }
 
     public void Start()
@@ -116,10 +120,10 @@ namespace Machine.Mta.LowerLevelMessageBus
 			{
 			  return;
 			}
+      TransportMessage transportMessage = (TransportMessage)obj;
       try
       {
-        TransportMessage transportMessage = (TransportMessage)obj;
-        using (CurrentMessageContext currentMessageContext = CurrentMessageContext.Open(transportMessage))
+        using (CurrentMessageContext.Open(transportMessage))
         {
           ICollection<IMessage> messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
           if (transportMessage.CorrelationId != Guid.Empty)
@@ -135,7 +139,7 @@ namespace Machine.Mta.LowerLevelMessageBus
       catch (Exception error)
       {
         _log.Error(error);
-        throw;
+        _poison.Send(transportMessage);
       }
     }
 

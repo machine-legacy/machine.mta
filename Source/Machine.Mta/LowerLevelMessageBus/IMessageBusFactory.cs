@@ -7,7 +7,7 @@ namespace Machine.Mta.LowerLevelMessageBus
 {
   public interface IMessageBusFactory
   {
-    IMessageBus CreateMessageBus(EndpointName endpointName);
+    IMessageBus CreateMessageBus(EndpointName listeningOnEndpointName, EndpointName poisonEndpointName);
   }
   public class MessageBusFactory : IMessageBusFactory
   {
@@ -27,9 +27,9 @@ namespace Machine.Mta.LowerLevelMessageBus
     }
 
     #region IMessageBusFactory Members
-    public IMessageBus CreateMessageBus(EndpointName endpointName)
+    public IMessageBus CreateMessageBus(EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
     {
-      return new MessageBus(_endpointResolver, _uriFactory, _messageEndpointLookup, _transportMessageBodySerializer, _messageDispatcher, endpointName);
+      return new MessageBus(_endpointResolver, _uriFactory, _messageEndpointLookup, _transportMessageBodySerializer, _messageDispatcher, listeningOnEndpointName, poisonEndpointName);
     }
     #endregion
   }

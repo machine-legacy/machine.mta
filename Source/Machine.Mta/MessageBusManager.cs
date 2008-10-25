@@ -19,9 +19,9 @@ namespace Machine.Mta
     }
 
     #region IMessageBusManager Members
-    public IMessageBus UseSingleBus(EndpointName local)
+    public IMessageBus UseSingleBus(EndpointName listeningEndpoint, EndpointName poisonEndpoint)
     {
-      _bus = _messageBusFactory.CreateMessageBus(local);
+      _bus = _messageBusFactory.CreateMessageBus(listeningEndpoint, poisonEndpoint);
       _container.Register.Type<IMessageBus>().Is(_bus);
       return _bus;
     }
