@@ -69,6 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EndpointName.cs" />
+    <Compile Include="MtaServices.cs" />
+    <Compile Include="Wrapper\SubscriptionManagerServices.cs" />
     <Compile Include="Wrapper\HostedServicesController.cs" />
     <Compile Include="Wrapper\IMassTransit.cs" />
     <Compile Include="Wrapper\IMassTransitConfigurationProvider.cs" />
@@ -102,7 +104,7 @@
     <Compile Include="Wrapper\MassTransitUriFactory.cs" />
     <Compile Include="Wrapper\MassTransitConfiguration.cs" />
     <Compile Include="Wrapper\MassTransitController.cs" />
-    <Compile Include="MassTransitExtensionServices.cs" />
+    <Compile Include="Wrapper\MassTransitExtensionServices.cs" />
     <Compile Include="LowerLevelMessageBus\MessageBus.cs" />
     <Compile Include="MessageBusManager.cs" />
     <Compile Include="MessageEndpointLookup.cs" />
