@@ -73,7 +73,7 @@ namespace Machine.Mta.Minimalistic
 
     private TransportMessage CreateAndSend<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
     {
-      return CreateAndSend(_messageEndpointLookup.LookupEndpointFor(typeof(T)), correlatedBy, messages);
+      return CreateAndSend(_messageEndpointLookup.LookupEndpointsFor(typeof(T)), correlatedBy, messages);
     }
 
     private TransportMessage CreateAndSend<T>(IEnumerable<EndpointName> destinations, Guid correlatedBy, params T[] messages) where T : class, IMessage

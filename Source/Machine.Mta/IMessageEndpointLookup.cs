@@ -6,7 +6,7 @@ namespace Machine.Mta
 {
   public interface IMessageEndpointLookup
   {
-    ICollection<EndpointName> LookupEndpointFor(Type messageType);
+    ICollection<EndpointName> LookupEndpointsFor(Type messageType);
     void SendMessageTypeTo(Type messageType, EndpointName destination);
     void SendMessageTypeTo<T>(EndpointName destination);
     void SendAllFromAssemblyTo<T>(Assembly assembly, EndpointName destination);

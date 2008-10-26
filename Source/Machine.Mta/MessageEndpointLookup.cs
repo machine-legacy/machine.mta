@@ -13,7 +13,7 @@ namespace Machine.Mta
     private readonly List<EndpointName> _catchAlls = new List<EndpointName>();
     private readonly ReaderWriterLock _lock = new ReaderWriterLock();
 
-    public ICollection<EndpointName> LookupEndpointFor(Type messageType)
+    public ICollection<EndpointName> LookupEndpointsFor(Type messageType)
     {
       using (RWLock.AsReader(_lock))
       {
