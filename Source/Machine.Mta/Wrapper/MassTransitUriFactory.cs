@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Machine.Mta.Wrapper
 {
-  public class MassTransitUriFactory : IMassTransitUriFactory
+  public class MassTransitUriFactory : IMtaUriFactory
   {
     private readonly IMassTransitConfigurationProvider _configurationProvider;
-    private static readonly Dictionary<Type, IMassTransitUriFactory> _factories = new Dictionary<Type, IMassTransitUriFactory>();
+    private static readonly Dictionary<Type, IMtaUriFactory> _factories = new Dictionary<Type, IMtaUriFactory>();
 
     static MassTransitUriFactory()
     {

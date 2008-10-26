@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using MassTransit.ServiceBus;
@@ -9,12 +9,12 @@ namespace Machine.Mta.Wrapper
 {
   public class ServiceBusFactory : IServiceBusFactory
   {
-    private readonly IMassTransitUriFactory _uriFactory;
+    private readonly IMtaUriFactory _uriFactory;
     private readonly IObjectBuilder _objectBuilder;
     private readonly ISubscriptionCache _subscriptionCache;
     private readonly IEndpointResolver _endpointResolver;
 
-    public ServiceBusFactory(IEndpointResolver endpointResolver, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache, IMassTransitUriFactory uriFactory)
+    public ServiceBusFactory(IEndpointResolver endpointResolver, IObjectBuilder objectBuilder, ISubscriptionCache subscriptionCache, IMtaUriFactory uriFactory)
     {
       _endpointResolver = endpointResolver;
       _objectBuilder = objectBuilder;

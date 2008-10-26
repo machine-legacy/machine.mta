@@ -75,7 +75,7 @@
     <Compile Include="Wrapper\HostedServicesController.cs" />
     <Compile Include="Wrapper\IMassTransit.cs" />
     <Compile Include="Wrapper\IMassTransitConfigurationProvider.cs" />
-    <Compile Include="IMassTransitUriFactory.cs" />
+    <Compile Include="IMtaUriFactory.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
     <Compile Include="IMessageEndpointLookup.cs" />

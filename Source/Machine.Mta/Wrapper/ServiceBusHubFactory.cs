@@ -9,12 +9,12 @@ namespace Machine.Mta.Wrapper
   public class ServiceBusHubFactory : IServiceBusHubFactory
   {
     private readonly IMassTransitConfigurationProvider _configurationProvider;
-    private readonly IMassTransitUriFactory _uriFactory;
+    private readonly IMtaUriFactory _uriFactory;
     private readonly IObjectBuilder _objectBuilder;
     private readonly IEndpointResolver _endpointResolver;
     private readonly ISubscriptionRepository _subscriptionRepository;
 
-    public ServiceBusHubFactory(IMassTransitConfigurationProvider configurationProvider, IEndpointResolver endpointResolver, IObjectBuilder objectBuilder, IMassTransitUriFactory uriFactory, ISubscriptionRepository subscriptionRepository)
+    public ServiceBusHubFactory(IMassTransitConfigurationProvider configurationProvider, IEndpointResolver endpointResolver, IObjectBuilder objectBuilder, IMtaUriFactory uriFactory, ISubscriptionRepository subscriptionRepository)
     {
       _configurationProvider = configurationProvider;
       _endpointResolver = endpointResolver;

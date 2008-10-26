@@ -10,7 +10,7 @@ namespace Machine.Mta.Minimalistic
   public class MessageBus : IMessageBus
   {
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(IMessageBus));
-    private readonly IMassTransitUriFactory _uriFactory;
+    private readonly IMtaUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly IEndpointResolver _endpointResolver;
     private readonly IEndpoint _listeningOn;
@@ -22,7 +22,7 @@ namespace Machine.Mta.Minimalistic
     private readonly MessageDispatcher _dispatcher;
     private readonly AsyncCallbackMap _asyncCallbackMap;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMassTransitUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
+    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
     {
       _endpointResolver = endpointResolver;
       _dispatcher = dispatcher;

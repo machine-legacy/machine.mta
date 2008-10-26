@@ -5,12 +5,12 @@ namespace Machine.Mta.Minimalistic
   public class MessageBusFactory : IMessageBusFactory
   {
     private readonly IEndpointResolver _endpointResolver;
-    private readonly IMassTransitUriFactory _uriFactory;
+    private readonly IMtaUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly MessageDispatcher _messageDispatcher;
 
-    public MessageBusFactory(IEndpointResolver endpointResolver, IMassTransitUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher messageDispatcher)
+    public MessageBusFactory(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher messageDispatcher)
     {
       _endpointResolver = endpointResolver;
       _uriFactory = uriFactory;

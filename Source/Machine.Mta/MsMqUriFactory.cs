@@ -2,7 +2,7 @@ using System;
 
 namespace Machine.Mta
 {
-  public class MsMqUriFactory : IMassTransitUriFactory
+  public class MsMqUriFactory : IMtaUriFactory
   {
     public Uri CreateUri(EndpointName name)
     {
