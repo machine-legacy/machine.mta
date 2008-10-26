@@ -38,6 +38,11 @@ namespace Machine.Mta.Minimalistic
       _asyncCallbackMap = new AsyncCallbackMap();
     }
 
+    public EndpointName PoisonAddress
+    {
+      get { return _poisonEndpointName; }
+    }
+
     public EndpointName Address
     {
       get { return _listeningOnEndpointName; }
