@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using MassTransit.ServiceBus.Internal;
 
-namespace Machine.Mta.LowerLevelMessageBus
+namespace Machine.Mta.Minimalistic
 {
   public interface IMessageBusFactory
   {

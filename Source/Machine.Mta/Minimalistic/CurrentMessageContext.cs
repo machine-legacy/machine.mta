@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.Mta.LowerLevelMessageBus
+namespace Machine.Mta.Minimalistic
 {
   public class CurrentMessageContext : IDisposable
   {

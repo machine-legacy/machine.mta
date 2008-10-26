@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using Machine.Container.Services;
-using Machine.Mta.LowerLevelMessageBus;
+using Machine.Mta.Minimalistic;
 
 namespace Machine.Mta
 {

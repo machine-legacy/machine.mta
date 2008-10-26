@@ -1,6 +1,6 @@
 using System;
 
-namespace Machine.Mta.LowerLevelMessageBus
+namespace Machine.Mta.Minimalistic
 {
   [Serializable]
   public class TransportMessage

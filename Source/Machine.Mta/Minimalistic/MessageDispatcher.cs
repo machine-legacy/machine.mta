@@ -5,7 +5,7 @@ using Machine.Container.Services;
 
 using MassTransit.ServiceBus;
 
-namespace Machine.Mta.LowerLevelMessageBus
+namespace Machine.Mta.Minimalistic
 {
   public class MessageDispatcher
   {
