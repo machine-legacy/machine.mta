@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EndpointName.cs" />
+    <Compile Include="Minimalistic\MessageBusFactory.cs" />
     <Compile Include="MtaServices.cs" />
     <Compile Include="Wrapper\SubscriptionManagerServices.cs" />
     <Compile Include="Wrapper\HostedServicesController.cs" />
@@ -97,10 +98,10 @@
     <Compile Include="Minimalistic\CurrentMessageContext.cs" />
     <Compile Include="IMessageBusManager.cs" />
     <Compile Include="Minimalistic\ITransportMessageBodyFormatter.cs" />
-    <Compile Include="Minimalistic\IMessageBusFactory.cs" />
+    <Compile Include="IMessageBusFactory.cs" />
     <Compile Include="Minimalistic\Invoker.cs" />
     <Compile Include="Minimalistic\MessageDispatcher.cs" />
-    <Compile Include="MachineObjectBuilder.cs" />
+    <Compile Include="Wrapper\MachineObjectBuilder.cs" />
     <Compile Include="Wrapper\MassTransitUriFactory.cs" />
     <Compile Include="Wrapper\MassTransitConfiguration.cs" />
     <Compile Include="Wrapper\MassTransitController.cs" />

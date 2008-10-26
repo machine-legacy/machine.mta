@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-
 using MassTransit.ServiceBus.Internal;
 
 namespace Machine.Mta.Minimalistic
 {
-  public interface IMessageBusFactory
-  {
-    IMessageBus CreateMessageBus(EndpointName listeningOnEndpointName, EndpointName poisonEndpointName);
-  }
   public class MessageBusFactory : IMessageBusFactory
   {
     private readonly IEndpointResolver _endpointResolver;
