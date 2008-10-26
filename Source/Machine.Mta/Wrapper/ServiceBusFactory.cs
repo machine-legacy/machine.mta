@@ -5,7 +5,7 @@ using MassTransit.ServiceBus;
 using MassTransit.ServiceBus.Internal;
 using MassTransit.ServiceBus.Subscriptions;
 
-namespace Machine.Mta
+namespace Machine.Mta.Wrapper
 {
   public class ServiceBusFactory : IServiceBusFactory
   {

@@ -69,9 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EndpointName.cs" />
-    <Compile Include="HostedServicesController.cs" />
-    <Compile Include="IMassTransit.cs" />
-    <Compile Include="IMassTransitConfigurationProvider.cs" />
+    <Compile Include="Wrapper\HostedServicesController.cs" />
+    <Compile Include="Wrapper\IMassTransit.cs" />
+    <Compile Include="Wrapper\IMassTransitConfigurationProvider.cs" />
     <Compile Include="IMassTransitUriFactory.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
@@ -88,10 +88,10 @@
     <Compile Include="InterfacesAsMessages\MessageInterfaceTransportFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IServiceBusFactory.cs" />
-    <Compile Include="IServiceBusHub.cs" />
-    <Compile Include="IServiceBusHubFactory.cs" />
-    <Compile Include="ISubscriptionService.cs" />
+    <Compile Include="Wrapper\IServiceBusFactory.cs" />
+    <Compile Include="Wrapper\IServiceBusHub.cs" />
+    <Compile Include="Wrapper\IServiceBusHubFactory.cs" />
+    <Compile Include="Wrapper\ISubscriptionService.cs" />
     <Compile Include="LowerLevelMessageBus\CurrentMessageContext.cs" />
     <Compile Include="IMessageBusManager.cs" />
     <Compile Include="LowerLevelMessageBus\ITransportMessageBodyFormatter.cs" />
@@ -99,19 +99,21 @@
     <Compile Include="LowerLevelMessageBus\Invoker.cs" />
     <Compile Include="LowerLevelMessageBus\MessageDispatcher.cs" />
     <Compile Include="MachineObjectBuilder.cs" />
-    <Compile Include="MassTransitUriFactory.cs" />
-    <Compile Include="MassTransitConfiguration.cs" />
-    <Compile Include="MassTransitController.cs" />
+    <Compile Include="Wrapper\MassTransitUriFactory.cs" />
+    <Compile Include="Wrapper\MassTransitConfiguration.cs" />
+    <Compile Include="Wrapper\MassTransitController.cs" />
     <Compile Include="MassTransitExtensionServices.cs" />
     <Compile Include="LowerLevelMessageBus\MessageBus.cs" />
     <Compile Include="MessageBusManager.cs" />
     <Compile Include="MessageEndpointLookup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServerSubscriptionService.cs" />
-    <Compile Include="ServiceBusFactory.cs" />
-    <Compile Include="ServiceBusHub.cs" />
-    <Compile Include="ServiceBusHubFactory.cs" />
-    <Compile Include="SubscriptionManagerService.cs" />
+    <Compile Include="MsMqUriFactory.cs" />
+    <Compile Include="NmsUriFactory.cs" />
+    <Compile Include="Wrapper\ServerSubscriptionService.cs" />
+    <Compile Include="Wrapper\ServiceBusFactory.cs" />
+    <Compile Include="Wrapper\ServiceBusHub.cs" />
+    <Compile Include="Wrapper\ServiceBusHubFactory.cs" />
+    <Compile Include="Wrapper\SubscriptionManagerService.cs" />
     <Compile Include="LowerLevelMessageBus\TransportMessage.cs" />
     <Compile Include="LowerLevelMessageBus\TransportMessageBodySerializer.cs" />
   </ItemGroup>

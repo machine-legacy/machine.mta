@@ -5,6 +5,7 @@ using Machine.Container;
 using Machine.Container.Plugins;
 using Machine.Mta.InterfacesAsMessages;
 using Machine.Mta.LowerLevelMessageBus;
+using Machine.Mta.Wrapper;
 
 using MassTransit.ServiceBus.Internal;
 using MassTransit.ServiceBus.Subscriptions;

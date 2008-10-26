@@ -4,7 +4,7 @@ using MassTransit.ServiceBus;
 
 using Machine.Container.Services;
 
-namespace Machine.Mta
+namespace Machine.Mta.Wrapper
 {
   public class HostedServicesController : IDisposable
   {
