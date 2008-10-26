@@ -19,9 +19,7 @@ namespace Machine.Mta.Minimalistic
     public void Dispatch(IMessage message)
     {
       Type messageType = message.GetType();
-      IList<object> handlers = _container.Resolve.All(delegate(Type handlerType) {
-        return IsAcceptableHandler(handlerType, messageType);
-      });
+      IList<object> handlers = _container.Resolve.All(handlerType => IsAcceptableHandler(handlerType, messageType));
       foreach (object handler in handlers)
       {
         foreach (HandlerConsumption consumption in EnumerateHandlerImplementationsOf(handler.GetType(), messageType))
@@ -30,11 +28,6 @@ namespace Machine.Mta.Minimalistic
           invoker.Dispatch(message, handler);
         }
       }
-    }
-
-    private static Type MakeHandlerType(Type messageType)
-    {
-      return typeof(Consumes<>.All).MakeGenericType(messageType);
     }
 
     private static IEnumerable<HandlerConsumption> EnumerateHandlerImplementationsOf(Type handlerType, Type messageType)
@@ -55,6 +48,11 @@ namespace Machine.Mta.Minimalistic
           yield return new HandlerConsumption(handlerType, wouldBeMessageType, interfaceType);
         }
       }
+    }
+
+    private static Type MakeHandlerType(Type messageType)
+    {
+      return typeof(Consumes<>.All).MakeGenericType(messageType);
     }
 
     private static bool IsAcceptableHandler(Type handlerType, Type messageType)

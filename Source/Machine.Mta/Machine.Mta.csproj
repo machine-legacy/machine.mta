@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Machine.Mta</RootNamespace>
     <AssemblyName>Machine.Mta</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -64,11 +64,15 @@
       <HintPath>..\..\Libraries\MassTransit\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EndpointName.cs" />
+    <Compile Include="Minimalistic\CovarianceHelpers.cs" />
     <Compile Include="Minimalistic\MessageBusFactory.cs" />
     <Compile Include="MtaServices.cs" />
     <Compile Include="Wrapper\SubscriptionManagerServices.cs" />
