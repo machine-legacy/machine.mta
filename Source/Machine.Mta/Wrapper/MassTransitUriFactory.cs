@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using Machine.Mta.Minimalistic;
+
 namespace Machine.Mta.Wrapper
 {
   public class MassTransitUriFactory : IMtaUriFactory

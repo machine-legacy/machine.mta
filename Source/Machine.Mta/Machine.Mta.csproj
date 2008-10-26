@@ -107,11 +107,11 @@
     <Compile Include="Wrapper\MassTransitController.cs" />
     <Compile Include="Wrapper\MassTransitExtensionServices.cs" />
     <Compile Include="Minimalistic\MessageBus.cs" />
-    <Compile Include="MessageBusManager.cs" />
-    <Compile Include="MessageEndpointLookup.cs" />
+    <Compile Include="Minimalistic\MessageBusManager.cs" />
+    <Compile Include="Minimalistic\MessageEndpointLookup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MsMqUriFactory.cs" />
-    <Compile Include="NmsUriFactory.cs" />
+    <Compile Include="Minimalistic\MsMqUriFactory.cs" />
+    <Compile Include="Minimalistic\NmsUriFactory.cs" />
     <Compile Include="Wrapper\ServerSubscriptionService.cs" />
     <Compile Include="Wrapper\ServiceBusFactory.cs" />
     <Compile Include="Wrapper\ServiceBusHub.cs" />

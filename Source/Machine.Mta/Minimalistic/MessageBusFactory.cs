@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 using MassTransit.ServiceBus.Internal;
 
 namespace Machine.Mta.Minimalistic

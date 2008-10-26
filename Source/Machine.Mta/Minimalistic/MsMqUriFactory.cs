@@ -1,6 +1,6 @@
 using System;
 
-namespace Machine.Mta
+namespace Machine.Mta.Minimalistic
 {
   public class MsMqUriFactory : IMtaUriFactory
   {

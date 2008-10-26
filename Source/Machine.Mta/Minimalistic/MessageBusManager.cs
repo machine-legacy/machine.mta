@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Machine.Container.Services;
 
-namespace Machine.Mta
+namespace Machine.Mta.Minimalistic
 {
   public class MessageBusManager : IMessageBusManager, IDisposable
   {
