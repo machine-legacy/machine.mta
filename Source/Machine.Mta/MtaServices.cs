@@ -1,6 +1,7 @@
+using MassTransit.ServiceBus.Internal;
+
 using Machine.Container;
 using Machine.Container.Plugins;
-
 using Machine.Mta.InterfacesAsMessages;
 using Machine.Mta.Minimalistic;
 
@@ -11,6 +12,7 @@ namespace Machine.Mta
     #region IServiceCollection Members
     public virtual void RegisterServices(ContainerRegisterer register)
     {
+      register.Type<EndpointResolver>();
       register.Type<MessageEndpointLookup>();
       register.Type<MessageInterfaceTransportFormatter>();
       register.Type<TransportMessageBodySerializer>();
