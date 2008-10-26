@@ -44,7 +44,7 @@ namespace Machine.Mta.InterfacesAsMessages
       {
         if (!property.CanRead || !property.CanWrite)
         {
-          throw new InvalidOperationException();
+          throw new InvalidOperationException("Bad message type: " + type.FullName + " property needs getter and setter: " + property.Name);
         }
         FieldBuilder fieldBuilder = typeBuilder.DefineField(MakeFieldName(property), property.PropertyType, FieldAttributes.Private);
         PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(property.Name, PropertyAttributes.None, property.PropertyType, new Type[0]);
