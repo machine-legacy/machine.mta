@@ -9,7 +9,7 @@ namespace Machine.Mta.Minimalistic
 {
   public class MessageBus : IMessageBus
   {
-    private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(IMessageBus));
+    private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
     private readonly IMtaUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly IEndpointResolver _endpointResolver;
