@@ -72,7 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EndpointName.cs" />
-    <Compile Include="Minimalistic\CovarianceHelpers.cs" />
+    <Compile Include="Minimalistic\InvarianceHelpers.cs" />
     <Compile Include="Minimalistic\MessageBusFactory.cs" />
     <Compile Include="MtaServices.cs" />
     <Compile Include="Wrapper\SubscriptionManagerServices.cs" />
