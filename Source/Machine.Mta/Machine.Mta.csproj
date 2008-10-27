@@ -72,6 +72,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EndpointName.cs" />
+    <Compile Include="IProvideHandlerOrder.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Minimalistic\InvarianceHelpers.cs" />
     <Compile Include="Minimalistic\MessageBusFactory.cs" />
     <Compile Include="MtaServices.cs" />
