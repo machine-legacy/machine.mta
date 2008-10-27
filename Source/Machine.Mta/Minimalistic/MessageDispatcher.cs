@@ -68,7 +68,40 @@ namespace Machine.Mta.Minimalistic
         }
       }
 
-      return invocations;
+      return ApplyOrdering(messageType, invocations);
+    }
+
+    private IEnumerable<FutureHandlerInvocation> ApplyOrdering(Type messageType, IEnumerable<FutureHandlerInvocation> invocations)
+    {
+      List<FutureHandlerInvocation> remaining = new List<FutureHandlerInvocation>(invocations);
+      List<FutureHandlerInvocation> ordered = new List<FutureHandlerInvocation>();
+      foreach (Type handlerOfType in GetHandlerOrderFor(messageType))
+      {
+        foreach (FutureHandlerInvocation invocation in new List<FutureHandlerInvocation>(remaining))
+        {
+          if (handlerOfType.IsAssignableFrom(invocation.TargetType))
+          {
+            ordered.Add(invocation);
+            remaining.Remove(invocation);
+            break;
+          }
+        }
+      }
+      ordered.AddRange(remaining);
+      return ordered;
+    }
+
+    private IEnumerable<Type> GetHandlerOrderFor(Type messageType)
+    {
+      object orderer = _container.Resolve.All(type => {
+        return type.IsSortOfContravariantWith(typeof(IProvideHandlerOrderFor<>).MakeGenericType(messageType));
+      }).FirstOrDefault();
+      if (orderer == null)
+      {
+        return new List<Type>();
+      }
+      IProvideHandlerOrderFor<IMessage> orderProvider = Invokers.CreateForHandlerOrderProvider(messageType, orderer);
+      return orderProvider.GetHandlerOrder();
     }
   }
 
