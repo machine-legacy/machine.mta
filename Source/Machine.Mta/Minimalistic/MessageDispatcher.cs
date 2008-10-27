@@ -88,8 +88,8 @@ namespace Machine.Mta.Minimalistic
       foreach (FutureHandlerInvocation invocation in _handlerDiscoverer.GetHandlerInvocationsFor(message.GetType()))
       {
         object handler = _container.Resolve.Object(invocation.TargetType);
-        IInvoker invoker = Invokers.CreateFor(invocation.TargetExpectsMessageOfType);
-        invoker.Dispatch(message, handler);
+        Consumes<IMessage>.All invoker = Invokers.CreateForHandler(invocation.TargetExpectsMessageOfType, handler);
+        invoker.Consume(message);
       }
     }
   }

@@ -5,27 +5,56 @@ using MassTransit.ServiceBus;
 
 namespace Machine.Mta.Minimalistic
 {
-  public class Invoker<T> : IInvoker where T : class, IMessage
+  public class ProvideHandlerOrderInvoker<T> : IProvideHandlerOrderFor<IMessage>  where T : class, IMessage
   {
-    #region IInvoker Members
-    public void Dispatch(IMessage message, object handler)
+    private readonly IProvideHandlerOrderFor<T> _target;
+
+    public ProvideHandlerOrderInvoker(IProvideHandlerOrderFor<T> target)
     {
-      Consumes<T>.All genericHandler = (Consumes<T>.All)handler;
-      genericHandler.Consume((T)message);
+      _target = target;
     }
-    #endregion
+
+    public IEnumerable<Type> GetHandlerOrder()
+    {
+      return _target.GetHandlerOrder();
+    }
+
+    public override string ToString()
+    {
+      return _target.ToString();
+    }
   }
-  
-  public interface IInvoker
+
+  public class HandlerInvoker<T> : Consumes<IMessage>.All where T : class, IMessage
   {
-    void Dispatch(IMessage message, object handler);
+    private readonly Consumes<T>.All _target;
+
+    public HandlerInvoker(Consumes<T>.All target)
+    {
+      _target = target;
+    }
+
+    public void Consume(IMessage message)
+    {
+      _target.Consume((T)message);
+    }
+
+    public override string ToString()
+    {
+      return _target.ToString();
+    }
   }
   
   public static class Invokers
   {
-    public static IInvoker CreateFor(Type messageType)
+    public static Consumes<IMessage>.All CreateForHandler(Type messageType, object handler)
     {
-      return (IInvoker)Activator.CreateInstance(typeof(Invoker<>).MakeGenericType(messageType));
+      return (Consumes<IMessage>.All)Activator.CreateInstance(typeof(HandlerInvoker<>).MakeGenericType(messageType), handler);
+    }
+
+    public static IProvideHandlerOrderFor<IMessage> CreateForHandlerOrderProvider(Type messageType, object handler)
+    {
+      return (IProvideHandlerOrderFor<IMessage>)Activator.CreateInstance(typeof(ProvideHandlerOrderInvoker<>).MakeGenericType(messageType), handler);
     }
   }
 }
