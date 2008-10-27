@@ -1,96 +1,96 @@
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using Machine.Container.Model;
 using Machine.Container.Services;
 
 using MassTransit.ServiceBus;
 
 namespace Machine.Mta.Minimalistic
 {
-  public class MessageDispatcher
+  public class FutureHandlerInvocation
+  {
+    readonly Type _targetType;
+    readonly Type _consumerType;
+
+    public Type TargetType
+    {
+      get { return _targetType; }
+    }
+
+    public Type ConsumerType
+    {
+      get { return _consumerType; }
+    }
+
+    public Type TargetExpectsMessageOfType
+    {
+      get { return _consumerType.GetGenericArguments()[0]; }
+    }
+
+    public FutureHandlerInvocation(Type targetType, Type consumerType)
+    {
+      _targetType = targetType;
+      _consumerType = consumerType;
+    }
+
+    public override string ToString()
+    {
+      return "Invoke " + this.TargetType.FullName + " to handle " + this.TargetExpectsMessageOfType.FullName;
+    }
+  }
+
+  public class HandlerDiscoverer
   {
     private readonly IMachineContainer _container;
 
-    public MessageDispatcher(IMachineContainer container)
+    public HandlerDiscoverer(IMachineContainer container)
     {
       _container = container;
     }
 
-    public void Dispatch(IMessage message)
+    public IEnumerable<FutureHandlerInvocation> GetHandlerInvocationsFor(Type messageType)
     {
-      Type messageType = message.GetType();
-      IList<object> handlers = _container.Resolve.All(handlerType => IsAcceptableHandler(handlerType, messageType));
-      foreach (object handler in handlers)
+      List<FutureHandlerInvocation> invocations = new List<FutureHandlerInvocation>();
+      
+      foreach (ServiceRegistration registration in _container.RegisteredServices)
       {
-        foreach (HandlerConsumption consumption in EnumerateHandlerImplementationsOf(handler.GetType(), messageType))
+        Type handlerOfMessageType = typeof(Consumes<>.All).MakeGenericType(messageType);
+        if (registration.ServiceType.IsSortOfContravariantWith(handlerOfMessageType))
         {
-          IInvoker invoker = Invokers.CreateFor(consumption.MessageType);
-          invoker.Dispatch(message, handler);
+          foreach (Type interfaceType in registration.ServiceType.GetInterfaces())
+          {
+            if (interfaceType.IsSortOfContravariantWith(handlerOfMessageType))
+            {
+              invocations.Add(new FutureHandlerInvocation(registration.ServiceType, interfaceType));
+            }
+          }
         }
       }
-    }
 
-    private static IEnumerable<HandlerConsumption> EnumerateHandlerImplementationsOf(Type handlerType, Type messageType)
-    {
-      foreach (Type interfaceType in handlerType.GetInterfaces())
-      {
-        if (interfaceType.GetGenericArguments().Length != 1)
-        {
-          continue;
-        }
-        Type wouldBeMessageType = interfaceType.GetGenericArguments()[0];
-        if (!wouldBeMessageType.IsAssignableFrom(messageType))
-        {
-          continue;
-        }
-        if (MakeHandlerType(wouldBeMessageType).IsAssignableFrom(interfaceType))
-        {
-          yield return new HandlerConsumption(handlerType, wouldBeMessageType, interfaceType);
-        }
-      }
-    }
-
-    private static Type MakeHandlerType(Type messageType)
-    {
-      return typeof(Consumes<>.All).MakeGenericType(messageType);
-    }
-
-    private static bool IsAcceptableHandler(Type handlerType, Type messageType)
-    {
-      foreach (HandlerConsumption consumption in EnumerateHandlerImplementationsOf(handlerType, messageType))
-      {
-        return true;
-      }
-      return false;
+      return invocations;
     }
   }
 
-  public class HandlerConsumption
+  public class MessageDispatcher
   {
-    readonly Type _handlerType;
-    readonly Type _messageType;
-    readonly Type _interfaceType;
+    private readonly IMachineContainer _container;
+    private readonly HandlerDiscoverer _handlerDiscoverer;
 
-    public Type HandlerType
+    public MessageDispatcher(IMachineContainer container)
     {
-      get { return _handlerType; }
+      _container = container;
+      _handlerDiscoverer = new HandlerDiscoverer(container);
     }
 
-    public Type MessageType
+    public void Dispatch(IMessage message)
     {
-      get { return _messageType; }
-    }
-
-    public Type InterfaceType
-    {
-      get { return _interfaceType; }
-    }
-
-    public HandlerConsumption(Type handlerType, Type messageType, Type interfaceType)
-    {
-      _handlerType = handlerType;
-      _messageType = messageType;
-      _interfaceType = interfaceType;
+      foreach (FutureHandlerInvocation invocation in _handlerDiscoverer.GetHandlerInvocationsFor(message.GetType()))
+      {
+        object handler = _container.Resolve.Object(invocation.TargetType);
+        IInvoker invoker = Invokers.CreateFor(invocation.TargetExpectsMessageOfType);
+        invoker.Dispatch(message, handler);
+      }
     }
   }
 }
