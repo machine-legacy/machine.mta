@@ -77,6 +77,7 @@
     </Compile>
     <Compile Include="Minimalistic\InvarianceHelpers.cs" />
     <Compile Include="Minimalistic\MessageBusFactory.cs" />
+    <Compile Include="Minimalistic\RequestReply.cs" />
     <Compile Include="MtaServices.cs" />
     <Compile Include="Wrapper\SubscriptionManagerServices.cs" />
     <Compile Include="Wrapper\HostedServicesController.cs" />
