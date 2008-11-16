@@ -13,16 +13,16 @@ namespace Machine.Mta.Minimalistic
     private readonly IMtaUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly IEndpointResolver _endpointResolver;
+    private readonly IMessageDispatcher _dispatcher;
     private readonly IEndpoint _listeningOn;
     private readonly IEndpoint _poison;
     private readonly EndpointName _listeningOnEndpointName;
     private readonly EndpointName _poisonEndpointName;
     private readonly ResourceThreadPool<IEndpoint, object> _threads;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
-    private readonly MessageDispatcher _dispatcher;
     private readonly AsyncCallbackMap _asyncCallbackMap;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
+    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
     {
       _endpointResolver = endpointResolver;
       _dispatcher = dispatcher;
@@ -135,10 +135,7 @@ namespace Machine.Mta.Minimalistic
           {
             _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId, messages);
           }
-          foreach (IMessage message in messages)
-          {
-            _dispatcher.Dispatch(message);
-          }
+          _dispatcher.Dispatch(messages);
         }
       }
       catch (Exception error)

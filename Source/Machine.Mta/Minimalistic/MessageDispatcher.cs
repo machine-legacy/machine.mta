@@ -105,7 +105,7 @@ namespace Machine.Mta.Minimalistic
     }
   }
 
-  public class MessageDispatcher
+  public class MessageDispatcher : IMessageDispatcher
   {
     private readonly IMachineContainer _container;
     private readonly HandlerDiscoverer _handlerDiscoverer;
@@ -116,13 +116,21 @@ namespace Machine.Mta.Minimalistic
       _handlerDiscoverer = new HandlerDiscoverer(container);
     }
 
-    public void Dispatch(IMessage message)
+    private void Dispatch(IMessage message)
     {
       foreach (FutureHandlerInvocation invocation in _handlerDiscoverer.GetHandlerInvocationsFor(message.GetType()))
       {
         object handler = _container.Resolve.Object(invocation.TargetType);
         Consumes<IMessage>.All invoker = Invokers.CreateForHandler(invocation.TargetExpectsMessageOfType, handler);
         invoker.Consume(message);
+      }
+    }
+
+    public void Dispatch(IMessage[] messages)
+    {
+      foreach (IMessage message in messages)
+      {
+        Dispatch(message);
       }
     }
   }
