@@ -80,6 +80,7 @@
     <Compile Include="Minimalistic\MessageBusFactory.cs" />
     <Compile Include="Minimalistic\RequestReply.cs" />
     <Compile Include="MtaServices.cs" />
+    <Compile Include="Timeouts\TimeoutClient.cs" />
     <Compile Include="Timeouts\Messages.cs" />
     <Compile Include="Timeouts\TimeoutHandlers.cs" />
     <Compile Include="Timeouts\TimeoutService.cs" />

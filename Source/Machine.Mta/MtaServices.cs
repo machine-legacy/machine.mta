@@ -23,6 +23,7 @@ namespace Machine.Mta
       register.Type<MessageBusManager>();
       register.Type<TimeoutService>();
       register.Type<TimeoutHandlers>();
+      register.Type<TimeoutClient>();
     }
   }
 }
