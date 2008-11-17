@@ -1,8 +1,6 @@
 using System;
 using System.Threading;
 
-using Machine.Mta.InterfacesAsMessages;
-
 using MassTransit.ServiceBus.Services.Timeout;
 using MassTransit.ServiceBus.Util;
 

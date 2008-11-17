@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.Mta.InterfacesAsMessages
+namespace Machine.Mta
 {
   public interface IMessageFactory
   {

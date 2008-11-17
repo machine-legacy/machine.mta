@@ -91,7 +91,7 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
     <Compile Include="IMessageEndpointLookup.cs" />
-    <Compile Include="InterfacesAsMessages\IMessageFactory.cs">
+    <Compile Include="IMessageFactory.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="InterfacesAsMessages\MessageFactory.cs">
