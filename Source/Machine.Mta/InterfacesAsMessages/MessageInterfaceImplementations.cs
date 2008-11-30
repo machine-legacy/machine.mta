@@ -40,36 +40,48 @@ namespace Machine.Mta.InterfacesAsMessages
       TypeAttributes attributes = TypeAttributes.Public | TypeAttributes.Serializable;
       TypeBuilder typeBuilder = _moduleBuilder.DefineType(newTypeName, attributes);
       typeBuilder.AddInterfaceImplementation(type);
-      foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+      foreach (Type interfaceType in TypesToGenerateForType(type))
       {
-        if (!property.CanRead || !property.CanWrite)
+        foreach (PropertyInfo property in interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
         {
-          throw new InvalidOperationException("Bad message type: " + type.FullName + " property needs getter and setter: " + property.Name);
+          if (!property.CanRead || !property.CanWrite)
+          {
+            throw new InvalidOperationException("Bad message type: " + type.FullName + " property needs getter and setter: " + property.Name);
+          }
+          FieldBuilder fieldBuilder = typeBuilder.DefineField(MakeFieldName(property), property.PropertyType, FieldAttributes.Private);
+          PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(property.Name, PropertyAttributes.None, property.PropertyType, new Type[0]);
+          MethodBuilder getMethod = typeBuilder.DefineMethod("get_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, property.PropertyType, new Type[0]);
+          ILGenerator ilGet = getMethod.GetILGenerator();
+          ilGet.Emit(OpCodes.Ldarg_0);
+          ilGet.Emit(OpCodes.Ldfld, fieldBuilder);
+          ilGet.Emit(OpCodes.Ret);
+
+          propertyBuilder.SetGetMethod(getMethod);
+          typeBuilder.DefineMethodOverride(getMethod, property.GetGetMethod());
+
+          MethodBuilder setMethod = typeBuilder.DefineMethod("set_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, typeof(void), new Type[] { property.PropertyType });
+          ParameterBuilder parameterBuilder = setMethod.DefineParameter(0, ParameterAttributes.None, "value");
+          ILGenerator ilSet = setMethod.GetILGenerator();
+          ilSet.Emit(OpCodes.Ldarg_0);
+          ilSet.Emit(OpCodes.Ldarg_1);
+          ilSet.Emit(OpCodes.Stfld, fieldBuilder);
+          ilSet.Emit(OpCodes.Ret);
+
+          propertyBuilder.SetSetMethod(setMethod);
+          typeBuilder.DefineMethodOverride(setMethod, property.GetSetMethod());
         }
-        FieldBuilder fieldBuilder = typeBuilder.DefineField(MakeFieldName(property), property.PropertyType, FieldAttributes.Private);
-        PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(property.Name, PropertyAttributes.None, property.PropertyType, new Type[0]);
-        MethodBuilder getMethod = typeBuilder.DefineMethod("get_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, property.PropertyType, new Type[0]);
-        ILGenerator ilGet = getMethod.GetILGenerator();
-        ilGet.Emit(OpCodes.Ldarg_0);
-        ilGet.Emit(OpCodes.Ldfld, fieldBuilder);
-        ilGet.Emit(OpCodes.Ret);
-
-        propertyBuilder.SetGetMethod(getMethod);
-        typeBuilder.DefineMethodOverride(getMethod, property.GetGetMethod());
-
-        MethodBuilder setMethod = typeBuilder.DefineMethod("set_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, typeof(void), new Type[] { property.PropertyType });
-        ParameterBuilder parameterBuilder = setMethod.DefineParameter(0, ParameterAttributes.None, "value");
-        ILGenerator ilSet = setMethod.GetILGenerator();
-        ilSet.Emit(OpCodes.Ldarg_0);
-        ilSet.Emit(OpCodes.Ldarg_1);
-        ilSet.Emit(OpCodes.Stfld, fieldBuilder);
-        ilSet.Emit(OpCodes.Ret);
-
-        propertyBuilder.SetSetMethod(setMethod);
-        typeBuilder.DefineMethodOverride(setMethod, property.GetSetMethod());
       }
       _interfaceToClass[type] = typeBuilder.CreateType();
       _classToInterface[_interfaceToClass[type]] = type;
+    }
+
+    private static IEnumerable<Type> TypesToGenerateForType(Type type)
+    {
+      foreach (Type interfaceType in type.FindInterfaces((ignored, data) => true, null))
+      {
+        yield return interfaceType;
+      }
+      yield return type;
     }
 
     private static string MakeFieldName(PropertyInfo property)
