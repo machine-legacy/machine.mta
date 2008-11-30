@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Machine.Container.Model;
-using Machine.Container.Services;
 
 using MassTransit.ServiceBus;
 
+using Machine.Container.Model;
+using Machine.Container.Services;
+
 namespace Machine.Mta.Minimalistic
 {
-  public class FutureHandlerInvocation
+  public class MessageHandlerType
   {
     readonly Type _targetType;
     readonly Type _consumerType;
@@ -28,7 +29,7 @@ namespace Machine.Mta.Minimalistic
       get { return _consumerType.GetGenericArguments()[0]; }
     }
 
-    public FutureHandlerInvocation(Type targetType, Type consumerType)
+    public MessageHandlerType(Type targetType, Type consumerType)
     {
       _targetType = targetType;
       _consumerType = consumerType;
@@ -49,9 +50,9 @@ namespace Machine.Mta.Minimalistic
       _container = container;
     }
 
-    public IEnumerable<FutureHandlerInvocation> GetHandlerInvocationsFor(Type messageType)
+    public IEnumerable<MessageHandlerType> GetHandlerTypesFor(Type messageType)
     {
-      List<FutureHandlerInvocation> invocations = new List<FutureHandlerInvocation>();
+      List<MessageHandlerType> messageHandlerTypes = new List<MessageHandlerType>();
       
       foreach (ServiceRegistration registration in _container.RegisteredServices)
       {
@@ -62,27 +63,27 @@ namespace Machine.Mta.Minimalistic
           {
             if (interfaceType.IsSortOfContravariantWith(handlerOfMessageType))
             {
-              invocations.Add(new FutureHandlerInvocation(registration.ServiceType, interfaceType));
+              messageHandlerTypes.Add(new MessageHandlerType(registration.ServiceType, interfaceType));
             }
           }
         }
       }
 
-      return ApplyOrdering(messageType, invocations);
+      return ApplyOrdering(messageType, messageHandlerTypes);
     }
 
-    private IEnumerable<FutureHandlerInvocation> ApplyOrdering(Type messageType, IEnumerable<FutureHandlerInvocation> invocations)
+    private IEnumerable<MessageHandlerType> ApplyOrdering(Type messageType, IEnumerable<MessageHandlerType> handlerTypes)
     {
-      List<FutureHandlerInvocation> remaining = new List<FutureHandlerInvocation>(invocations);
-      List<FutureHandlerInvocation> ordered = new List<FutureHandlerInvocation>();
+      List<MessageHandlerType> remaining = new List<MessageHandlerType>(handlerTypes);
+      List<MessageHandlerType> ordered = new List<MessageHandlerType>();
       foreach (Type handlerOfType in GetHandlerOrderFor(messageType))
       {
-        foreach (FutureHandlerInvocation invocation in new List<FutureHandlerInvocation>(remaining))
+        foreach (MessageHandlerType messageHandlerType in new List<MessageHandlerType>(remaining))
         {
-          if (handlerOfType.IsAssignableFrom(invocation.TargetType))
+          if (handlerOfType.IsAssignableFrom(messageHandlerType.TargetType))
           {
-            ordered.Add(invocation);
-            remaining.Remove(invocation);
+            ordered.Add(messageHandlerType);
+            remaining.Remove(messageHandlerType);
             break;
           }
         }
@@ -107,9 +108,9 @@ namespace Machine.Mta.Minimalistic
 
   public class MessageDispatcher : IMessageDispatcher
   {
-    private readonly IMachineContainer _container;
-    private readonly HandlerDiscoverer _handlerDiscoverer;
-    private readonly IMessageAspectsProvider _messageAspectsProvider;
+    readonly IMachineContainer _container;
+    readonly HandlerDiscoverer _handlerDiscoverer;
+    readonly IMessageAspectsProvider _messageAspectsProvider;
 
     public MessageDispatcher(IMachineContainer container, IMessageAspectsProvider messageAspectsProvider)
     {
@@ -120,11 +121,11 @@ namespace Machine.Mta.Minimalistic
 
     private void Dispatch(IMessage message)
     {
-      foreach (FutureHandlerInvocation futureInvocation in _handlerDiscoverer.GetHandlerInvocationsFor(message.GetType()))
+      foreach (MessageHandlerType messageHandlerType in _handlerDiscoverer.GetHandlerTypesFor(message.GetType()))
       {
-        object handler = _container.Resolve.Object(futureInvocation.TargetType);
-        Consumes<IMessage>.All invoker = Invokers.CreateForHandler(futureInvocation.TargetExpectsMessageOfType, handler);
-        HandlerInvocation invocation = futureInvocation.ToInvocation(message, handler, invoker, _messageAspectsProvider.GetAspects());
+        object handler = _container.Resolve.Object(messageHandlerType.TargetType);
+        Consumes<IMessage>.All invoker = Invokers.CreateForHandler(messageHandlerType.TargetExpectsMessageOfType, handler);
+        HandlerInvocation invocation = messageHandlerType.ToInvocation(message, handler, invoker, _messageAspectsProvider.GetAspects());
         invocation.Continue();
       }
     }
@@ -140,9 +141,9 @@ namespace Machine.Mta.Minimalistic
 
   public static class InvocationMappings
   {
-    public static HandlerInvocation ToInvocation(this FutureHandlerInvocation futureInvocation, IMessage message, object handler, Consumes<IMessage>.All invoker, Stack<IMessageAspect> aspects)
+    public static HandlerInvocation ToInvocation(this MessageHandlerType messageHandlerType, IMessage message, object handler, Consumes<IMessage>.All invoker, Stack<IMessageAspect> aspects)
     {
-      return new HandlerInvocation(message, futureInvocation.TargetExpectsMessageOfType, futureInvocation.TargetType, handler, invoker, aspects);
+      return new HandlerInvocation(message, messageHandlerType.TargetExpectsMessageOfType, messageHandlerType.TargetType, handler, invoker, aspects);
     }
   }
 
