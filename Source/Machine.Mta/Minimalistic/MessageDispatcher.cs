@@ -109,10 +109,12 @@ namespace Machine.Mta.Minimalistic
   {
     private readonly IMachineContainer _container;
     private readonly HandlerDiscoverer _handlerDiscoverer;
+    private readonly IMessageAspectsProvider _messageAspectsProvider;
 
-    public MessageDispatcher(IMachineContainer container)
+    public MessageDispatcher(IMachineContainer container, IMessageAspectsProvider messageAspectsProvider)
     {
       _container = container;
+      _messageAspectsProvider = messageAspectsProvider;
       _handlerDiscoverer = new HandlerDiscoverer(container);
     }
 
@@ -122,7 +124,7 @@ namespace Machine.Mta.Minimalistic
       {
         object handler = _container.Resolve.Object(futureInvocation.TargetType);
         Consumes<IMessage>.All invoker = Invokers.CreateForHandler(futureInvocation.TargetExpectsMessageOfType, handler);
-        HandlerInvocation invocation = futureInvocation.ToInvocation(message, handler, invoker);
+        HandlerInvocation invocation = futureInvocation.ToInvocation(message, handler, invoker, _messageAspectsProvider.GetAspects());
         invocation.Continue();
       }
     }
@@ -138,9 +140,9 @@ namespace Machine.Mta.Minimalistic
 
   public static class InvocationMappings
   {
-    public static HandlerInvocation ToInvocation(this FutureHandlerInvocation futureInvocation, IMessage message, object handler, Consumes<IMessage>.All invoker)
+    public static HandlerInvocation ToInvocation(this FutureHandlerInvocation futureInvocation, IMessage message, object handler, Consumes<IMessage>.All invoker, Stack<IMessageAspect> aspects)
     {
-      return new HandlerInvocation(message, futureInvocation.TargetExpectsMessageOfType, futureInvocation.TargetType, handler, invoker);
+      return new HandlerInvocation(message, futureInvocation.TargetExpectsMessageOfType, futureInvocation.TargetType, handler, invoker, aspects);
     }
   }
 
@@ -173,11 +175,6 @@ namespace Machine.Mta.Minimalistic
       get { return _handler; }
     }
 
-    public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, Consumes<IMessage>.All invoker)
-      : this(message, messageType, handlerType, handler, invoker, new Stack<IMessageAspect>())
-    {
-    }
-
     public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, Consumes<IMessage>.All invoker, Stack<IMessageAspect> aspects)
     {
       _message = message;
@@ -203,7 +200,15 @@ namespace Machine.Mta.Minimalistic
 
   public interface IMessageAspectsProvider
   {
-    ICollection<IMessageAspect> GetAspects();
+    Stack<IMessageAspect> GetAspects();
+  }
+
+  public class DefaultMessageAspectsProvider : IMessageAspectsProvider
+  {
+    public Stack<IMessageAspect> GetAspects()
+    {
+      return new Stack<IMessageAspect>();
+    }
   }
 
   public interface IMessageAspect

@@ -21,6 +21,7 @@ namespace Machine.Mta
       register.Type<MessageDispatcher>();
       register.Type<MessageBusFactory>();
       register.Type<MessageBusManager>();
+      register.Type<DefaultMessageAspectsProvider>();
       register.Type<TimeoutService>();
       register.Type<TimeoutHandlers>();
       register.Type<TimeoutClient>();
