@@ -118,11 +118,12 @@ namespace Machine.Mta.Minimalistic
 
     private void Dispatch(IMessage message)
     {
-      foreach (FutureHandlerInvocation invocation in _handlerDiscoverer.GetHandlerInvocationsFor(message.GetType()))
+      foreach (FutureHandlerInvocation futureInvocation in _handlerDiscoverer.GetHandlerInvocationsFor(message.GetType()))
       {
-        object handler = _container.Resolve.Object(invocation.TargetType);
-        Consumes<IMessage>.All invoker = Invokers.CreateForHandler(invocation.TargetExpectsMessageOfType, handler);
-        invoker.Consume(message);
+        object handler = _container.Resolve.Object(futureInvocation.TargetType);
+        Consumes<IMessage>.All invoker = Invokers.CreateForHandler(futureInvocation.TargetExpectsMessageOfType, handler);
+        HandlerInvocation invocation = futureInvocation.ToInvocation(message, handler, invoker);
+        invocation.Continue();
       }
     }
 
@@ -133,5 +134,80 @@ namespace Machine.Mta.Minimalistic
         Dispatch(message);
       }
     }
+  }
+
+  public static class InvocationMappings
+  {
+    public static HandlerInvocation ToInvocation(this FutureHandlerInvocation futureInvocation, IMessage message, object handler, Consumes<IMessage>.All invoker)
+    {
+      return new HandlerInvocation(message, futureInvocation.TargetExpectsMessageOfType, futureInvocation.TargetType, handler, invoker);
+    }
+  }
+
+  public class HandlerInvocation
+  {
+    readonly IMessage _message;
+    readonly Type _messageType;
+    readonly Type _handlerType;
+    readonly object _handler;
+    readonly Stack<IMessageAspect> _aspects;
+    readonly Consumes<IMessage>.All _invoker;
+
+    public IMessage Message
+    {
+      get { return _message; }
+    }
+
+    public Type MessageType
+    {
+      get { return _messageType; }
+    }
+
+    public Type HandlerType
+    {
+      get { return _handlerType; }
+    }
+
+    public object Handler
+    {
+      get { return _handler; }
+    }
+
+    public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, Consumes<IMessage>.All invoker)
+      : this(message, messageType, handlerType, handler, invoker, new Stack<IMessageAspect>())
+    {
+    }
+
+    public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, Consumes<IMessage>.All invoker, Stack<IMessageAspect> aspects)
+    {
+      _message = message;
+      _aspects = aspects;
+      _messageType = messageType;
+      _handlerType = handlerType;
+      _handler = handler;
+      _invoker = invoker;
+    }
+
+    public void Continue()
+    {
+      if (_aspects.Count > 0)
+      {
+        _aspects.Pop().Continue(this);
+      }
+      else
+      {
+        _invoker.Consume(_message);
+      }
+    }
+  }
+
+  public interface IMessageAspectsProvider
+  {
+    ICollection<IMessageAspect> GetAspects();
+  }
+
+  public interface IMessageAspect
+  {
+    void Continue(HandlerInvocation invocation);
   }
 }
