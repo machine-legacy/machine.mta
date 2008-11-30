@@ -61,9 +61,15 @@ namespace Machine.Mta.Minimalistic
         {
           foreach (Type interfaceType in registration.ServiceType.GetInterfaces())
           {
-            if (interfaceType.IsSortOfContravariantWith(handlerOfMessageType))
+            if (interfaceType.GetGenericArguments().Length > 0)
             {
-              messageHandlerTypes.Add(new MessageHandlerType(registration.ServiceType, interfaceType));
+              if (typeof(Consumes<>.All).MakeGenericType(interfaceType.GetGenericArguments()[0]).Equals(interfaceType))
+              {
+                if (interfaceType.IsSortOfContravariantWith(handlerOfMessageType))
+                {
+                  messageHandlerTypes.Add(new MessageHandlerType(registration.ServiceType, interfaceType));
+                }
+              }
             }
           }
         }
