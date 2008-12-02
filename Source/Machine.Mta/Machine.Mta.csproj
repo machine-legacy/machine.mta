@@ -76,6 +76,7 @@
     <Compile Include="IProvideHandlerOrder.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MessagePayload.cs" />
     <Compile Include="Minimalistic\InvarianceHelpers.cs" />
     <Compile Include="Minimalistic\MessageBusFactory.cs" />
     <Compile Include="Minimalistic\RequestReply.cs" />
