@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E5207944-1E30-4363-8A3C-2214F9C4CEA4}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -80,6 +80,14 @@
     <Compile Include="Minimalistic\MessageBusFactory.cs" />
     <Compile Include="Minimalistic\RequestReply.cs" />
     <Compile Include="MtaServices.cs" />
+    <Compile Include="Timing\CronTrigger.cs" />
+    <Compile Include="Timing\IOnceASecondTask.cs" />
+    <Compile Include="Timing\ITrigger.cs" />
+    <Compile Include="Timing\PublishMessageTask.cs" />
+    <Compile Include="Timing\ServerClock.cs" />
+    <Compile Include="Timing\SimpleCronEntry.cs" />
+    <Compile Include="Timing\TimingManager.cs" />
+    <Compile Include="Timing\TimingTaskFactory.cs" />
     <Compile Include="Timeouts\TimeoutClient.cs" />
     <Compile Include="Timeouts\Messages.cs" />
     <Compile Include="Timeouts\TimeoutHandlers.cs" />
