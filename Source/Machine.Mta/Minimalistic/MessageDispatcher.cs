@@ -4,6 +4,7 @@ using System.Linq;
 
 using MassTransit.ServiceBus;
 
+using Machine.Mta.Sagas;
 using Machine.Container.Model;
 using Machine.Container.Services;
 
@@ -131,7 +132,7 @@ namespace Machine.Mta.Minimalistic
       {
         object handler = _container.Resolve.Object(messageHandlerType.TargetType);
         Consumes<IMessage>.All invoker = Invokers.CreateForHandler(messageHandlerType.TargetExpectsMessageOfType, handler);
-        HandlerInvocation invocation = messageHandlerType.ToInvocation(message, handler, invoker, _messageAspectsProvider.GetAspects());
+        HandlerInvocation invocation = messageHandlerType.ToInvocation(message, handler, invoker, _messageAspectsProvider.DefaultAspects());
         invocation.Continue();
       }
     }
@@ -207,14 +208,26 @@ namespace Machine.Mta.Minimalistic
 
   public interface IMessageAspectsProvider
   {
-    Stack<IMessageAspect> GetAspects();
+    Stack<IMessageAspect> DefaultAspects();
   }
 
   public class DefaultMessageAspectsProvider : IMessageAspectsProvider
   {
-    public Stack<IMessageAspect> GetAspects()
+    readonly IMachineContainer _container;
+
+    public DefaultMessageAspectsProvider(IMachineContainer container)
     {
-      return new Stack<IMessageAspect>();
+      _container = container;
+    }
+
+    public Stack<IMessageAspect> DefaultAspects()
+    {
+      Stack<IMessageAspect> aspects = new Stack<IMessageAspect>();
+      foreach (Type type in new Type[] { typeof(SagaAspect) })
+      {
+        aspects.Push((IMessageAspect)_container.Resolve.Object(type));
+      }
+      return aspects;
     }
   }
 

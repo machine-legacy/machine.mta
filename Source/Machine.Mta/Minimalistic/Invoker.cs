@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using Machine.Mta.Sagas;
+
 using MassTransit.ServiceBus;
 
 namespace Machine.Mta.Minimalistic
@@ -44,17 +46,47 @@ namespace Machine.Mta.Minimalistic
       return _target.ToString();
     }
   }
+
+  public class RepositoryInvoker<T> : ISagaStateRepository<ISagaState> where T : class, ISagaState
+  {
+    readonly ISagaStateRepository<T> _target;
+
+    public RepositoryInvoker(ISagaStateRepository<T> target)
+    {
+      _target = target;
+    }
+
+    public ISagaState FindSagaState(Guid sagaId)
+    {
+      return _target.FindSagaState(sagaId);
+    }
+
+    public void Save(ISagaState sagaState)
+    {
+      _target.Save((T)sagaState);
+    }
+
+    public void Delete(ISagaState sagaState)
+    {
+      _target.Delete((T)sagaState);
+    }
+  }
   
   public static class Invokers
   {
-    public static Consumes<IMessage>.All CreateForHandler(Type messageType, object handler)
+    public static Consumes<IMessage>.All CreateForHandler(Type messageType, object target)
     {
-      return (Consumes<IMessage>.All)Activator.CreateInstance(typeof(HandlerInvoker<>).MakeGenericType(messageType), handler);
+      return (Consumes<IMessage>.All)Activator.CreateInstance(typeof(HandlerInvoker<>).MakeGenericType(messageType), target);
     }
 
-    public static IProvideHandlerOrderFor<IMessage> CreateForHandlerOrderProvider(Type messageType, object handler)
+    public static IProvideHandlerOrderFor<IMessage> CreateForHandlerOrderProvider(Type messageType, object target)
     {
-      return (IProvideHandlerOrderFor<IMessage>)Activator.CreateInstance(typeof(ProvideHandlerOrderInvoker<>).MakeGenericType(messageType), handler);
+      return (IProvideHandlerOrderFor<IMessage>)Activator.CreateInstance(typeof(ProvideHandlerOrderInvoker<>).MakeGenericType(messageType), target);
+    }
+
+    public static ISagaStateRepository<ISagaState> CreateForRepository(Type sagaStateType, object target)
+    {
+      return (ISagaStateRepository<ISagaState>)Activator.CreateInstance(typeof(RepositoryInvoker<>).MakeGenericType(sagaStateType), target);
     }
   }
 }
