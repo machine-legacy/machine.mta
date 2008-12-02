@@ -62,24 +62,6 @@ namespace Machine.Mta.Minimalistic
       SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, messages));
     }
 
-    private void Send(EndpointName destination, TransportMessage transportMessage)
-    {
-      Uri uri = _uriFactory.CreateUri(destination);
-      IEndpoint endpoint = _endpointResolver.Resolve(uri);
-      endpoint.Send(transportMessage);
-    }
-
-    private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
-    {
-      byte[] body = _transportMessageBodySerializer.Serialize(messages);
-      return CreateTransportMessage(correlatedBy, new MessagePayload(body));
-    }
-
-    private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
-    {
-      return new TransportMessage(this.Address, correlatedBy, payload.ToByteArray());
-    }
-
     public TransportMessage SendTransportMessage<T>(TransportMessage transportMessage)
     {
       return SendTransportMessage(_messageEndpointLookup.LookupEndpointsFor(typeof (T)), transportMessage);
@@ -102,6 +84,24 @@ namespace Machine.Mta.Minimalistic
     public void Dispose()
     {
       Stop();
+    }
+
+    public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
+    {
+      return new RequestReplyBuilder(SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages)), _asyncCallbackMap);
+    }
+
+    public void Reply<T>(params T[] messages) where T : class, IMessage
+    {
+      CurrentMessageContext cmc = CurrentMessageContext.Current;
+      EndpointName returnAddress = cmc.TransportMessage.ReturnAddress;
+      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(cmc.TransportMessage.Id, messages));
+    }
+
+    public void Publish<T>(params T[] messages) where T : class, IMessage
+    {
+      // Yes, this isn't really doing a Publish... See the commit message.
+      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 
     private static object EndpointReader(IEndpoint resource)
@@ -148,22 +148,22 @@ namespace Machine.Mta.Minimalistic
       }
     }
 
-    public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
+    private void Send(EndpointName destination, TransportMessage transportMessage)
     {
-      return new RequestReplyBuilder(SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages)), _asyncCallbackMap);
+      Uri uri = _uriFactory.CreateUri(destination);
+      IEndpoint endpoint = _endpointResolver.Resolve(uri);
+      endpoint.Send(transportMessage);
     }
 
-    public void Reply<T>(params T[] messages) where T : class, IMessage
+    private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
     {
-      CurrentMessageContext cmc = CurrentMessageContext.Current;
-      EndpointName returnAddress = cmc.TransportMessage.ReturnAddress;
-      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(cmc.TransportMessage.Id, messages));
+      byte[] body = _transportMessageBodySerializer.Serialize(messages);
+      return CreateTransportMessage(correlatedBy, new MessagePayload(body));
     }
 
-    public void Publish<T>(params T[] messages) where T : class, IMessage
+    private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
     {
-      // Yes, this isn't really doing a Publish... See the commit message.
-      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
+      return new TransportMessage(this.Address, correlatedBy, payload.ToByteArray());
     }
   }
 }
