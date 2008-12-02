@@ -54,12 +54,12 @@ namespace Machine.Mta.Minimalistic
 
     public void Send<T>(params T[] messages) where T : class, IMessage
     {
-      CreateAndSend(Guid.Empty, messages);
+      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 
     public void Send<T>(EndpointName destination, params T[] messages) where T : class, IMessage
     {
-      CreateAndSend(new[] { destination }, Guid.Empty, messages);
+      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, messages));
     }
 
     private void Send(EndpointName destination, TransportMessage transportMessage)
@@ -72,18 +72,21 @@ namespace Machine.Mta.Minimalistic
     private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
     {
       byte[] body = _transportMessageBodySerializer.Serialize(messages);
-      TransportMessage transportMessage = new TransportMessage(this.Address, correlatedBy, body);
-      return transportMessage;
+      return CreateTransportMessage(correlatedBy, new MessagePayload(body));
     }
 
-    private TransportMessage CreateAndSend<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
+    private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
     {
-      return CreateAndSend(_messageEndpointLookup.LookupEndpointsFor(typeof(T)), correlatedBy, messages);
+      return new TransportMessage(this.Address, correlatedBy, payload.ToByteArray());
     }
 
-    private TransportMessage CreateAndSend<T>(IEnumerable<EndpointName> destinations, Guid correlatedBy, params T[] messages) where T : class, IMessage
+    public TransportMessage SendTransportMessage<T>(TransportMessage transportMessage)
     {
-      TransportMessage transportMessage = CreateTransportMessage<T>(correlatedBy, messages);
+      return SendTransportMessage(_messageEndpointLookup.LookupEndpointsFor(typeof (T)), transportMessage);
+    }
+
+    public TransportMessage SendTransportMessage(IEnumerable<EndpointName> destinations, TransportMessage transportMessage)
+    {
       foreach (EndpointName destination in destinations)
       {
         Send(destination, transportMessage);
@@ -147,20 +150,20 @@ namespace Machine.Mta.Minimalistic
 
     public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
     {
-      return new RequestReplyBuilder(CreateAndSend(Guid.Empty, messages), _asyncCallbackMap);
+      return new RequestReplyBuilder(SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages)), _asyncCallbackMap);
     }
 
     public void Reply<T>(params T[] messages) where T : class, IMessage
     {
       CurrentMessageContext cmc = CurrentMessageContext.Current;
       EndpointName returnAddress = cmc.TransportMessage.ReturnAddress;
-      CreateAndSend(new[] { returnAddress }, cmc.TransportMessage.Id, messages);
+      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(cmc.TransportMessage.Id, messages));
     }
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
       // Yes, this isn't really doing a Publish... See the commit message.
-      CreateAndSend(Guid.Empty, messages);
+      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
   }
 }
