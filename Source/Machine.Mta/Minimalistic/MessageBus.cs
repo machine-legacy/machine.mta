@@ -62,6 +62,11 @@ namespace Machine.Mta.Minimalistic
       SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, messages));
     }
 
+    public void Send(EndpointName destination, MessagePayload payload)
+    {
+      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, payload));
+    }
+
     public TransportMessage SendTransportMessage<T>(TransportMessage transportMessage)
     {
       return SendTransportMessage(_messageEndpointLookup.LookupEndpointsFor(typeof (T)), transportMessage);
@@ -100,7 +105,6 @@ namespace Machine.Mta.Minimalistic
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
-      // Yes, this isn't really doing a Publish... See the commit message.
       SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 

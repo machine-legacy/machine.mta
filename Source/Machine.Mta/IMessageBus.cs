@@ -10,6 +10,7 @@ namespace Machine.Mta
     void Start();
     void Send<T>(params T[] messages) where T : class, IMessage;
     void Send<T>(EndpointName destination, params T[] messages) where T : class, IMessage;
+    void Send(EndpointName destination, MessagePayload payload);
     void Stop();
     IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage;
     void Reply<T>(params T[] messages) where T : class, IMessage;
