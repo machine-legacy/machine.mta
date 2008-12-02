@@ -4,7 +4,7 @@ using Machine.Container;
 using Machine.Container.Plugins;
 using Machine.Mta.InterfacesAsMessages;
 using Machine.Mta.Minimalistic;
-using Machine.Mta.Timeouts;
+using Machine.Mta.Timing;
 
 namespace Machine.Mta
 {
@@ -22,9 +22,11 @@ namespace Machine.Mta
       register.Type<MessageBusFactory>();
       register.Type<MessageBusManager>();
       register.Type<DefaultMessageAspectsProvider>();
-      register.Type<TimeoutService>();
-      register.Type<TimeoutHandlers>();
-      register.Type<TimeoutClient>();
+      register.Type<TimingManager>();
+      register.Type<TimingTaskFactory>();
+      register.Type<PublishScheduledMessagesTask>();
+      register.Type<ScheduleFutureMessages>();
+      register.Type<SchedulePublishHandler>();
     }
   }
 }

@@ -87,6 +87,7 @@
     <Compile Include="Timing\PublishMessageTask.cs" />
     <Compile Include="Timing\ServerClock.cs" />
     <Compile Include="Timing\SimpleCronEntry.cs" />
+    <Compile Include="Timing\ScheduleFutureMessages.cs" />
     <Compile Include="Timing\TimingManager.cs" />
     <Compile Include="Timing\TimingTaskFactory.cs" />
     <Compile Include="Timeouts\TimeoutClient.cs" />
