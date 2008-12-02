@@ -90,10 +90,6 @@
     <Compile Include="Timing\ScheduleFutureMessages.cs" />
     <Compile Include="Timing\TimingManager.cs" />
     <Compile Include="Timing\TimingTaskFactory.cs" />
-    <Compile Include="Timeouts\TimeoutClient.cs" />
-    <Compile Include="Timeouts\Messages.cs" />
-    <Compile Include="Timeouts\TimeoutHandlers.cs" />
-    <Compile Include="Timeouts\TimeoutService.cs" />
     <Compile Include="IMtaUriFactory.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
