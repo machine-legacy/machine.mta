@@ -71,6 +71,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdoNet\AdoNetSagaStateRepository.cs" />
+    <Compile Include="AdoNet\AdoNetScheduledPublishRepository.cs" />
+    <Compile Include="AdoNet\BinarySagaSerializer.cs" />
+    <Compile Include="AdoNet\DatabaseHelpers.cs" />
+    <Compile Include="AdoNet\IAdoNetConnectionString.cs" />
+    <Compile Include="AdoNet\IAdoNetSagaRepositoryConfiguration.cs" />
     <Compile Include="EndpointName.cs" />
     <Compile Include="IMessageDispatcher.cs" />
     <Compile Include="IProvideHandlerOrder.cs">
@@ -126,6 +132,9 @@
     <Compile Include="Minimalistic\NmsUriFactory.cs" />
     <Compile Include="Minimalistic\TransportMessage.cs" />
     <Compile Include="Minimalistic\TransportMessageBodySerializer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AdoNet\Tables.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
