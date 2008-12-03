@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{15F05072-C94E-45F4-8AA1-C74C6AA3DBE1}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -35,6 +35,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Logging\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Machine.Container, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5c474de7a495cff1, processorArchitecture=MSIL" />
     <Reference Include="Machine.Specifications, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Specifications\Machine.Specifications.dll</HintPath>
@@ -75,6 +76,8 @@
     <Compile Include="Timing\CronTriggerSpecs.cs" />
     <Compile Include="Timing\PublishMessageTaskSpecs.cs" />
     <Compile Include="Timing\SimpleCronEntrySpecs.cs" />
+    <Compile Include="WithBus.cs" />
+    <Compile Include="WithSaga.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Machine.Mta\Machine.Mta.csproj">
