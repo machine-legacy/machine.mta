@@ -148,7 +148,7 @@ namespace Machine.Mta.Minimalistic
 
   public static class InvocationMappings
   {
-    public static HandlerInvocation ToInvocation(this MessageHandlerType messageHandlerType, IMessage message, object handler, Consumes<IMessage>.All invoker, Stack<IMessageAspect> aspects)
+    public static HandlerInvocation ToInvocation(this MessageHandlerType messageHandlerType, IMessage message, object handler, Consumes<IMessage>.All invoker, Queue<IMessageAspect> aspects)
     {
       return new HandlerInvocation(message, messageHandlerType.TargetExpectsMessageOfType, messageHandlerType.TargetType, handler, invoker, aspects);
     }
@@ -160,7 +160,7 @@ namespace Machine.Mta.Minimalistic
     readonly Type _messageType;
     readonly Type _handlerType;
     readonly object _handler;
-    readonly Stack<IMessageAspect> _aspects;
+    readonly Queue<IMessageAspect> _aspects;
     readonly Consumes<IMessage>.All _invoker;
 
     public IMessage Message
@@ -183,7 +183,7 @@ namespace Machine.Mta.Minimalistic
       get { return _handler; }
     }
 
-    public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, Consumes<IMessage>.All invoker, Stack<IMessageAspect> aspects)
+    public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, Consumes<IMessage>.All invoker, Queue<IMessageAspect> aspects)
     {
       _message = message;
       _aspects = aspects;
@@ -197,7 +197,7 @@ namespace Machine.Mta.Minimalistic
     {
       if (_aspects.Count > 0)
       {
-        _aspects.Pop().Continue(this);
+        _aspects.Dequeue().Continue(this);
       }
       else
       {
@@ -208,7 +208,7 @@ namespace Machine.Mta.Minimalistic
 
   public interface IMessageAspectsProvider
   {
-    Stack<IMessageAspect> DefaultAspects();
+    Queue<IMessageAspect> DefaultAspects();
   }
 
   public class DefaultMessageAspectsProvider : IMessageAspectsProvider
@@ -225,12 +225,12 @@ namespace Machine.Mta.Minimalistic
       get { return new[] { typeof(SagaAspect) }; }
     }
 
-    public Stack<IMessageAspect> DefaultAspects()
+    public Queue<IMessageAspect> DefaultAspects()
     {
-      Stack<IMessageAspect> aspects = new Stack<IMessageAspect>();
+      Queue<IMessageAspect> aspects = new Queue<IMessageAspect>();
       foreach (Type type in this.AspectTypes)
       {
-        aspects.Push((IMessageAspect)_container.Resolve.Object(type));
+        aspects.Enqueue((IMessageAspect)_container.Resolve.Object(type));
       }
       return aspects;
     }
