@@ -42,6 +42,21 @@ namespace Machine.Mta.Minimalistic
     }
   }
 
+  public static class HandlerTypeHelpers
+  {
+    public static IEnumerable<Type> Interfaces(this Type type)
+    {
+      if (type.IsInterface)
+      {
+        yield return type;
+      }
+      foreach (Type interfaceType in type.GetInterfaces())
+      {
+        yield return interfaceType;
+      }
+    }
+  }
+
   public class HandlerDiscoverer
   {
     private readonly IMachineContainer _container;
@@ -60,7 +75,7 @@ namespace Machine.Mta.Minimalistic
         Type handlerOfMessageType = typeof(Consumes<>.All).MakeGenericType(messageType);
         if (registration.ServiceType.IsSortOfContravariantWith(handlerOfMessageType))
         {
-          foreach (Type interfaceType in registration.ServiceType.GetInterfaces())
+          foreach (Type interfaceType in registration.ServiceType.Interfaces())
           {
             if (interfaceType.GetGenericArguments().Length > 0)
             {
