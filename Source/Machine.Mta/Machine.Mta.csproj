@@ -78,6 +78,8 @@
     <Compile Include="AdoNet\IAdoNetConnectionString.cs" />
     <Compile Include="AdoNet\IAdoNetSagaRepositoryConfiguration.cs" />
     <Compile Include="EndpointName.cs" />
+    <Compile Include="Helpers\MessageHandlerServices.cs" />
+    <Compile Include="Helpers\MessageSetupHelpers.cs" />
     <Compile Include="IMessageDispatcher.cs" />
     <Compile Include="IProvideHandlerOrder.cs">
       <SubType>Code</SubType>
