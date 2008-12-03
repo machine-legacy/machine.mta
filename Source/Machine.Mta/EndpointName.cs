@@ -48,10 +48,16 @@ namespace Machine.Mta
 
     public override string ToString()
     {
-      return "Endpoint<" + _address + "." + _name + ">";
+      return _name + "@" + _address;
     }
 
     public static readonly EndpointName Null = new EndpointName();
+
+    public static EndpointName FromString(string value)
+    {
+      string[] fields = value.Split('@');
+      return ForRemoteQueue(fields[1], fields[0]);
+    }
 
     public static EndpointName ForRemoteQueue(string address, string queue)
     {
