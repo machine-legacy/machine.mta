@@ -7,6 +7,36 @@ using MassTransit.ServiceBus.Threading;
 
 namespace Machine.Mta.Minimalistic
 {
+  public class MessageFailureManager
+  {
+    readonly Dictionary<Guid, List<Exception>> _errors = new Dictionary<Guid, List<Exception>>();
+    readonly object _lock = new object();
+
+    public void RecordFailure(Guid id, Exception error)
+    {
+      lock (_lock)
+      {
+        if (!_errors.ContainsKey(id))
+        {
+          _errors[id] = new List<Exception>();
+        }
+        _errors[id].Add(error);
+      }
+    }
+
+    public bool SendToPoisonQueue(Guid id)
+    {
+      lock (_lock)
+      {
+        bool hasErrors = _errors.ContainsKey(id);
+        if (hasErrors)
+        {
+          _errors.Remove(id);
+        }
+        return hasErrors;
+      }
+    }
+  }
   public class MessageBus : IMessageBus
   {
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
@@ -21,6 +51,7 @@ namespace Machine.Mta.Minimalistic
     private readonly ResourceThreadPool<IEndpoint, object> _threads;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly AsyncCallbackMap _asyncCallbackMap;
+    private readonly MessageFailureManager _messageFailureManager;
 
     public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
     {
@@ -36,6 +67,7 @@ namespace Machine.Mta.Minimalistic
       _messageEndpointLookup = messageEndpointLookup;
       _threads = new ResourceThreadPool<IEndpoint, object>(_listeningOn, EndpointReader, EndpointDispatcher, 10, 1, 1);
       _asyncCallbackMap = new AsyncCallbackMap();
+      _messageFailureManager = new MessageFailureManager();
     }
 
     public EndpointName PoisonAddress
@@ -133,6 +165,11 @@ namespace Machine.Mta.Minimalistic
 			  return;
 			}
       TransportMessage transportMessage = (TransportMessage)obj;
+      if (_messageFailureManager.SendToPoisonQueue(transportMessage.Id))
+      {
+        _poison.Send(transportMessage);
+        return;
+      }
       try
       {
         using (CurrentMessageContext.Open(transportMessage))
@@ -147,8 +184,8 @@ namespace Machine.Mta.Minimalistic
       }
       catch (Exception error)
       {
-        _log.Error(error);
-        _poison.Send(transportMessage);
+        _messageFailureManager.RecordFailure(transportMessage.Id, error);
+        throw;
       }
     }
 
