@@ -220,10 +220,15 @@ namespace Machine.Mta.Minimalistic
       _container = container;
     }
 
+    protected virtual Type[] AspectTypes
+    {
+      get { return new[] { typeof(SagaAspect) }; }
+    }
+
     public Stack<IMessageAspect> DefaultAspects()
     {
       Stack<IMessageAspect> aspects = new Stack<IMessageAspect>();
-      foreach (Type type in new Type[] { typeof(SagaAspect) })
+      foreach (Type type in this.AspectTypes)
       {
         aspects.Push((IMessageAspect)_container.Resolve.Object(type));
       }

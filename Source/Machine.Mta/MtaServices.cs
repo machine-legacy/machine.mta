@@ -5,6 +5,7 @@ using Machine.Container.Plugins;
 using Machine.Mta.InterfacesAsMessages;
 using Machine.Mta.Minimalistic;
 using Machine.Mta.Timing;
+using Machine.Mta.Sagas;
 
 namespace Machine.Mta
 {
@@ -21,12 +22,12 @@ namespace Machine.Mta
       register.Type<MessageDispatcher>();
       register.Type<MessageBusFactory>();
       register.Type<MessageBusManager>();
-      register.Type<DefaultMessageAspectsProvider>();
       register.Type<TimingManager>();
       register.Type<TimingTaskFactory>();
       register.Type<PublishScheduledMessagesTask>();
       register.Type<ScheduleFutureMessages>();
       register.Type<SchedulePublishHandler>();
+      register.Type<SagaAspect>();
     }
   }
 }
