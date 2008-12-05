@@ -46,13 +46,47 @@ namespace Machine.Mta.Configuration
   }
   public class MessageForward
   {
-    string _name;
+    string _toQueue;
+    string _messageType;
 
     [XmlAttribute]
-    public string Name
+    public string To
     {
-      get { return _name; }
-      set { _name = value; }
+      get { return _toQueue; }
+      set { _toQueue = value; }
+    }
+
+    [XmlAttribute]
+    public string Message
+    {
+      get { return _messageType; }
+      set { _messageType = value; }
+    }
+
+    public Type MessageType
+    {
+      get
+      {
+        Type type = Type.GetType(_messageType);
+        if (type == null)
+        {
+          throw new InvalidOperationException("No such message: " + _messageType);
+        }
+        return type;
+      }
+    }
+
+    public void Apply(MessageBusConfigurationSection configuration, IMessageEndpointLookup lookup)
+    {
+      EndpointName endpointName = configuration.Lookup(this.To);
+      if (String.IsNullOrEmpty(_messageType))
+      {
+        lookup.SendAllTo(endpointName);
+      }
+      else
+      {
+        lookup.SendMessageTypeTo(this.MessageType, endpointName);
+      }
     }
   }
   [XmlRoot("messaging")]
@@ -89,7 +123,7 @@ namespace Machine.Mta.Configuration
     {
       foreach (MessageForward forward in _forwards)
       {
-        messageEndpointLookup.SendAllTo(Lookup(forward.Name));
+        forward.Apply(this, messageEndpointLookup);
       }
     }
 
