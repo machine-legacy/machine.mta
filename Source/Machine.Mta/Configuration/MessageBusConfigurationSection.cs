@@ -44,15 +44,33 @@ namespace Machine.Mta.Configuration
       return EndpointName.ForRemoteQueue(_address, _queue);
     }
   }
+  public class MessageForward
+  {
+    string _name;
+
+    [XmlAttribute]
+    public string Name
+    {
+      get { return _name; }
+      set { _name = value; }
+    }
+  }
   [XmlRoot("messaging")]
   public class MessageBusConfigurationSection
   {
     private readonly List<MessageBusEndpoint> _endpoints = new List<MessageBusEndpoint>();
+    private readonly List<MessageForward> _forwards = new List<MessageForward>();
 
     [XmlElement("endpoint")]
     public List<MessageBusEndpoint> Endpoints
     {
       get { return _endpoints; }
+    }
+
+    [XmlElement("forward")]
+    public List<MessageForward> Forwards
+    {
+      get { return _forwards; }
     }
 
     public EndpointName Lookup(string name)
@@ -65,6 +83,14 @@ namespace Machine.Mta.Configuration
         }
       }
       throw new KeyNotFoundException("No endpoint configured: " + name);
+    }
+
+    public void ApplyForwards(IMessageEndpointLookup messageEndpointLookup)
+    {
+      foreach (MessageForward forward in _forwards)
+      {
+        messageEndpointLookup.SendAllTo(Lookup(forward.Name));
+      }
     }
 
     public static MessageBusConfigurationSection Read(string name)
