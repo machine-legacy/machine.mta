@@ -93,6 +93,7 @@ namespace Machine.Mta.InterfacesAsMessages
       }
       JsonSerializer serializer = new JsonSerializer();
       serializer.Converters.Add(this);
+      serializer.Converters.Add(new EndpointNameJsonConverter());
       object value = serializer.Deserialize(reader, deserializeAs);
       reader.Read();
       return value;
@@ -131,6 +132,7 @@ namespace Machine.Mta.InterfacesAsMessages
       writer.WritePropertyName(MessageBodyPropertyName);
       JsonSerializer serializer = new JsonSerializer();
       serializer.Converters.Add(this);
+      serializer.Converters.Add(new EndpointNameJsonConverter());
       _skipNext = true;
       serializer.Serialize(writer, value);
       writer.WriteEndObject();

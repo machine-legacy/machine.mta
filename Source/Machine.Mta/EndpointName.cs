@@ -1,7 +1,26 @@
 using System;
 
+using Newtonsoft.Json;
+
 namespace Machine.Mta
 {
+  public class EndpointNameJsonConverter : JsonConverter
+  {
+    public override bool CanConvert(Type objectType)
+    {
+      return typeof(EndpointName).IsAssignableFrom(objectType);
+    }
+
+    public override object ReadJson(JsonReader reader, Type objectType)
+    {
+      return EndpointName.FromString(reader.Value.ToString());
+    }
+
+    public override void WriteJson(JsonWriter writer, object value)
+    {
+      writer.WriteValue(value.ToString());
+    }
+  }
   [Serializable]
   public class EndpointName
   {
