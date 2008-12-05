@@ -27,13 +27,16 @@ namespace Machine.Mta.AdoNet
     {
       using (IDbConnection connection = OpenConnection())
       {
-        IDbCommand command = CreateInsertCommand(connection);
-        command.Parameter("PublishAt").Value = scheduled.PublishAt;
-        command.Parameter("ReturnAddress").Value = scheduled.ReturnAddress.ToString();
-        command.Parameter("MessagePayload").Value = scheduled.MessagePayload.ToByteArray();
-        if (command.ExecuteNonQuery() != 1)
+        foreach (EndpointName destination in scheduled.Addresses)
         {
-          throw new InvalidOperationException();
+          IDbCommand command = CreateInsertCommand(connection);
+          command.Parameter("PublishAt").Value = scheduled.PublishAt;
+          command.Parameter("ReturnAddress").Value = destination.ToString();
+          command.Parameter("MessagePayload").Value = scheduled.MessagePayload.ToByteArray();
+          if (command.ExecuteNonQuery() != 1)
+          {
+            throw new InvalidOperationException();
+          }
         }
       }
     }
@@ -53,7 +56,7 @@ namespace Machine.Mta.AdoNet
             DateTime publishAt = reader.GetDateTime(1);
             string returnAddress = reader.GetString(2);
             byte[] messagePayload = (byte[])reader.GetValue(3);
-            scheduled.Add(new ScheduledPublish(publishAt, new MessagePayload(messagePayload), EndpointName.FromString(returnAddress)));
+            scheduled.Add(new ScheduledPublish(publishAt, new MessagePayload(messagePayload), new[] { EndpointName.FromString(returnAddress) }));
           }
           reader.Close();
         }
