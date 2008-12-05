@@ -18,13 +18,16 @@ namespace Machine.Mta
       using (RWLock.AsReader(_lock))
       {
         List<EndpointName> destinations = new List<EndpointName>(_catchAlls);
-        if (_map.ContainsKey(messageType))
+        foreach (KeyValuePair<Type, List<EndpointName>> pair in _map)
         {
-          foreach (EndpointName endpointName in destinations)
+          if (pair.Key.IsAssignableFrom(messageType))
           {
-            if (!destinations.Contains(endpointName))
+            foreach (EndpointName endpointName in pair.Value)
             {
-              destinations.Add(endpointName);
+              if (!destinations.Contains(endpointName))
+              {
+                destinations.Add(endpointName);
+              }
             }
           }
         }
