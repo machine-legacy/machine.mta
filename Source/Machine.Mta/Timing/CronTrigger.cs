@@ -33,6 +33,11 @@ namespace Machine.Mta.Timing
       return entries.ToTrigger();
     }
 
+    public static ITrigger EverySecond()
+    {
+      return new AlwaysTriggered();
+    }
+
     public static CronTrigger ToTrigger(this List<SimpleCronEntry> entries)
     {
       return new CronTrigger(entries.ToArray());
@@ -60,6 +65,13 @@ namespace Machine.Mta.Timing
         }
       }
       return false;
+    }
+  }
+  public class AlwaysTriggered : ITrigger
+  {
+    public bool IsFired()
+    {
+      return true;
     }
   }
 }
