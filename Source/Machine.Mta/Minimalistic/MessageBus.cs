@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-using MassTransit.ServiceBus;
-using MassTransit.ServiceBus.Internal;
-using MassTransit.ServiceBus.Threading;
+using MassTransit;
+using MassTransit.Internal;
+using MassTransit.Threading;
 
 namespace Machine.Mta.Minimalistic
 {

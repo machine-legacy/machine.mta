@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-using MassTransit.ServiceBus.Internal;
+using MassTransit.Internal;
 
 namespace Machine.Mta.Minimalistic
 {

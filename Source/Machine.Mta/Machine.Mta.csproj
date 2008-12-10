@@ -43,17 +43,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Machine.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MassTransit.ServiceBus, Version=0.4.0.1230, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="MassTransit, Version=0.5.0.1509, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\MassTransit\MassTransit.ServiceBus.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.ServiceBus.MSMQ, Version=0.4.0.1230, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\MassTransit\MassTransit.ServiceBus.MSMQ.dll</HintPath>
-    </Reference>
-    <Reference Include="MassTransit.ServiceBus.NMS, Version=0.4.0.1230, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\MassTransit\MassTransit.ServiceBus.NMS.dll</HintPath>
+      <HintPath>..\..\Libraries\MassTransit\MassTransit.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

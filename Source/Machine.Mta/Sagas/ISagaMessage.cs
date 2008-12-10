@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using MassTransit.ServiceBus;
+using MassTransit;
 
 namespace Machine.Mta.Sagas
 {

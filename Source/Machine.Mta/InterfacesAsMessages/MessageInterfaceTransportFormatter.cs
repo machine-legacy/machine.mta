@@ -37,7 +37,7 @@ namespace Machine.Mta.InterfacesAsMessages
         InterfaceMessageJsonConverter converter = new InterfaceMessageJsonConverter(_messageInterfaceImplementor, true);
         JsonSerializer serializer = new JsonSerializer();
         serializer.Converters.Add(converter);
-        return (IMessage[])serializer.Deserialize(new JsonReader(reader), typeof(IMessage[]));
+        return (IMessage[])serializer.Deserialize(new JsonTextReader(reader), typeof(IMessage[]));
       }
     }
     #endregion

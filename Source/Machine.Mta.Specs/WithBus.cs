@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 
-using MassTransit.ServiceBus;
-using MassTransit.ServiceBus.Internal;
-using MassTransit.ServiceBus.MSMQ;
+using MassTransit;
+using MassTransit.Internal;
 
 using Machine.Mta.Sagas;
 using Machine.Container;
@@ -12,6 +11,7 @@ using Machine.Mta.InterfacesAsMessages;
 using Machine.Mta.Minimalistic;
 
 using Machine.Specifications;
+using MassTransit.Transports.Msmq;
 using Rhino.Mocks;
 
 namespace Machine.Mta.Specs
@@ -99,6 +99,33 @@ namespace Machine.Mta.Specs
       handler2 = MockRepository.GenerateMock<Consumes<ISampleMessage>.All>();
       container.Register.Type<Consumes<IMessage>.All>().Is(handler1);
       container.Register.Type<Consumes<ISampleMessage>.All>().Is(handler2);
+    };
+
+    Because of = () =>
+      dispatcher.Dispatch(new IMessage[] { message2 });
+
+    It should_call_the_first_handler = () =>
+      handler1.AssertWasCalled(x => x.Consume(message2));
+
+    It should_call_the_second_handler = () =>
+      handler2.AssertWasCalled(x => x.Consume(message2));
+  }
+
+  [Subject("Message dispatching")]
+  public class when_dispatching_a_message_with_inapplicable_handlers : with_bus
+  {
+    static Consumes<IMessage>.All handler1;
+    static Consumes<ISampleMessage>.All handler2;
+    static Consumes<ISampleSagaMessage>.All handler3;
+
+    Establish context = () =>
+    {
+      handler1 = MockRepository.GenerateMock<Consumes<IMessage>.All>();
+      handler2 = MockRepository.GenerateMock<Consumes<ISampleMessage>.All>();
+      handler3 = MockRepository.GenerateMock<Consumes<ISampleSagaMessage>.All>();
+      container.Register.Type<Consumes<IMessage>.All>().Is(handler1);
+      container.Register.Type<Consumes<ISampleMessage>.All>().Is(handler2);
+      container.Register.Type<Consumes<ISampleSagaMessage>.All>().Is(handler3);
     };
 
     Because of = () =>

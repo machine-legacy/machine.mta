@@ -1,4 +1,4 @@
-using MassTransit.ServiceBus.Internal;
+using MassTransit.Internal;
 
 using Machine.Container;
 using Machine.Container.Plugins;

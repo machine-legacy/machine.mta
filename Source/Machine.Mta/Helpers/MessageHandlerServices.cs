@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-using MassTransit.ServiceBus;
+using MassTransit;
 
 using Machine.Container;
 using Machine.Container.Plugins;

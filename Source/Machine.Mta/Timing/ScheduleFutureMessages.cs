@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using MassTransit.ServiceBus;
+using MassTransit;
 
 using Machine.Mta.Minimalistic;
 

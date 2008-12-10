@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Machine.Mta.Sagas;
 
-using MassTransit.ServiceBus;
+using MassTransit;
 
 namespace Machine.Mta.Minimalistic
 {

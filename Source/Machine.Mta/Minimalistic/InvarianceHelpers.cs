@@ -14,13 +14,6 @@ namespace Machine.Mta.Minimalistic
           return true;
         }
       }
-      foreach (Type interfaceType in type2.GetInterfaces())
-      {
-        if (type1.IsSortOfContravariantWith(interfaceType))
-        {
-          return true;
-        }
-      }
       if (type1.GetGenericArguments().Length != type2.GetGenericArguments().Length)
       {
         return false;
@@ -50,17 +43,17 @@ namespace Machine.Mta.Minimalistic
       Console.WriteLine(typeof(IReader<IBase>).IsSortOfContravariantWith(typeof(IReader<IDerrived>)));
       Console.WriteLine(!typeof(IReader<IDerrived>).IsSortOfContravariantWith(typeof(IReader<IBase>)));
       Console.WriteLine(!typeof(IReader<IDerrived>).IsSortOfContravariantWith(typeof(IReader<IAnotherDerrived>)));
-      Console.WriteLine(typeof(IReader<string>).IsSortOfContravariantWith(typeof(DoesStrings)));
-      Console.WriteLine(typeof(IReader<object>).IsSortOfContravariantWith(typeof(DoesStrings)));
-      Console.WriteLine(typeof(IWriter<string>).IsSortOfContravariantWith(typeof(DoesStrings)));
-      Console.WriteLine(typeof(IWriter<object>).IsSortOfContravariantWith(typeof(DoesStrings)));
       Console.WriteLine(!typeof(IWriter<short>).IsSortOfContravariantWith(typeof(DoesStrings)));
-      Console.WriteLine(typeof(IReader<IBase>).IsSortOfContravariantWith(typeof(DoesDerrived)));
-      Console.WriteLine(typeof(IReader<IDerrived>).IsSortOfContravariantWith(typeof(DoesDerrived)));
-      Console.WriteLine(typeof(IReader<object>).IsSortOfContravariantWith(typeof(DoesDerrived)));
       Console.WriteLine(!typeof(IReader<ISomethingElse>).IsSortOfContravariantWith(typeof(DoesDerrived)));
       Console.WriteLine(typeof(IReader<object>).IsSortOfContravariantWith(typeof(IReader<string>)));
       Console.WriteLine(!typeof(IReader<Int32>).IsSortOfContravariantWith(typeof(IReader<string>)));
+      Console.WriteLine(typeof(DoesStrings).IsSortOfContravariantWith(typeof(IReader<string>)));
+      Console.WriteLine(!typeof(DoesStrings).IsSortOfContravariantWith(typeof(IReader<object>)));
+      Console.WriteLine(typeof(DoesStrings).IsSortOfContravariantWith(typeof(IWriter<string>)));
+      Console.WriteLine(!typeof(DoesStrings).IsSortOfContravariantWith(typeof(IWriter<object>)));
+      Console.WriteLine(!typeof(DoesDerrived).IsSortOfContravariantWith(typeof(IReader<IBase>)));
+      Console.WriteLine(typeof(DoesDerrived).IsSortOfContravariantWith(typeof(IReader<IDerrived>)));
+      Console.WriteLine(!typeof(DoesDerrived).IsSortOfContravariantWith(typeof(IReader<object>)));
     }
 
     interface IReader<T> { T Read(); }
