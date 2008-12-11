@@ -148,7 +148,7 @@ namespace Machine.Mta.Minimalistic
     {
       CurrentMessageContext cmc = CurrentMessageContext.Current;
       EndpointName returnAddress = cmc.TransportMessage.ReturnAddress;
-      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(cmc.TransportMessage.Id, messages));
+      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(cmc.TransportMessage.ReturnCorrelationId, messages));
     }
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
@@ -183,7 +183,7 @@ namespace Machine.Mta.Minimalistic
       TransportMessage transportMessage = (TransportMessage)obj;
       if (_messageFailureManager.SendToPoisonQueue(transportMessage.Id))
       {
-        _log.Info("Forwarding to Poison " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
+        _log.Info("Poison " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
         _poison.Send(transportMessage);
         return;
       }
@@ -223,7 +223,7 @@ namespace Machine.Mta.Minimalistic
 
     private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
     {
-      return new TransportMessage(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy, payload.ToByteArray());
+      return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy, CurrentCorrelationContext.CurrentCorrelation, payload.ToByteArray());
     }
   }
 }

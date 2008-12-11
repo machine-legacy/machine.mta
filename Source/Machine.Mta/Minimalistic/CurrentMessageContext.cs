@@ -9,11 +9,6 @@ namespace Machine.Mta.Minimalistic
     static CurrentMessageContext _current;
     readonly TransportMessage _transportMessage;
 
-    public static CurrentMessageContext Current
-    {
-      get { return _current; }
-    }
-
     public TransportMessage TransportMessage
     {
       get { return _transportMessage; }
@@ -29,11 +24,52 @@ namespace Machine.Mta.Minimalistic
       return _current = new CurrentMessageContext(transportMessage);
     }
 
-    #region IDisposable Members
+    public static CurrentMessageContext Current
+    {
+      get { return _current; }
+    }
+
     public void Dispose()
     {
       _current = null;
     }
-    #endregion
+  }
+  public class CurrentCorrelationContext : IDisposable
+  {
+    [ThreadStatic]
+    static CurrentCorrelationContext _current;
+    readonly Guid _correlationId;
+
+    public Guid Id
+    {
+      get { return _correlationId; }
+    }
+
+    public CurrentCorrelationContext(Guid correlationId)
+    {
+      _correlationId = correlationId;
+    }
+
+    public static CurrentCorrelationContext Open(TransportMessage transportMessage)
+    {
+      return _current = new CurrentCorrelationContext(transportMessage.Id);
+    }
+
+    public static Guid CurrentCorrelation
+    {
+      get
+      {
+        if (_current == null)
+        {
+          return Guid.Empty;
+        }
+        return _current.Id;
+      }
+    }
+
+    public void Dispose()
+    {
+      _current = null;
+    }
   }
 }

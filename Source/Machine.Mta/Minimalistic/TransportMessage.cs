@@ -7,12 +7,18 @@ namespace Machine.Mta.Minimalistic
   {
     private readonly EndpointName _returnAddress;
     private readonly Guid _id;
+    private readonly Guid _returnCorrelationId;
     private readonly Guid _correlationId;
     private readonly byte[] _body;
 
     public Guid Id
     {
       get { return _id; }
+    }
+
+    public Guid ReturnCorrelationId
+    {
+      get { return _returnCorrelationId; }
     }
 
     public Guid CorrelationId
@@ -34,17 +40,28 @@ namespace Machine.Mta.Minimalistic
     {
     }
 
-    public TransportMessage(EndpointName returnAddress, Guid correlationId, byte[] body)
+    protected TransportMessage(Guid id, EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, byte[] body)
     {
-      _id = Guid.NewGuid();
-      _correlationId = correlationId;
+      _id = id;
       _returnAddress = returnAddress;
+      _correlationId = correlationId;
+      _returnCorrelationId = returnCorrelationId;
       _body = body;
     }
 
     public override string ToString()
     {
       return "TransportMessage from " + _returnAddress + " with " + _body.Length + "bytes";
+    }
+
+    public static TransportMessage For(EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, byte[] body)
+    {
+      Guid id = Guid.NewGuid();
+      if (returnCorrelationId == Guid.Empty)
+      {
+        returnCorrelationId = id;
+      }
+      return new TransportMessage(id, returnAddress, correlationId, returnCorrelationId, body);
     }
   }
 }
