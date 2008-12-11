@@ -26,11 +26,11 @@ namespace Machine.Mta.Sagas
       }
       ISagaHandler handler = invocation.SagaHandler();
       ISagaStateRepository<ISagaState> repository = GetRepositoryFor(handler.SagaStateType);
-      if (invocation.IsForSagaMessage())
+      Guid sagaId = invocation.RetrieveSagaId();
+      if (sagaId != Guid.Empty)
       {
-        ISagaMessage message = invocation.SagaMessage();
-        _log.Info("Retrieving: " + message.SagaId);
-        handler.State = repository.FindSagaState(message.SagaId);
+        _log.Info("Retrieving: " + sagaId);
+        handler.State = repository.FindSagaState(sagaId);
       }
       else
       {
@@ -81,6 +81,23 @@ namespace Machine.Mta.Sagas
     public static bool IsForSagaHandler(this HandlerInvocation invocation)
     {
       return invocation.HandlerType.IsSagaHandler();
+    }
+    
+    public static Guid RetrieveSagaId(this HandlerInvocation invocation)
+    {
+      if (invocation.IsForSagaMessage())
+      {
+        return invocation.SagaMessage().SagaId;
+      }
+      if (CurrentMessageContext.Current != null)
+      {
+        TransportMessage transportMessage = CurrentMessageContext.Current.TransportMessage;
+        if (transportMessage != null)
+        {
+          return transportMessage.SagaId;
+        }
+      }
+      return Guid.Empty;
     }
     
     public static ISagaMessage SagaMessage(this HandlerInvocation invocation)
