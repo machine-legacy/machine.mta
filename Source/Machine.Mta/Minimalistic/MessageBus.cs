@@ -223,7 +223,10 @@ namespace Machine.Mta.Minimalistic
 
     private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
     {
-      return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy, CurrentCorrelationContext.CurrentCorrelation, payload.ToByteArray());
+      return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy,
+        CurrentCorrelationContext.CurrentCorrelation,
+        CurrentSagaContext.CurrentSagaId,
+        payload.ToByteArray());
     }
   }
 }

@@ -9,6 +9,7 @@ namespace Machine.Mta.Minimalistic
     private readonly Guid _id;
     private readonly Guid _returnCorrelationId;
     private readonly Guid _correlationId;
+    private readonly Guid _sagaId;
     private readonly byte[] _body;
 
     public Guid Id
@@ -26,6 +27,11 @@ namespace Machine.Mta.Minimalistic
       get { return _correlationId; }
     }
 
+    public Guid SagaId
+    {
+      get { return _sagaId; }
+    }
+
     public EndpointName ReturnAddress
     {
       get { return _returnAddress; }
@@ -40,12 +46,13 @@ namespace Machine.Mta.Minimalistic
     {
     }
 
-    protected TransportMessage(Guid id, EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, byte[] body)
+    protected TransportMessage(Guid id, EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid sagaId, byte[] body)
     {
       _id = id;
       _returnAddress = returnAddress;
       _correlationId = correlationId;
       _returnCorrelationId = returnCorrelationId;
+      _sagaId = sagaId;
       _body = body;
     }
 
@@ -54,14 +61,14 @@ namespace Machine.Mta.Minimalistic
       return "TransportMessage from " + _returnAddress + " with " + _body.Length + "bytes";
     }
 
-    public static TransportMessage For(EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, byte[] body)
+    public static TransportMessage For(EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid sagaId, byte[] body)
     {
       Guid id = Guid.NewGuid();
       if (returnCorrelationId == Guid.Empty)
       {
         returnCorrelationId = id;
       }
-      return new TransportMessage(id, returnAddress, correlationId, returnCorrelationId, body);
+      return new TransportMessage(id, returnAddress, correlationId, returnCorrelationId, sagaId, body);
     }
   }
 }

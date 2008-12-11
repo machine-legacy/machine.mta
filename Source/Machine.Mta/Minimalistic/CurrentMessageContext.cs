@@ -40,11 +40,6 @@ namespace Machine.Mta.Minimalistic
     static CurrentCorrelationContext _current;
     readonly Guid _correlationId;
 
-    public Guid Id
-    {
-      get { return _correlationId; }
-    }
-
     public CurrentCorrelationContext(Guid correlationId)
     {
       _correlationId = correlationId;
@@ -63,7 +58,40 @@ namespace Machine.Mta.Minimalistic
         {
           return Guid.Empty;
         }
-        return _current.Id;
+        return _current._correlationId;
+      }
+    }
+
+    public void Dispose()
+    {
+      _current = null;
+    }
+  }
+  public class CurrentSagaContext : IDisposable
+  {
+    [ThreadStatic]
+    static CurrentSagaContext _current;
+    readonly Guid _sagaId;
+
+    public CurrentSagaContext(Guid sagaId)
+    {
+      _sagaId = sagaId;
+    }
+
+    public static CurrentSagaContext Open(Guid sagaId)
+    {
+      return _current = new CurrentSagaContext(sagaId);
+    }
+
+    public static Guid CurrentSagaId
+    {
+      get
+      {
+        if (_current == null)
+        {
+          return Guid.Empty;
+        }
+        return _current._sagaId;
       }
     }
 
