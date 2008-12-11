@@ -37,6 +37,17 @@ namespace Machine.Mta.Minimalistic
       }
     }
   }
+  public class ReturnAddressProvider
+  {
+    public virtual EndpointName GetReturnAddress(EndpointName listeningOn)
+    {
+      if (listeningOn.IsLocal)
+      {
+        return EndpointName.ForRemoteQueue(Environment.MachineName, listeningOn.Name);
+      }
+      return listeningOn;
+    }
+  }
   public class MessageBus : IMessageBus
   {
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
@@ -52,6 +63,7 @@ namespace Machine.Mta.Minimalistic
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly AsyncCallbackMap _asyncCallbackMap;
     private readonly MessageFailureManager _messageFailureManager;
+    private readonly ReturnAddressProvider _returnAddressProvider;
 
     public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
     {
@@ -68,6 +80,7 @@ namespace Machine.Mta.Minimalistic
       _threads = new ResourceThreadPool<IEndpoint, object>(_listeningOn, EndpointReader, EndpointDispatcher, 10, 1, 1);
       _asyncCallbackMap = new AsyncCallbackMap();
       _messageFailureManager = new MessageFailureManager();
+      _returnAddressProvider = new ReturnAddressProvider();
     }
 
     public EndpointName PoisonAddress
@@ -82,6 +95,7 @@ namespace Machine.Mta.Minimalistic
 
     public void Start()
     {
+      _threads.WakeUp();
     }
 
     public void Send<T>(params T[] messages) where T : class, IMessage
@@ -174,6 +188,7 @@ namespace Machine.Mta.Minimalistic
       {
         using (CurrentMessageContext.Open(transportMessage))
         {
+          _log.Info("Received from " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
           IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
           if (transportMessage.CorrelationId != Guid.Empty)
           {
@@ -204,7 +219,7 @@ namespace Machine.Mta.Minimalistic
 
     private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
     {
-      return new TransportMessage(this.Address, correlatedBy, payload.ToByteArray());
+      return new TransportMessage(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy, payload.ToByteArray());
     }
   }
 }

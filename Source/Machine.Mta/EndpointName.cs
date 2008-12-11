@@ -37,6 +37,11 @@ namespace Machine.Mta
       get { return _name; }
     }
 
+    public bool IsLocal
+    {
+      get { return _address.Equals("localhost", StringComparison.InvariantCultureIgnoreCase); }
+    }
+
     protected EndpointName()
     {
       _name = null;
