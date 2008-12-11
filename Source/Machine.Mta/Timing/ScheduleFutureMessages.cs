@@ -116,6 +116,7 @@ namespace Machine.Mta.Timing
       }
     }
   }
+  [Serializable]
   public class ScheduledPublish
   {
     readonly DateTime _publishAt;

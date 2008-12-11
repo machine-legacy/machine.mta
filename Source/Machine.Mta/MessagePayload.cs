@@ -27,6 +27,7 @@ namespace Machine.Mta
       return Convert.ToBase64String(payload.ToByteArray());
     }
   }
+  [Serializable]
   [TypeConverter(typeof(MessagePayloadConverter))]
   public class MessagePayload
   {
