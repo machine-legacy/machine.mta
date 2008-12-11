@@ -181,6 +181,7 @@ namespace Machine.Mta.Minimalistic
       TransportMessage transportMessage = (TransportMessage)obj;
       if (_messageFailureManager.SendToPoisonQueue(transportMessage.Id))
       {
+        _log.Info("Forwarding to Poison " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
         _poison.Send(transportMessage);
         return;
       }
@@ -188,7 +189,7 @@ namespace Machine.Mta.Minimalistic
       {
         using (CurrentMessageContext.Open(transportMessage))
         {
-          _log.Info("Received from " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
+          _log.Info("Receiving " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
           IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
           if (transportMessage.CorrelationId != Guid.Empty)
           {
@@ -199,6 +200,7 @@ namespace Machine.Mta.Minimalistic
       }
       catch (Exception error)
       {
+        _log.Error(error);
         _messageFailureManager.RecordFailure(transportMessage.Id, error);
         throw;
       }
