@@ -95,6 +95,7 @@ namespace Machine.Mta.Minimalistic
 
     public void Start()
     {
+      _log.Info("Starting");
       _threads.WakeUp();
     }
 
@@ -115,7 +116,7 @@ namespace Machine.Mta.Minimalistic
 
     public TransportMessage SendTransportMessage<T>(TransportMessage transportMessage)
     {
-      return SendTransportMessage(_messageEndpointLookup.LookupEndpointsFor(typeof (T)), transportMessage);
+      return SendTransportMessage(_messageEndpointLookup.LookupEndpointsFor(typeof(T)), transportMessage);
     }
 
     public TransportMessage SendTransportMessage(IEnumerable<EndpointName> destinations, TransportMessage transportMessage)
@@ -129,6 +130,7 @@ namespace Machine.Mta.Minimalistic
 
     public void Stop()
     {
+      _log.Info("Stopping");
       _threads.Dispose();
     }
 
