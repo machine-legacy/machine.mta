@@ -37,7 +37,10 @@ namespace Machine.Mta.Sagas
         _log.Info("Non-Saga Message: " + handler);
         handler.State = null;
       }
-      invocation.Continue();
+      using (CurrentSagaContext.Open(sagaId))
+      {
+        invocation.Continue();
+      }
       SaveOrDeleteState(handler, repository);
     }
 
