@@ -146,9 +146,9 @@ namespace Machine.Mta.Minimalistic
 
     public void Reply<T>(params T[] messages) where T : class, IMessage
     {
-      CurrentMessageContext cmc = CurrentMessageContext.Current;
-      EndpointName returnAddress = cmc.TransportMessage.ReturnAddress;
-      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(cmc.TransportMessage.ReturnCorrelationId, messages));
+      TransportMessage transportMessage = CurrentMessageContext.Current;
+      EndpointName returnAddress = transportMessage.ReturnAddress;
+      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(transportMessage.ReturnCorrelationId, messages));
     }
 
     public void Publish<T>(params T[] messages) where T : class, IMessage

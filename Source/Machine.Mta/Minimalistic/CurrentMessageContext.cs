@@ -9,11 +9,6 @@ namespace Machine.Mta.Minimalistic
     static CurrentMessageContext _current;
     readonly TransportMessage _transportMessage;
 
-    public TransportMessage TransportMessage
-    {
-      get { return _transportMessage; }
-    }
-
     public CurrentMessageContext(TransportMessage transportMessage)
     {
       _transportMessage = transportMessage;
@@ -24,9 +19,16 @@ namespace Machine.Mta.Minimalistic
       return _current = new CurrentMessageContext(transportMessage);
     }
 
-    public static CurrentMessageContext Current
+    public static TransportMessage Current
     {
-      get { return _current; }
+      get
+      {
+        if (_current == null)
+        {
+          return null;
+        }
+        return _current._transportMessage;
+      }
     }
 
     public void Dispose()
@@ -89,6 +91,11 @@ namespace Machine.Mta.Minimalistic
       {
         if (_current == null)
         {
+          TransportMessage transportMessage = CurrentMessageContext.Current;
+          if (transportMessage != null)
+          {
+            return transportMessage.SagaId;
+          }
           return Guid.Empty;
         }
         return _current._sagaId;
