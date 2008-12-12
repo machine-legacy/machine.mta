@@ -50,6 +50,8 @@ namespace Machine.Mta.Minimalistic
   }
   public class MessageBus : IMessageBus
   {
+    private static readonly log4net.ILog _receivingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Receiving");
+    private static readonly log4net.ILog _poisonLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Poison");
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
     private readonly IMtaUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
@@ -183,7 +185,7 @@ namespace Machine.Mta.Minimalistic
       TransportMessage transportMessage = (TransportMessage)obj;
       if (_messageFailureManager.SendToPoisonQueue(transportMessage.Id))
       {
-        _log.Info("Poison " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
+        _poisonLog.Info("Poison " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
         _poison.Send(transportMessage);
         return;
       }
@@ -191,7 +193,7 @@ namespace Machine.Mta.Minimalistic
       {
         using (CurrentMessageContext.Open(transportMessage))
         {
-          _log.Info("Receiving " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
+          _receivingLog.Info("Receiving " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
           IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
           if (transportMessage.CorrelationId != Guid.Empty)
           {
