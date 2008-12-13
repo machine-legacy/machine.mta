@@ -13,6 +13,7 @@ namespace Machine.Mta.Sagas
     {
       get;
     }
+    void Complete();
   }
   public abstract class Saga<T> : ISagaHandler where T : ISagaState
   {
@@ -31,6 +32,10 @@ namespace Machine.Mta.Sagas
     public Type SagaStateType
     {
       get { return typeof(T); }
+    }
+
+    public virtual void Complete()
+    {
     }
   }
 }

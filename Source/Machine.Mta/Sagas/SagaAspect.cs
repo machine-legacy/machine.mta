@@ -52,6 +52,7 @@ namespace Machine.Mta.Sagas
       }
       if (handler.State.IsSagaComplete)
       {
+        handler.Complete();
         _log.Info("Deleting: " + handler.State.SagaId);
         repository.Delete(handler.State);
       }
