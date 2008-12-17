@@ -10,6 +10,7 @@ namespace Machine.Mta.DotNetBinaryStorage
     Stream Open(string path);
     Stream Create(string path);
     void Delete(string path);
+    IEnumerable<string> ListFiles(string directory, string suffix);
   }
   public class PhysicalFileSystem : IFlatFileSystem
   {
@@ -31,6 +32,11 @@ namespace Machine.Mta.DotNetBinaryStorage
     public void Delete(string path)
     {
       File.Delete(path);
+    }
+
+    public IEnumerable<string> ListFiles(string directory, string suffix)
+    {
+      return Directory.GetFiles(directory, "*." + suffix);
     }
   }
   public class InMemoryFileSystem : IFlatFileSystem
@@ -63,10 +69,36 @@ namespace Machine.Mta.DotNetBinaryStorage
 
     public void Delete(string path)
     {
-      if (_files.ContainsKey(path))
+      lock (_files)
       {
-        _files.Remove(path);
+        if (_files.ContainsKey(path))
+        {
+          _files.Remove(path);
+        }
       }
+    }
+
+    public IEnumerable<string> ListFiles(string directory, string suffix)
+    {
+      List<string> matched = new List<string>();
+      lock (_files)
+      {
+        foreach (KeyValuePair<string, MemoryStream> pair in _files)
+        {
+          string entryDirectory = Path.GetDirectoryName(pair.Key);
+          string extension = Path.GetExtension(pair.Key);
+          if (!entryDirectory.Equals(Path.GetDirectoryName(directory), StringComparison.InvariantCultureIgnoreCase))
+          {
+            continue;
+          }
+          if (!extension.Equals("." + suffix, StringComparison.InvariantCultureIgnoreCase))
+          {
+            continue;
+          }
+          matched.Add(pair.Key);
+        }
+      }
+      return matched;
     }
   }
 }

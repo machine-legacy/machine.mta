@@ -50,6 +50,17 @@ namespace Machine.Mta.DotNetBinaryStorage
       }
     }
 
+    public IEnumerable<T> FindAll()
+    {
+      foreach (string path in _flatFileSystem.ListFiles(_configuration.SagaStatePath, Suffix))
+      {
+        using (Stream stream = _flatFileSystem.Open(path))
+        {
+          yield return (T)_formatter.Deserialize(stream);
+        }
+      }
+    }
+
     public string PathForState(Guid id)
     {
       return Path.Combine(_configuration.SagaStatePath, id.ToString("D") + "." + Suffix);
