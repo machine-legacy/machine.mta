@@ -10,12 +10,14 @@ namespace Machine.Mta.DotNetBinaryStorage
   public class DotNetBinaryScheduledPublishRepository : IScheduledPublishRepository
   {
     readonly BinaryFormatter _formatter = new BinaryFormatter();
+    readonly IFlatFileSystem _flatFileSystem;
     readonly IFlatBinaryFileConfiguration _configuration;
     List<ScheduledPublish> _cache;
 
-    public DotNetBinaryScheduledPublishRepository(IFlatBinaryFileConfiguration configuration)
+    public DotNetBinaryScheduledPublishRepository(IFlatBinaryFileConfiguration configuration, IFlatFileSystem flatFileSystem)
     {
       _configuration = configuration;
+      _flatFileSystem = flatFileSystem;
     }
 
     public void Add(ScheduledPublish scheduled)
@@ -51,9 +53,9 @@ namespace Machine.Mta.DotNetBinaryStorage
         return;
       }
       _cache = new List<ScheduledPublish>();
-      if (File.Exists(_configuration.ScheduledPublishesPath))
+      if (_flatFileSystem.IsFile(_configuration.ScheduledPublishesPath))
       {
-        using (FileStream stream = File.OpenRead(_configuration.ScheduledPublishesPath))
+        using (Stream stream = _flatFileSystem.Open(_configuration.ScheduledPublishesPath))
         {
           _cache.AddRange((ScheduledPublish[]) _formatter.Deserialize(stream));
         }
@@ -62,7 +64,7 @@ namespace Machine.Mta.DotNetBinaryStorage
 
     private void WriteToDisk()
     {
-      using (FileStream stream = File.Create(_configuration.ScheduledPublishesPath))
+      using (Stream stream = _flatFileSystem.Create(_configuration.ScheduledPublishesPath))
       {
         _formatter.Serialize(stream, _cache.ToArray());
       }

@@ -74,6 +74,7 @@
     <Compile Include="DotNetBinaryStorage\DotNetBinarySagaStateRepository.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinaryScheduledPublishRepository.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatBinaryFileConfiguration.cs" />
+    <Compile Include="DotNetBinaryStorage\IFlatFileSystem.cs" />
     <Compile Include="EndpointName.cs" />
     <Compile Include="Helpers\MessageHandlerServices.cs" />
     <Compile Include="Helpers\MessageSetupHelpers.cs" />

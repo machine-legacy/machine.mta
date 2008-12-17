@@ -10,21 +10,23 @@ namespace Machine.Mta.DotNetBinaryStorage
   public abstract class DotNetBinarySagaStateRepository<T> : ISagaStateRepository<T> where T : class, ISagaState
   {
     readonly BinaryFormatter _formatter = new BinaryFormatter();
+    readonly IFlatFileSystem _flatFileSystem;
     readonly IFlatBinaryFileConfiguration _configuration;
 
-    protected DotNetBinarySagaStateRepository(IFlatBinaryFileConfiguration configuration)
+    protected DotNetBinarySagaStateRepository(IFlatBinaryFileConfiguration configuration, IFlatFileSystem flatFileSystem)
     {
       _configuration = configuration;
+      _flatFileSystem = flatFileSystem;
     }
 
     public T FindSagaState(Guid sagaId)
     {
       string path = PathForState(sagaId);
-      if (!File.Exists(path))
+      if (!_flatFileSystem.IsFile(path))
       {
         return default(T);
       }
-      using (FileStream stream = File.OpenRead(path))
+      using (Stream stream = _flatFileSystem.Open(path))
       {
         return (T)_formatter.Deserialize(stream);
       }
@@ -33,7 +35,7 @@ namespace Machine.Mta.DotNetBinaryStorage
     public void Save(T sagaState)
     {
       string path = PathForState(sagaState.SagaId);
-      using (FileStream stream = File.Create(path))
+      using (Stream stream = _flatFileSystem.Create(path))
       {
         _formatter.Serialize(stream, sagaState);
       }
@@ -42,9 +44,9 @@ namespace Machine.Mta.DotNetBinaryStorage
     public void Delete(T sagaState)
     {
       string path = PathForState(sagaState.SagaId);
-      if (File.Exists(path))
+      if (_flatFileSystem.IsFile(path))
       {
-        File.Delete(path);
+        _flatFileSystem.Delete(path);
       }
     }
 
