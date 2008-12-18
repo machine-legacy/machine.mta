@@ -25,6 +25,7 @@ namespace Machine.Mta.Specs
     protected static IMessageFactory messageFactory;
     protected static IMessage message1;
     protected static ISampleMessage message2;
+    protected static ISampleSagaMessage message3;
     protected static IMachineContainer container;
 
     Establish context = () =>
@@ -46,6 +47,7 @@ namespace Machine.Mta.Specs
       bus = new MessageBus(endpointResolver, uriFactory, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnName, poisonName);
       message1 = messageFactory.Create<IMessage>();
       message2 = messageFactory.Create<ISampleMessage>();
+      message3 = messageFactory.Create<ISampleSagaMessage>();
     };
   }
 

@@ -42,8 +42,8 @@ namespace Machine.Mta.Specs
     Because of = () =>
       dispatcher.Dispatch(new IMessage[] { message2 });
 
-    It should_call_the_saga = () =>
-      saga.Consumed.ShouldContainOnly(message2);
+    It should_not_call_the_saga = () =>
+      saga.Consumed.ShouldBeEmpty();
 
     It should_have_null_state = () =>
       saga.State.ShouldBeNull();
@@ -56,10 +56,10 @@ namespace Machine.Mta.Specs
   public class when_dispatching_non_saga_message_to_saga_that_creates_new_state : with_saga
   {
     Because of = () =>
-      dispatcher.Dispatch(new IMessage[] { message2 });
+      dispatcher.Dispatch(new IMessage[] { message3 });
 
     It should_call_the_saga = () =>
-      saga.Consumed.ShouldContainOnly(message2);
+      saga.Consumed.ShouldContainOnly(message3);
 
     It should_have_initial_state = () =>
       saga.State.ShouldEqual(state);
@@ -109,7 +109,7 @@ namespace Machine.Mta.Specs
       repository.AssertWasCalled(x => x.Delete(state));
   }
 
-  public class SampleSaga : Saga<ISagaState>, Consumes<ISampleMessage>.All, Consumes<ISampleSagaMessage>.All
+  public class SampleSaga : Saga<ISagaState>, IConsume<ISampleMessage>, ISagaStartedBy<ISampleSagaMessage>
   {
     readonly Queue<IMessage> _consumed = new Queue<IMessage>();
     ISagaState _initialState;
@@ -127,12 +127,12 @@ namespace Machine.Mta.Specs
 
     public void Consume(ISampleMessage message)
     {
-      this.State = _initialState;
       _consumed.Enqueue(message);
     }
 
     public void Consume(ISampleSagaMessage message)
     {
+      this.State = _initialState;
       _consumed.Enqueue(message);
     }
   }
