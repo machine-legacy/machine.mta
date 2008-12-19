@@ -17,6 +17,8 @@ namespace Machine.Mta.Timing
   public interface IScheduleFutureMessages
   {
     void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage;
+    void PublishAt<T>(DateTime publishAt, EndpointName destination, params T[] messages) where T : class, IMessage;
+    void PublishAt<T>(DateTime publishAt, EndpointName[] destinations, params T[] messages) where T : class, IMessage;
   }
   public class ScheduleFutureMessages : IScheduleFutureMessages
   {
@@ -35,9 +37,19 @@ namespace Machine.Mta.Timing
 
     public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage
     {
-      ICollection<EndpointName> destinations = _messageEndpointLookup.LookupEndpointsFor(typeof(T));
+      EndpointName[] destinations = _messageEndpointLookup.LookupEndpointsFor(typeof(T)).ToArray();
+      PublishAt(publishAt, destinations, messages);
+    }
+
+    public void PublishAt<T>(DateTime publishAt, EndpointName destination, params T[] messages) where T : class, IMessage
+    {
+      PublishAt(publishAt, new[] { destination }, messages);
+    }
+
+    public void PublishAt<T>(DateTime publishAt, EndpointName[] destinations, params T[] messages) where T : class, IMessage
+    {
       ISchedulePublishMessage message = _messageFactory.Create<ISchedulePublishMessage>();
-      message.PublishAddresses = destinations.ToArray();
+      message.PublishAddresses = destinations;
       message.PublishAt = publishAt;
       message.MessagePayload = new MessagePayload(_transportMessageBodySerializer.Serialize(messages));
       _bus.Send(message);
@@ -54,7 +66,7 @@ namespace Machine.Mta.Timing
 
     public void Consume(ISchedulePublishMessage message)
     {
-      ScheduledPublish scheduled = new ScheduledPublish(message.PublishAt, message.MessagePayload, message.PublishAddresses);
+      ScheduledPublish scheduled = new ScheduledPublish(message.PublishAt, message.MessagePayload, message.PublishAddresses, CurrentSagaContext.CurrentSagaId);
       _scheduledPublishRepository.Add(scheduled);
     }
   }
@@ -109,9 +121,12 @@ namespace Machine.Mta.Timing
     {
       foreach (ScheduledPublish scheduled in _scheduledPublishRepository.FindAllExpired())
       {
-        foreach (EndpointName destination in scheduled.Addresses)
+        using (CurrentSagaContext.Open(scheduled.SagaId))
         {
-          _bus.Send(destination, scheduled.MessagePayload);
+          foreach (EndpointName destination in scheduled.Addresses)
+          {
+            _bus.Send(destination, scheduled.MessagePayload);
+          }
         }
       }
     }
@@ -122,6 +137,7 @@ namespace Machine.Mta.Timing
     readonly DateTime _publishAt;
     readonly MessagePayload _messagePayload;
     readonly EndpointName[] _addresses;
+    readonly Guid _sagaId;
 
     public DateTime PublishAt
     {
@@ -138,11 +154,17 @@ namespace Machine.Mta.Timing
       get { return _addresses; }
     }
 
-    public ScheduledPublish(DateTime publishAt, MessagePayload messagePayload, EndpointName[] addresses)
+    public Guid SagaId
+    {
+      get { return _sagaId; }
+    }
+
+    public ScheduledPublish(DateTime publishAt, MessagePayload messagePayload, EndpointName[] addresses, Guid sagaId)
     {
       _publishAt = publishAt;
       _messagePayload = messagePayload;
       _addresses = addresses;
+      _sagaId = sagaId;
     }
   }
 }

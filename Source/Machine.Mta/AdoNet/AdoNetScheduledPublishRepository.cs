@@ -33,6 +33,7 @@ namespace Machine.Mta.AdoNet
           command.Parameter("PublishAt").Value = scheduled.PublishAt;
           command.Parameter("ReturnAddress").Value = destination.ToString();
           command.Parameter("MessagePayload").Value = scheduled.MessagePayload.ToByteArray();
+          command.Parameter("SagaId").Value = scheduled.SagaId;
           if (command.ExecuteNonQuery() != 1)
           {
             throw new InvalidOperationException();
@@ -56,7 +57,8 @@ namespace Machine.Mta.AdoNet
             DateTime publishAt = reader.GetDateTime(1);
             string returnAddress = reader.GetString(2);
             byte[] messagePayload = (byte[])reader.GetValue(3);
-            scheduled.Add(new ScheduledPublish(publishAt, new MessagePayload(messagePayload), new[] { EndpointName.FromString(returnAddress) }));
+            Guid sagaId = (Guid)reader.GetValue(4);
+            scheduled.Add(new ScheduledPublish(publishAt, new MessagePayload(messagePayload), new[] { EndpointName.FromString(returnAddress) }, sagaId));
           }
           reader.Close();
         }
@@ -71,10 +73,11 @@ namespace Machine.Mta.AdoNet
     {
       IDbCommand command = connection.CreateCommand();
       command.Connection = connection;
-      command.CommandText = "INSERT INTO future_publish (CreatedAt, PublishAt, ReturnAddress, MessagePayload) VALUES (getutcdate(), @PublishAt, @ReturnAddress, @MessagePayload)";
+      command.CommandText = "INSERT INTO future_publish (CreatedAt, PublishAt, ReturnAddress, MessagePayload, SagaId) VALUES (getutcdate(), @PublishAt, @ReturnAddress, @MessagePayload, @SagaId)";
       command.CreateParameter("PublishAt", DbType.DateTime);
       command.CreateParameter("ReturnAddress", DbType.String);
       command.CreateParameter("MessagePayload", DbType.Binary);
+      command.CreateParameter("SagaId", DbType.Guid);
       return command;
     }
 
@@ -82,7 +85,7 @@ namespace Machine.Mta.AdoNet
     {
       IDbCommand command = connection.CreateCommand();
       command.Connection = connection;
-      command.CommandText = "SELECT Id, PublishAt, ReturnAddress, MessagePayload FROM future_publish WHERE PublishAt < @Now";
+      command.CommandText = "SELECT Id, PublishAt, ReturnAddress, MessagePayload, SagaId FROM future_publish WHERE PublishAt < @Now";
       command.CreateParameter("Now", DbType.DateTime);
       return command;
     }
