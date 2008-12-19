@@ -40,7 +40,13 @@ namespace Machine.Mta.Sagas
       else
       {
         _log.Info("Retrieving: " + sagaId);
-        handler.State = repository.FindSagaState(sagaId);
+        ISagaState state = repository.FindSagaState(sagaId);
+        if (state == null)
+        {
+          _log.Info("Unable to find state: " + sagaId);
+          return;
+        }
+        handler.State = state;
       }
       using (CurrentSagaContext.Open(sagaId))
       {
