@@ -52,6 +52,7 @@ namespace Machine.Mta.Minimalistic
   {
     private static readonly log4net.ILog _receivingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Receiving");
     private static readonly log4net.ILog _poisonLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Poison");
+    private static readonly log4net.ILog _sendingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Sending");
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
     private readonly IMtaUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
@@ -103,16 +104,19 @@ namespace Machine.Mta.Minimalistic
 
     public void Send<T>(params T[] messages) where T : class, IMessage
     {
+      foreach (T message in messages) _sendingLog.Info("Sending " + message);
       SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 
     public void Send<T>(EndpointName destination, params T[] messages) where T : class, IMessage
     {
+      foreach (T message in messages) _sendingLog.Info("Sending " + message + " to " + destination);
       SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, messages));
     }
 
     public void Send(EndpointName destination, MessagePayload payload)
     {
+      _sendingLog.Info("Sending raw payload to " + destination);
       SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, payload));
     }
 
@@ -148,6 +152,7 @@ namespace Machine.Mta.Minimalistic
 
     public void Reply<T>(params T[] messages) where T : class, IMessage
     {
+      foreach (T message in messages) _sendingLog.Info("Replying " + message);
       TransportMessage transportMessage = CurrentMessageContext.Current;
       EndpointName returnAddress = transportMessage.ReturnAddress;
       SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(transportMessage.ReturnCorrelationId, messages));
@@ -155,6 +160,7 @@ namespace Machine.Mta.Minimalistic
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
+      foreach (T message in messages) _sendingLog.Info("Publishing " + message);
       SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 
