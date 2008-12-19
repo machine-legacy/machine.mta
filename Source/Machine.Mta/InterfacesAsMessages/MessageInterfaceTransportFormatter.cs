@@ -94,6 +94,7 @@ namespace Machine.Mta.InterfacesAsMessages
       JsonSerializer serializer = new JsonSerializer();
       serializer.Converters.Add(this);
       serializer.Converters.Add(new EndpointNameJsonConverter());
+      serializer.Converters.Add(new ExceptionJsonConverter());
       object value = serializer.Deserialize(reader, deserializeAs);
       reader.Read();
       return value;
@@ -133,6 +134,7 @@ namespace Machine.Mta.InterfacesAsMessages
       JsonSerializer serializer = new JsonSerializer();
       serializer.Converters.Add(this);
       serializer.Converters.Add(new EndpointNameJsonConverter());
+      serializer.Converters.Add(new ExceptionJsonConverter());
       _skipNext = true;
       serializer.Serialize(writer, value);
       writer.WriteEndObject();
