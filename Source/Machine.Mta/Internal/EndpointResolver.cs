@@ -5,11 +5,11 @@ namespace Machine.Mta.Internal
 {
   public interface IEndpointResolver
   {
-    IEndpoint Resolve(Uri uri);
+    IEndpoint Resolve(EndpointName name);
   }
   public class EndpointResolver : IEndpointResolver
   {
-    public IEndpoint Resolve(Uri uri)
+    public IEndpoint Resolve(EndpointName name)
     {
       throw new System.NotImplementedException();
     }

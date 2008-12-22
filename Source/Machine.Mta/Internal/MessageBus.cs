@@ -53,7 +53,6 @@ namespace Machine.Mta.Internal
     private static readonly log4net.ILog _poisonLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Poison");
     private static readonly log4net.ILog _sendingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Sending");
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
-    private readonly IMtaUriFactory _uriFactory;
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly IEndpointResolver _endpointResolver;
     private readonly IMessageDispatcher _dispatcher;
@@ -67,15 +66,14 @@ namespace Machine.Mta.Internal
     private readonly MessageFailureManager _messageFailureManager;
     private readonly ReturnAddressProvider _returnAddressProvider;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ThreadPoolConfiguration threadPoolConfiguration)
+    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ThreadPoolConfiguration threadPoolConfiguration)
     {
       _endpointResolver = endpointResolver;
       _dispatcher = dispatcher;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageEndpointLookup = messageEndpointLookup;
-      _uriFactory = uriFactory;
-      _listeningOn = _endpointResolver.Resolve(_uriFactory.CreateUri(listeningOnEndpointName));
-      _poison = _endpointResolver.Resolve(_uriFactory.CreateUri(poisonEndpointName));
+      _listeningOn = _endpointResolver.Resolve(listeningOnEndpointName);
+      _poison = _endpointResolver.Resolve(poisonEndpointName);
       _listeningOnEndpointName = listeningOnEndpointName;
       _poisonEndpointName = poisonEndpointName;
       _messageEndpointLookup = messageEndpointLookup;
@@ -85,8 +83,8 @@ namespace Machine.Mta.Internal
       _returnAddressProvider = new ReturnAddressProvider();
     }
 
-    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
-      : this(endpointResolver, uriFactory, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnEndpointName, poisonEndpointName, new ThreadPoolConfiguration(1, 1))
+    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
+      : this(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnEndpointName, poisonEndpointName, new ThreadPoolConfiguration(1, 1))
     {
     }
 
@@ -209,8 +207,7 @@ namespace Machine.Mta.Internal
 
     private void Send(EndpointName destination, TransportMessage transportMessage)
     {
-      Uri uri = _uriFactory.CreateUri(destination);
-      IEndpoint endpoint = _endpointResolver.Resolve(uri);
+      IEndpoint endpoint = _endpointResolver.Resolve(destination);
       endpoint.Send(transportMessage);
     }
 
