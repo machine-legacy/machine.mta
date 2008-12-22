@@ -73,6 +73,7 @@
     <Compile Include="DotNetBinaryStorage\IFlatBinaryFileConfiguration.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatFileSystem.cs" />
     <Compile Include="EndpointName.cs" />
+    <Compile Include="Helpers\SagaRepositoryServices.cs" />
     <Compile Include="Internal\IEndpoint.cs" />
     <Compile Include="Internal\EndpointResolver.cs" />
     <Compile Include="InterfacesAsMessages\ExceptionJsonConverter.cs" />
