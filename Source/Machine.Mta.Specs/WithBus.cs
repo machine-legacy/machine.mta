@@ -6,8 +6,9 @@ using Machine.Container;
 using Machine.Container.Services;
 using Machine.Mta.InterfacesAsMessages;
 using Machine.Mta.Internal;
-
+using Machine.Mta.Transports.Msmq;
 using Machine.Specifications;
+
 using Rhino.Mocks;
 
 namespace Machine.Mta.Specs
@@ -30,8 +31,9 @@ namespace Machine.Mta.Specs
       container.Initialize();
       container.PrepareForServices();
       container.Register.Type<SagaAspect>();
+      container.Register.Type<MsmqEndpointFactory>();
       container.Start();  
-      IEndpointResolver endpointResolver = new EndpointResolver();
+      IEndpointResolver endpointResolver = new EndpointResolver(container);
       IMessageEndpointLookup messageEndpointLookup = new MessageEndpointLookup();
       MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations();
       messageInterfaceImplementations.GenerateImplementationsOf(typeof(IMessage), typeof(ISampleMessage), typeof(ISampleSagaMessage));
