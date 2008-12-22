@@ -9,6 +9,7 @@ namespace Machine.Mta.DotNetBinaryStorage
 {
   public abstract class DotNetBinarySagaStateRepository<T> : ISagaStateRepository<T> where T : class, ISagaState
   {
+    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(DotNetBinarySagaStateRepository<T>));
     readonly BinaryFormatter _formatter = new BinaryFormatter();
     readonly IFlatFileSystem _flatFileSystem;
     readonly IFlatBinaryFileConfiguration _configuration;

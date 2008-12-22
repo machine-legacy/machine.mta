@@ -31,19 +31,19 @@ namespace Machine.Mta.Sagas
       {
         if (!invocation.IsStartedBy())
         {
-          _log.Info("Ignoring: " + handler);
+          invocation.HandlerLogger.Info("Ignoring");
           return;
         }
-        _log.Info("Starting: " + handler);
+        invocation.HandlerLogger.Info("Starting");
         handler.State = null;
       }
       else
       {
-        _log.Info("Retrieving: " + sagaId);
+        invocation.HandlerLogger.Info("Retrieving: " + sagaId);
         ISagaState state = repository.FindSagaState(sagaId);
         if (state == null)
         {
-          _log.Info("Unable to find state: " + sagaId);
+          invocation.HandlerLogger.Info("Unable to find state: " + sagaId);
           return;
         }
         handler.State = state;
@@ -52,10 +52,10 @@ namespace Machine.Mta.Sagas
       {
         invocation.Continue();
       }
-      SaveOrDeleteState(handler, repository);
+      SaveOrDeleteState(invocation, handler, repository);
     }
 
-    private static void SaveOrDeleteState(ISagaHandler handler, ISagaStateRepository<ISagaState> repository)
+    private static void SaveOrDeleteState(HandlerInvocation invocation, ISagaHandler handler, ISagaStateRepository<ISagaState> repository)
     {
       if (handler.State == null)
       {
@@ -64,12 +64,12 @@ namespace Machine.Mta.Sagas
       if (handler.State.IsSagaComplete)
       {
         handler.Complete();
-        _log.Info("Deleting: " + handler.State.SagaId);
+        invocation.HandlerLogger.Info("Deleting: " + handler.State.SagaId);
         repository.Delete(handler.State);
       }
       else
       {
-        _log.Info("Saving: " + handler.State.SagaId);
+        invocation.HandlerLogger.Info("Saving: " + handler.State.SagaId);
         repository.Save(handler.State);
       }
     }
