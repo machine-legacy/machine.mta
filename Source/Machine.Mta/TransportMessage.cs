@@ -42,6 +42,11 @@ namespace Machine.Mta
       get { return _body; }
     }
 
+    public string ToLabel()
+    {
+      return "TM<" + _returnAddress + ">";
+    }
+
     protected TransportMessage()
     {
     }
