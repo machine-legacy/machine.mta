@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 
+using Machine.Utility.ThreadPool;
+using Machine.Utility.ThreadPool.QueueStrategies;
+
 using MassTransit;
 using MassTransit.Internal;
-using MassTransit.Threading;
 
 namespace Machine.Mta.Internal
 {
@@ -48,6 +50,7 @@ namespace Machine.Mta.Internal
       return listeningOn;
     }
   }
+
   public class MessageBus : IMessageBus
   {
     private static readonly log4net.ILog _receivingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Receiving");
@@ -62,13 +65,13 @@ namespace Machine.Mta.Internal
     private readonly IEndpoint _poison;
     private readonly EndpointName _listeningOnEndpointName;
     private readonly EndpointName _poisonEndpointName;
-    private readonly ResourceThreadPool<IEndpoint, object> _threads;
+    private readonly ThreadPool _threadPool;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly AsyncCallbackMap _asyncCallbackMap;
     private readonly MessageFailureManager _messageFailureManager;
     private readonly ReturnAddressProvider _returnAddressProvider;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
+    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ThreadPoolConfiguration threadPoolConfiguration)
     {
       _endpointResolver = endpointResolver;
       _dispatcher = dispatcher;
@@ -80,10 +83,15 @@ namespace Machine.Mta.Internal
       _listeningOnEndpointName = listeningOnEndpointName;
       _poisonEndpointName = poisonEndpointName;
       _messageEndpointLookup = messageEndpointLookup;
-      _threads = new ResourceThreadPool<IEndpoint, object>(_listeningOn, EndpointReader, EndpointDispatcher, 10, 1, 1);
+      _threadPool = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_listeningOn, EndpointDispatcher)));
       _asyncCallbackMap = new AsyncCallbackMap();
       _messageFailureManager = new MessageFailureManager();
       _returnAddressProvider = new ReturnAddressProvider();
+    }
+
+    public MessageBus(IEndpointResolver endpointResolver, IMtaUriFactory uriFactory, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
+      : this(endpointResolver, uriFactory, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnEndpointName, poisonEndpointName, new ThreadPoolConfiguration(1, 1))
+    {
     }
 
     public EndpointName PoisonAddress
@@ -99,7 +107,7 @@ namespace Machine.Mta.Internal
     public void Start()
     {
       _log.Info("Starting");
-      _threads.WakeUp();
+      _threadPool.Start();
     }
 
     public void Send<T>(params T[] messages) where T : class, IMessage
@@ -137,7 +145,7 @@ namespace Machine.Mta.Internal
     public void Stop()
     {
       _log.Info("Stopping");
-      _threads.Dispose();
+      _threadPool.Dispose();
     }
 
     public void Dispose()
@@ -162,24 +170,6 @@ namespace Machine.Mta.Internal
     {
       foreach (T message in messages) _sendingLog.Info("Publishing " + message);
       SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
-    }
-
-    private static object EndpointReader(IEndpoint resource)
-    {
-      try
-      {
-        return resource.Receive(TimeSpan.FromSeconds(3), Accept);
-      }
-      catch (Exception error)
-      {
-        _log.Error(error);
-        return null;
-      }
-    }
-
-    private static bool Accept(object obj)
-    {
-      return obj is TransportMessage;
     }
 
     private void EndpointDispatcher(object obj)
