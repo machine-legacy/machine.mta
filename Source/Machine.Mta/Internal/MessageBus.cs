@@ -50,7 +50,6 @@ namespace Machine.Mta.Internal
       return listeningOn;
     }
   }
-
   public class MessageBus : IMessageBus
   {
     private static readonly log4net.ILog _receivingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Receiving");
@@ -65,7 +64,7 @@ namespace Machine.Mta.Internal
     private readonly IEndpoint _poison;
     private readonly EndpointName _listeningOnEndpointName;
     private readonly EndpointName _poisonEndpointName;
-    private readonly ThreadPool _threadPool;
+    private readonly ThreadPool _threads;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly AsyncCallbackMap _asyncCallbackMap;
     private readonly MessageFailureManager _messageFailureManager;
@@ -83,7 +82,7 @@ namespace Machine.Mta.Internal
       _listeningOnEndpointName = listeningOnEndpointName;
       _poisonEndpointName = poisonEndpointName;
       _messageEndpointLookup = messageEndpointLookup;
-      _threadPool = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_listeningOn, EndpointDispatcher)));
+      _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_listeningOn, EndpointDispatcher)));
       _asyncCallbackMap = new AsyncCallbackMap();
       _messageFailureManager = new MessageFailureManager();
       _returnAddressProvider = new ReturnAddressProvider();
@@ -104,10 +103,15 @@ namespace Machine.Mta.Internal
       get { return _listeningOnEndpointName; }
     }
 
+    public void ChangeThreadPoolConfiguration(ThreadPoolConfiguration configuration)
+    {
+      _threads.ChangeConfiguration(configuration);
+    }
+
     public void Start()
     {
       _log.Info("Starting");
-      _threadPool.Start();
+      _threads.Start();
     }
 
     public void Send<T>(params T[] messages) where T : class, IMessage
@@ -145,7 +149,7 @@ namespace Machine.Mta.Internal
     public void Stop()
     {
       _log.Info("Stopping");
-      _threadPool.Dispose();
+      _threads.Dispose();
     }
 
     public void Dispose()
