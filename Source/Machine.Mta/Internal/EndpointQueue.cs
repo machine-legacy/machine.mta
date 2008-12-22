@@ -1,4 +1,5 @@
 using System;
+using System.Transactions;
 
 using Machine.Core.Services;
 using Machine.Utility.ThreadPool;
@@ -9,7 +10,6 @@ namespace Machine.Mta.Internal
 {
   public class EndpointQueue : IQueue
   {
-    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EndpointQueue));
     readonly IEndpoint _listeningOn;
     readonly Action<object> _dispatcher;
 
@@ -24,16 +24,39 @@ namespace Machine.Mta.Internal
       throw new NotSupportedException();
     }
 
+    public IScope CreateScope()
+    {
+      return new EndpointScope(_listeningOn, _dispatcher);
+    }
+
+    public void Drainstop()
+    {
+    }
+  }
+  public class EndpointScope : IScope
+  {
+    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EndpointScope));
+    readonly IEndpoint _listeningOn;
+    readonly Action<object> _dispatcher;
+    readonly TransactionScope _scope;
+
+    public EndpointScope(IEndpoint listeningOn, Action<object> dispatcher)
+    {
+      _listeningOn = listeningOn;
+      _dispatcher = dispatcher;
+      _scope = new TransactionScope();
+    }
+
     public IRunnable Dequeue()
     {
       try
       {
-        object received = _listeningOn.Receive(TimeSpan.FromSeconds(3), x => x is TransportMessage);
-        if (received == null)
+        object value = _listeningOn.Receive(TimeSpan.FromSeconds(3), x => x is TransportMessage);
+        if (value == null)
         {
           return null;
         }
-        return new DispatcherRunnable(received, _dispatcher);
+        return new DispatcherRunnable(_dispatcher, value);
       }
       catch (Exception error)
       {
@@ -42,25 +65,30 @@ namespace Machine.Mta.Internal
       }
     }
 
-    public void Drainstop()
+    public void Complete()
     {
+      _scope.Complete();
     }
 
-    class DispatcherRunnable : IRunnable
+    public void Dispose()
     {
-      readonly object _value;
-      readonly Action<object> _dispatcher;
+      _scope.Dispose();
+    }
+  }
+  public class DispatcherRunnable : IRunnable
+  {
+    readonly Action<object> _dispatcher;
+    readonly object _value;
 
-      public DispatcherRunnable(object value, Action<object> dispatcher)
-      {
-        _value = value;
-        _dispatcher = dispatcher;
-      }
+    public DispatcherRunnable(Action<object> dispatcher, object value)
+    {
+      _dispatcher = dispatcher;
+      _value = value;
+    }
 
-      public void Run()
-      {
-        _dispatcher(_value);
-      }
+    public void Run()
+    {
+      _dispatcher(_value);
     }
   }
 }
