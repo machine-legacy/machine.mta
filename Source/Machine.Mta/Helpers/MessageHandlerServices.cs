@@ -1,8 +1,6 @@
 using System;
 using System.Reflection;
 
-using MassTransit;
-
 using Machine.Container;
 using Machine.Container.Plugins;
 using Machine.Mta.Internal;
@@ -24,7 +22,7 @@ namespace Machine.Mta.Helpers
       {
         foreach (Type type in assembly.GetTypes())
         {
-          if (typeof(Consumes<IMessage>.All).IsSortOfContravariantWith(type))
+          if (typeof(IConsume<IMessage>).IsSortOfContravariantWith(type))
           {
             register.Type(type);
           }

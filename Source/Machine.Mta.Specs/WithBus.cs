@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using MassTransit;
 using MassTransit.Internal;
 using MassTransit.Transports.Msmq;
 
@@ -74,12 +73,12 @@ namespace Machine.Mta.Specs
   [Subject("Message dispatching")]
   public class when_dispatching_a_message : with_bus
   {
-    static Consumes<ISampleMessage>.All handler;
+    static IConsume<ISampleMessage> handler;
 
     Establish context = () =>
     {
-      handler = MockRepository.GenerateMock<Consumes<ISampleMessage>.All>();
-      container.Register.Type<Consumes<ISampleMessage>.All>().Is(handler);
+      handler = MockRepository.GenerateMock<IConsume<ISampleMessage>>();
+      container.Register.Type<IConsume<ISampleMessage>>().Is(handler);
     };
 
     Because of = () =>
@@ -92,15 +91,15 @@ namespace Machine.Mta.Specs
   [Subject("Message dispatching")]
   public class when_dispatching_a_message_with_two_applicable_handlers : with_bus
   {
-    static Consumes<IMessage>.All handler1;
-    static Consumes<ISampleMessage>.All handler2;
+    static IConsume<IMessage> handler1;
+    static IConsume<ISampleMessage> handler2;
 
     Establish context = () =>
     {
-      handler1 = MockRepository.GenerateMock<Consumes<IMessage>.All>();
-      handler2 = MockRepository.GenerateMock<Consumes<ISampleMessage>.All>();
-      container.Register.Type<Consumes<IMessage>.All>().Is(handler1);
-      container.Register.Type<Consumes<ISampleMessage>.All>().Is(handler2);
+      handler1 = MockRepository.GenerateMock<IConsume<IMessage>>();
+      handler2 = MockRepository.GenerateMock<IConsume<ISampleMessage>>();
+      container.Register.Type<IConsume<IMessage>>().Is(handler1);
+      container.Register.Type<IConsume<ISampleMessage>>().Is(handler2);
     };
 
     Because of = () =>
@@ -116,18 +115,18 @@ namespace Machine.Mta.Specs
   [Subject("Message dispatching")]
   public class when_dispatching_a_message_with_inapplicable_handlers : with_bus
   {
-    static Consumes<IMessage>.All handler1;
-    static Consumes<ISampleMessage>.All handler2;
-    static Consumes<ISampleSagaMessage>.All handler3;
+    static IConsume<IMessage> handler1;
+    static IConsume<ISampleMessage> handler2;
+    static IConsume<ISampleSagaMessage> handler3;
 
     Establish context = () =>
     {
-      handler1 = MockRepository.GenerateMock<Consumes<IMessage>.All>();
-      handler2 = MockRepository.GenerateMock<Consumes<ISampleMessage>.All>();
-      handler3 = MockRepository.GenerateMock<Consumes<ISampleSagaMessage>.All>();
-      container.Register.Type<Consumes<IMessage>.All>().Is(handler1);
-      container.Register.Type<Consumes<ISampleMessage>.All>().Is(handler2);
-      container.Register.Type<Consumes<ISampleSagaMessage>.All>().Is(handler3);
+      handler1 = MockRepository.GenerateMock<IConsume<IMessage>>();
+      handler2 = MockRepository.GenerateMock<IConsume<ISampleMessage>>();
+      handler3 = MockRepository.GenerateMock<IConsume<ISampleSagaMessage>>();
+      container.Register.Type<IConsume<IMessage>>().Is(handler1);
+      container.Register.Type<IConsume<ISampleMessage>>().Is(handler2);
+      container.Register.Type<IConsume<ISampleSagaMessage>>().Is(handler3);
     };
 
     Because of = () =>

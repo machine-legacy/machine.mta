@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using MassTransit;
-
 using Machine.Mta.Sagas;
 
 using Machine.Specifications;

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using MassTransit;
-
 using Machine.Mta.Internal;
 
 namespace Machine.Mta.Timing
@@ -55,7 +53,7 @@ namespace Machine.Mta.Timing
       _bus.Send(message);
     }
   }
-  public class SchedulePublishHandler : Consumes<ISchedulePublishMessage>.All
+  public class SchedulePublishHandler : IConsume<ISchedulePublishMessage>
   {
     readonly IScheduledPublishRepository _scheduledPublishRepository;
 

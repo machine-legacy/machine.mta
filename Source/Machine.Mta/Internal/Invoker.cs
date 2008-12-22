@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 using Machine.Mta.Sagas;
 
-using MassTransit;
-
 namespace Machine.Mta.Internal
 {
   public class ProvideHandlerOrderInvoker<T> : IProvideHandlerOrderFor<IMessage>  where T : class, IMessage
@@ -27,11 +25,11 @@ namespace Machine.Mta.Internal
     }
   }
 
-  public class HandlerInvoker<T> : Consumes<IMessage>.All where T : class, IMessage
+  public class HandlerInvoker<T> : IConsume<IMessage> where T : class, IMessage
   {
-    private readonly Consumes<T>.All _target;
+    private readonly IConsume<T> _target;
 
-    public HandlerInvoker(Consumes<T>.All target)
+    public HandlerInvoker(IConsume<T> target)
     {
       _target = target;
     }
@@ -74,9 +72,9 @@ namespace Machine.Mta.Internal
   
   public static class Invokers
   {
-    public static Consumes<IMessage>.All CreateForHandler(Type messageType, object target)
+    public static IConsume<IMessage> CreateForHandler(Type messageType, object target)
     {
-      return (Consumes<IMessage>.All)Activator.CreateInstance(typeof(HandlerInvoker<>).MakeGenericType(messageType), target);
+      return (IConsume<IMessage>)Activator.CreateInstance(typeof(HandlerInvoker<>).MakeGenericType(messageType), target);
     }
 
     public static IProvideHandlerOrderFor<IMessage> CreateForHandlerOrderProvider(Type messageType, object target)

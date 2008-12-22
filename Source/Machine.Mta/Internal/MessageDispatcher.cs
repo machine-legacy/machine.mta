@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using MassTransit;
-
 using Machine.Mta.Sagas;
 using Machine.Container.Model;
 using Machine.Container.Services;
@@ -72,14 +70,14 @@ namespace Machine.Mta.Internal
       
       foreach (ServiceRegistration registration in _container.RegisteredServices)
       {
-        Type handlerOfMessageType = typeof(Consumes<>.All).MakeGenericType(messageType);
+        Type handlerOfMessageType = typeof(IConsume<>).MakeGenericType(messageType);
         if (registration.ServiceType.IsSortOfContravariantWith(handlerOfMessageType))
         {
           foreach (Type interfaceType in registration.ServiceType.Interfaces())
           {
             if (interfaceType.GetGenericArguments().Length > 0)
             {
-              if (typeof(Consumes<>.All).MakeGenericType(interfaceType.GetGenericArguments()[0]).Equals(interfaceType))
+              if (typeof(IConsume<>).MakeGenericType(interfaceType.GetGenericArguments()[0]).Equals(interfaceType))
               {
                 if (interfaceType.IsSortOfContravariantWith(handlerOfMessageType))
                 {
@@ -148,7 +146,7 @@ namespace Machine.Mta.Internal
       foreach (MessageHandlerType messageHandlerType in _handlerDiscoverer.GetHandlerTypesFor(message.GetType()))
       {
         object handler = _container.Resolve.Object(messageHandlerType.TargetType);
-        Consumes<IMessage>.All invoker = Invokers.CreateForHandler(messageHandlerType.TargetExpectsMessageOfType, handler);
+        IConsume<IMessage> invoker = Invokers.CreateForHandler(messageHandlerType.TargetExpectsMessageOfType, handler);
         HandlerInvocation invocation = messageHandlerType.ToInvocation(message, handler, invoker, _messageAspectsProvider.DefaultAspects());
         invocation.Continue();
       }
@@ -165,7 +163,7 @@ namespace Machine.Mta.Internal
 
   public static class InvocationMappings
   {
-    public static HandlerInvocation ToInvocation(this MessageHandlerType messageHandlerType, IMessage message, object handler, Consumes<IMessage>.All invoker, Queue<IMessageAspect> aspects)
+    public static HandlerInvocation ToInvocation(this MessageHandlerType messageHandlerType, IMessage message, object handler, IConsume<IMessage> invoker, Queue<IMessageAspect> aspects)
     {
       return new HandlerInvocation(message, messageHandlerType.TargetExpectsMessageOfType, messageHandlerType.TargetType, handler, invoker, aspects);
     }
@@ -178,7 +176,7 @@ namespace Machine.Mta.Internal
     readonly Type _handlerType;
     readonly object _handler;
     readonly Queue<IMessageAspect> _aspects;
-    readonly Consumes<IMessage>.All _invoker;
+    readonly IConsume<IMessage> _invoker;
 
     public IMessage Message
     {
@@ -200,7 +198,7 @@ namespace Machine.Mta.Internal
       get { return _handler; }
     }
 
-    public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, Consumes<IMessage>.All invoker, Queue<IMessageAspect> aspects)
+    public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, IConsume<IMessage> invoker, Queue<IMessageAspect> aspects)
     {
       _message = message;
       _aspects = aspects;

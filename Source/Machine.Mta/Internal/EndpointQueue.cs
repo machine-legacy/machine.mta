@@ -51,7 +51,7 @@ namespace Machine.Mta.Internal
     {
       try
       {
-        object value = _listeningOn.Receive(TimeSpan.FromSeconds(3), x => x is TransportMessage);
+        object value = _listeningOn.Receive(TimeSpan.FromSeconds(3));
         if (value == null)
         {
           return null;
