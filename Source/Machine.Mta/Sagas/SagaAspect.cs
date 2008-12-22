@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -77,7 +77,7 @@ namespace Machine.Mta.Sagas
     private ISagaStateRepository<ISagaState> GetRepositoryFor(Type sagaStateType)
     {
       object repository = _container.Resolve.All(type => 
-        type.IsSortOfContravariantWith(typeof(ISagaStateRepository<>).MakeGenericType(sagaStateType))).FirstOrDefault();
+        type.IsGenericlyCompatible(typeof(ISagaStateRepository<>).MakeGenericType(sagaStateType))).FirstOrDefault();
       if (repository == null)
       {
         throw new SagaStateRepositoryNotFoundException(sagaStateType);

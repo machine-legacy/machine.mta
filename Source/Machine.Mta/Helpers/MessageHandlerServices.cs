@@ -22,7 +22,7 @@ namespace Machine.Mta.Helpers
       {
         foreach (Type type in assembly.GetTypes())
         {
-          if (typeof(IConsume<IMessage>).IsSortOfContravariantWith(type))
+          if (typeof(IConsume<IMessage>).IsGenericlyCompatible(type))
           {
             register.Type(type);
           }

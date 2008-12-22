@@ -71,7 +71,7 @@ namespace Machine.Mta.Internal
       foreach (ServiceRegistration registration in _container.RegisteredServices)
       {
         Type handlerOfMessageType = typeof(IConsume<>).MakeGenericType(messageType);
-        if (registration.ServiceType.IsSortOfContravariantWith(handlerOfMessageType))
+        if (registration.ServiceType.IsGenericlyCompatible(handlerOfMessageType))
         {
           foreach (Type interfaceType in registration.ServiceType.Interfaces())
           {
@@ -79,7 +79,7 @@ namespace Machine.Mta.Internal
             {
               if (typeof(IConsume<>).MakeGenericType(interfaceType.GetGenericArguments()[0]).Equals(interfaceType))
               {
-                if (interfaceType.IsSortOfContravariantWith(handlerOfMessageType))
+                if (interfaceType.IsGenericlyCompatible(handlerOfMessageType))
                 {
                   messageHandlerTypes.Add(new MessageHandlerType(registration.ServiceType, interfaceType));
                 }
@@ -115,7 +115,7 @@ namespace Machine.Mta.Internal
     private IEnumerable<Type> GetHandlerOrderFor(Type messageType)
     {
       object orderer = _container.Resolve.All(type => {
-        return type.IsSortOfContravariantWith(typeof(IProvideHandlerOrderFor<>).MakeGenericType(messageType));
+        return type.IsGenericlyCompatible(typeof(IProvideHandlerOrderFor<>).MakeGenericType(messageType));
       }).FirstOrDefault();
       if (orderer == null)
       {

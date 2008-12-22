@@ -1,80 +1,87 @@
 using System;
 using System.Collections.Generic;
 
+using Machine.Mta.Sagas;
+
 namespace Machine.Mta.Internal
 {
   public static class InvarianceHelpers
   {
-    public static bool IsSortOfContravariantWith(this Type type1, Type type2)
+    public static bool IsGenericlyCompatible(this Type type1, Type type2)
     {
-      foreach (Type interfaceType in type1.GetInterfaces())
+      if (!type1.IsGenericType)
       {
-        if (interfaceType.IsSortOfContravariantWith(type2))
+        foreach (Type type in type1.Interfaces())
+        {
+          if (type.IsGenericType)
+          {
+            if (type.IsGenericlyCompatible(type2))
+            {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      foreach (Type interfaceType in type2.Interfaces())
+      {
+        if (!interfaceType.IsGenericType) continue;
+        if (type1.GetGenericTypeDefinition() != interfaceType.GetGenericTypeDefinition())
+        {
+          continue;
+        }
+        for (short i = 0; i < type1.GetGenericArguments().Length; ++i)
+        {
+          Type arg1 = type1.GetGenericArguments()[i];
+          Type arg2 = interfaceType.GetGenericArguments()[i];
+          if (!arg1.IsAssignableFrom(arg2))
+          {
+            return false;
+          }
+        }
+        Type genericType = type1.GetGenericTypeDefinition();
+        return genericType.MakeGenericType(interfaceType.GetGenericArguments()).IsAssignableFrom(interfaceType);
+      }
+      return false;
+    }
+    
+    public static bool IsImplementationOfGenericType(this Type type, Type required)
+    {
+      foreach (Type interfaceType in type.FindInterfaces((Type t, object state) => true, null))
+      {
+        if (interfaceType.IsImplementationOfGenericType(required))
         {
           return true;
         }
       }
-      if (type1.GetGenericArguments().Length != type2.GetGenericArguments().Length)
+      if (type.IsGenericType && type.GetGenericTypeDefinition().Equals(required))
       {
-        return false;
+        return true;
       }
-      if (type1.GetGenericArguments().Length == 0)
-      {
-        return type1.IsAssignableFrom(type2);
-      }
-      for (short i = 0; i < type1.GetGenericArguments().Length; ++i)
-      {
-        Type arg1 = type1.GetGenericArguments()[i];
-        Type arg2 = type2.GetGenericArguments()[i];
-        if (!arg1.IsAssignableFrom(arg2))
-        {
-          return false;
-        }
-      }
-      Type genericType = type1.GetGenericTypeDefinition();
-      return genericType.MakeGenericType(type2.GetGenericArguments()).IsAssignableFrom(type2);
+      return false;
     }
   }
-  
+
   public class InvarianceHelpersSpecs
   {
     public void should_all_be_true()
     {
-      Console.WriteLine(typeof(IReader<IBase>).IsSortOfContravariantWith(typeof(IReader<IDerrived>)));
-      Console.WriteLine(!typeof(IReader<IDerrived>).IsSortOfContravariantWith(typeof(IReader<IBase>)));
-      Console.WriteLine(!typeof(IReader<IDerrived>).IsSortOfContravariantWith(typeof(IReader<IAnotherDerrived>)));
-      Console.WriteLine(!typeof(IWriter<short>).IsSortOfContravariantWith(typeof(DoesStrings)));
-      Console.WriteLine(!typeof(IReader<ISomethingElse>).IsSortOfContravariantWith(typeof(DoesDerrived)));
-      Console.WriteLine(typeof(IReader<object>).IsSortOfContravariantWith(typeof(IReader<string>)));
-      Console.WriteLine(!typeof(IReader<Int32>).IsSortOfContravariantWith(typeof(IReader<string>)));
-      Console.WriteLine(typeof(DoesStrings).IsSortOfContravariantWith(typeof(IReader<string>)));
-      Console.WriteLine(!typeof(DoesStrings).IsSortOfContravariantWith(typeof(IReader<object>)));
-      Console.WriteLine(typeof(DoesStrings).IsSortOfContravariantWith(typeof(IWriter<string>)));
-      Console.WriteLine(!typeof(DoesStrings).IsSortOfContravariantWith(typeof(IWriter<object>)));
-      Console.WriteLine(!typeof(DoesDerrived).IsSortOfContravariantWith(typeof(IReader<IBase>)));
-      Console.WriteLine(typeof(DoesDerrived).IsSortOfContravariantWith(typeof(IReader<IDerrived>)));
-      Console.WriteLine(!typeof(DoesDerrived).IsSortOfContravariantWith(typeof(IReader<object>)));
+      Console.WriteLine(typeof(IConsume<IMessage>).IsGenericlyCompatible(typeof(ReadsAll)));
+      Console.WriteLine(typeof(IConsume<IMessage>).IsGenericlyCompatible(typeof(ReadsSaga)));
+      Console.WriteLine(!typeof(IConsume<ISagaMessage>).IsGenericlyCompatible(typeof(ReadsAll)));
+      Console.WriteLine(typeof(IConsume<ISagaMessage>).IsGenericlyCompatible(typeof(ReadsSaga)));
+      Console.WriteLine(!typeof(IConsume<IAnotherMessage>).IsGenericlyCompatible(typeof(ReadsSaga)));
+      Console.WriteLine(typeof(IConsume<IAnotherMessage>).IsGenericlyCompatible(typeof(ReadsAll)));
+      Console.WriteLine(typeof(IConsume<IAnotherMessage>).IsGenericlyCompatible(typeof(ReadsAnotherMessages)));
+      Console.WriteLine(typeof(IConsume<IMessage>).IsGenericlyCompatible(typeof(ReadsAnotherMessages)));
+      Console.WriteLine(!typeof(IConsume<ISagaMessage>).IsGenericlyCompatible(typeof(ReadsAnotherMessages)));
     }
 
-    interface IReader<T> { T Read(); }
-    interface IWriter<T> { void Write(T value); }
-    interface IBase { }
-    interface IDerrived : IBase { }
-    interface IAnotherDerrived : IBase { }
-    interface ISomethingElse { }
-
-    class DoesDerrived : IReader<IDerrived>
-    {
-      public IDerrived Read()
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    class DoesStrings : IReader<string>, IWriter<string>
-    {
-      public string Read() { throw new NotImplementedException(); }
-      public void Write(string value) { throw new NotImplementedException(); }
-    }
+    class ReadsAll : IConsume<IMessage> { public void Consume(IMessage message) { throw new NotImplementedException(); } }
+    class ReadsSaga : IConsume<ISagaMessage> { public void Consume(ISagaMessage message) { throw new NotImplementedException(); } }
+    class ReadsAnotherMessages : IConsume<IAnotherMessage>{ public void Consume(IAnotherMessage message) { throw new NotImplementedException(); } }
+  }
+  public interface IAnotherMessage : IMessage
+  {
   }
 }
