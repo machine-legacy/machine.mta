@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.Mta.Minimalistic
+namespace Machine.Mta.Internal
 {
   public static class InvarianceHelpers
   {

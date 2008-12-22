@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Machine.Mta.Minimalistic
+namespace Machine.Mta.Internal
 {
   public class RequestReplyBuilder : IRequestReplyBuilder
   {

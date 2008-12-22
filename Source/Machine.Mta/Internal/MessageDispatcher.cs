@@ -8,7 +8,7 @@ using Machine.Mta.Sagas;
 using Machine.Container.Model;
 using Machine.Container.Services;
 
-namespace Machine.Mta.Minimalistic
+namespace Machine.Mta.Internal
 {
   public class MessageHandlerType
   {

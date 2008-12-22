@@ -5,7 +5,7 @@ using MassTransit;
 
 using Machine.Container;
 using Machine.Container.Plugins;
-using Machine.Mta.Minimalistic;
+using Machine.Mta.Internal;
 
 namespace Machine.Mta.Helpers
 {

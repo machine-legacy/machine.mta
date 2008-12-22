@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 using MassTransit;
 using MassTransit.Internal;
+using MassTransit.Transports.Msmq;
 
 using Machine.Mta.Sagas;
 using Machine.Container;
 using Machine.Container.Services;
 using Machine.Mta.InterfacesAsMessages;
-using Machine.Mta.Minimalistic;
+using Machine.Mta.Internal;
 
 using Machine.Specifications;
-using MassTransit.Transports.Msmq;
 using Rhino.Mocks;
 
 namespace Machine.Mta.Specs

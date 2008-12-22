@@ -3,7 +3,7 @@ using MassTransit.Internal;
 using Machine.Container;
 using Machine.Container.Plugins;
 using Machine.Mta.InterfacesAsMessages;
-using Machine.Mta.Minimalistic;
+using Machine.Mta.Internal;
 using Machine.Mta.Timing;
 using Machine.Mta.Sagas;
 

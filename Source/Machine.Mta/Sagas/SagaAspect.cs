@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Machine.Container.Services;
-using Machine.Mta.Minimalistic;
+using Machine.Mta.Internal;
 
 namespace Machine.Mta.Sagas
 {

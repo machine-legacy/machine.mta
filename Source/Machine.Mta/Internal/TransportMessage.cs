@@ -1,6 +1,6 @@
 using System;
 
-namespace Machine.Mta.Minimalistic
+namespace Machine.Mta.Internal
 {
   [Serializable]
   public class TransportMessage

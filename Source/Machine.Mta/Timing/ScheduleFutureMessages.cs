@@ -4,7 +4,7 @@ using System.Linq;
 
 using MassTransit;
 
-using Machine.Mta.Minimalistic;
+using Machine.Mta.Internal;
 
 namespace Machine.Mta.Timing
 {

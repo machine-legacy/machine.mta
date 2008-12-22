@@ -5,7 +5,7 @@ using MassTransit;
 using MassTransit.Internal;
 using MassTransit.Threading;
 
-namespace Machine.Mta.Minimalistic
+namespace Machine.Mta.Internal
 {
   public class MessageFailureManager
   {

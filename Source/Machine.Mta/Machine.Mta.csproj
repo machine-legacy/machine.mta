@@ -43,6 +43,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Machine.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Machine.Utility.ThreadPool, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Machine\Machine.Utility.ThreadPool.dll</HintPath>
+    </Reference>
     <Reference Include="MassTransit, Version=0.5.0.1509, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\MassTransit\MassTransit.dll</HintPath>
@@ -85,9 +89,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MessagePayload.cs" />
-    <Compile Include="Minimalistic\InvarianceHelpers.cs" />
-    <Compile Include="Minimalistic\MessageBusFactory.cs" />
-    <Compile Include="Minimalistic\RequestReply.cs" />
+    <Compile Include="Internal\InvarianceHelpers.cs" />
+    <Compile Include="Internal\MessageBusFactory.cs" />
+    <Compile Include="Internal\RequestReply.cs" />
     <Compile Include="MtaServices.cs" />
     <Compile Include="Sagas\ISagaMessage.cs" />
     <Compile Include="Sagas\ISagaState.cs" />
@@ -120,20 +124,20 @@
     <Compile Include="InterfacesAsMessages\MessageInterfaceTransportFormatter.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Minimalistic\CurrentMessageContext.cs" />
+    <Compile Include="Internal\CurrentMessageContext.cs" />
     <Compile Include="IMessageBusManager.cs" />
-    <Compile Include="Minimalistic\ITransportMessageBodyFormatter.cs" />
+    <Compile Include="Internal\ITransportMessageBodyFormatter.cs" />
     <Compile Include="IMessageBusFactory.cs" />
-    <Compile Include="Minimalistic\Invoker.cs" />
-    <Compile Include="Minimalistic\MessageDispatcher.cs" />
-    <Compile Include="Minimalistic\MessageBus.cs" />
-    <Compile Include="Minimalistic\MessageBusManager.cs" />
-    <Compile Include="Minimalistic\MessageEndpointLookup.cs" />
+    <Compile Include="Internal\Invoker.cs" />
+    <Compile Include="Internal\MessageDispatcher.cs" />
+    <Compile Include="Internal\MessageBus.cs" />
+    <Compile Include="Internal\MessageBusManager.cs" />
+    <Compile Include="Internal\MessageEndpointLookup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Minimalistic\MsMqUriFactory.cs" />
-    <Compile Include="Minimalistic\NmsUriFactory.cs" />
-    <Compile Include="Minimalistic\TransportMessage.cs" />
-    <Compile Include="Minimalistic\TransportMessageBodySerializer.cs" />
+    <Compile Include="Internal\MsMqUriFactory.cs" />
+    <Compile Include="Internal\NmsUriFactory.cs" />
+    <Compile Include="Internal\TransportMessage.cs" />
+    <Compile Include="Internal\TransportMessageBodySerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AdoNet\Tables.sql" />

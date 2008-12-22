@@ -5,7 +5,7 @@ using Machine.Mta.Sagas;
 
 using MassTransit;
 
-namespace Machine.Mta.Minimalistic
+namespace Machine.Mta.Internal
 {
   public class ProvideHandlerOrderInvoker<T> : IProvideHandlerOrderFor<IMessage>  where T : class, IMessage
   {

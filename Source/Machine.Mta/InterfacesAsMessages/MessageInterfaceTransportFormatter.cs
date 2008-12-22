@@ -5,7 +5,7 @@ using System.Reflection;
 
 using Newtonsoft.Json;
 
-using Machine.Mta.Minimalistic;
+using Machine.Mta.Internal;
 
 namespace Machine.Mta.InterfacesAsMessages
 {
