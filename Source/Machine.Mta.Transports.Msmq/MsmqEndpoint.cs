@@ -19,21 +19,21 @@ namespace Machine.Mta.Transports.Msmq
       _queue = queue;
     }
 
-    public void Send(object message)
+    public void Send(TransportMessage transportMessage)
     {
       if (!_queue.CanWrite)
       {
         throw new InvalidOperationException("Queue is read-only: " + _name);
       }
       Message systemMessage = new Message();
-      systemMessage.Label = "TransportMessage";
+      systemMessage.Label = transportMessage.ToString();
       systemMessage.Recoverable = true;
       systemMessage.TimeToBeReceived = TimeSpan.MaxValue;
-      _formatter.Serialize(systemMessage.BodyStream, message);
+      _formatter.Serialize(systemMessage.BodyStream, transportMessage);
       _queue.Send(systemMessage, MessageQueueTransactionType.Single);
     }
 
-    public object Receive(TimeSpan timeout)
+    public TransportMessage Receive(TimeSpan timeout)
     {
       if (!_queue.CanRead)
       {
@@ -46,7 +46,7 @@ namespace Machine.Mta.Transports.Msmq
         {
           return null;
         }
-        return _formatter.Deserialize(systemMessage.BodyStream);
+        return (TransportMessage)_formatter.Deserialize(systemMessage.BodyStream);
       }
       catch (MessageQueueException error)
       {

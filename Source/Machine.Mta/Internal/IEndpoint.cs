@@ -5,7 +5,7 @@ namespace Machine.Mta.Internal
 {
   public interface IEndpoint
   {
-    void Send(object message);
-    object Receive(TimeSpan timeout);
+    void Send(TransportMessage transportMessage);
+    TransportMessage Receive(TimeSpan timeout);
   }
 }
