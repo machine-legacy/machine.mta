@@ -4,6 +4,7 @@ using System.Reflection;
 using Machine.Container;
 using Machine.Container.Plugins;
 using Machine.Mta.Internal;
+using Machine.Mta.Sagas;
 
 namespace Machine.Mta.Helpers
 {
@@ -24,7 +25,14 @@ namespace Machine.Mta.Helpers
         {
           if (typeof(IConsume<IMessage>).IsGenericlyCompatible(type))
           {
-            register.Type(type);
+            if (typeof(ISagaHandler).IsAssignableFrom(type))
+            {
+              register.Type(type).AsTransient();
+            }
+            else
+            {
+              register.Type(type);
+            }
           }
         }
       }
