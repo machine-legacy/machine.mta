@@ -104,7 +104,6 @@
     <Compile Include="Timing\ScheduleFutureMessages.cs" />
     <Compile Include="Timing\TimingManager.cs" />
     <Compile Include="Timing\TimingTaskFactory.cs" />
-    <Compile Include="IMtaUriFactory.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
     <Compile Include="IMessageEndpointLookup.cs" />
@@ -130,8 +129,6 @@
     <Compile Include="Internal\MessageBusManager.cs" />
     <Compile Include="Internal\MessageEndpointLookup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Internal\MsMqUriFactory.cs" />
-    <Compile Include="Internal\NmsUriFactory.cs" />
     <Compile Include="TransportMessage.cs" />
     <Compile Include="Internal\TransportMessageBodySerializer.cs" />
   </ItemGroup>

@@ -16,6 +16,7 @@ namespace Machine.Mta.Internal
   }
   public class EndpointResolver : IEndpointResolver
   {
+    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EndpointResolver));
     readonly Dictionary<EndpointName, IEndpoint> _cache = new Dictionary<EndpointName, IEndpoint>();
     readonly ReaderWriterLock _lock = new ReaderWriterLock();
     readonly IMachineContainer _container;
@@ -42,9 +43,13 @@ namespace Machine.Mta.Internal
             _cache[name] = resolved;
             return resolved;
           }
+          else
+          {
+            _log.Info(factory + " failed to produce.");
+          }
         }
       }
-      throw new InvalidOperationException();
+      throw new InvalidOperationException("Unable to resolve: " + name);
     }
   }
 }
