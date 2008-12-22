@@ -1,5 +1,3 @@
-using MassTransit.Internal;
-
 using Machine.Container;
 using Machine.Container.Plugins;
 using Machine.Mta.InterfacesAsMessages;

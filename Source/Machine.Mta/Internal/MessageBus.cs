@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using Machine.Utility.ThreadPool;
 using Machine.Utility.ThreadPool.QueueStrategies;
 
-using MassTransit;
-using MassTransit.Internal;
-
 namespace Machine.Mta.Internal
 {
   public class MessageFailureManager

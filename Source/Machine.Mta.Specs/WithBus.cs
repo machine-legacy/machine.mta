@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using MassTransit.Internal;
-using MassTransit.Transports.Msmq;
-
 using Machine.Mta.Sagas;
 using Machine.Container;
 using Machine.Container.Services;
@@ -29,7 +26,6 @@ namespace Machine.Mta.Specs
 
     Establish context = () =>
     {
-      EndpointResolver.AddTransport(typeof(MsmqEndpoint));
       container = new MachineContainer();
       container.Initialize();
       container.PrepareForServices();

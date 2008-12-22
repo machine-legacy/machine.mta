@@ -4,8 +4,6 @@ using System.Transactions;
 using Machine.Core.Services;
 using Machine.Utility.ThreadPool;
 
-using MassTransit;
-
 namespace Machine.Mta.Internal
 {
   public class EndpointQueue : IQueue

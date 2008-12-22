@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using MassTransit.Internal;
-
 namespace Machine.Mta.Internal
 {
   public class MessageBusFactory : IMessageBusFactory
