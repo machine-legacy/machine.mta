@@ -40,7 +40,7 @@ namespace Machine.Mta.Specs
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
       dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container));
       messageFactory = new MessageFactory(messageInterfaceImplementations);
-      bus = new MessageBus(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnName, poisonName);
+      bus = new MessageBus(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnName, poisonName, new MsmqTransactionManager());
       message1 = messageFactory.Create<IMessage>();
       message2 = messageFactory.Create<ISampleMessage>();
       message3 = messageFactory.Create<ISampleSagaMessage>();

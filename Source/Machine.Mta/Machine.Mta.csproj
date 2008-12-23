@@ -82,6 +82,7 @@
     <Compile Include="IConsume.cs" />
     <Compile Include="IMessageDispatcher.cs" />
     <Compile Include="Internal\EndpointQueue.cs" />
+    <Compile Include="Internal\ITransactionManager.cs" />
     <Compile Include="IProvideHandlerOrder.cs">
       <SubType>Code</SubType>
     </Compile>

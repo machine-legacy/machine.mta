@@ -8,11 +8,13 @@ namespace Machine.Mta.Internal
 {
   public class EndpointQueue : IQueue
   {
+    readonly ITransactionManager _transactionManager;
     readonly IEndpoint _listeningOn;
     readonly Action<object> _dispatcher;
 
-    public EndpointQueue(IEndpoint listeningOn, Action<object> dispatcher)
+    public EndpointQueue(ITransactionManager transactionManager, IEndpoint listeningOn, Action<object> dispatcher)
     {
+      _transactionManager = transactionManager;
       _listeningOn = listeningOn;
       _dispatcher = dispatcher;
     }
@@ -24,7 +26,7 @@ namespace Machine.Mta.Internal
 
     public IScope CreateScope()
     {
-      return new EndpointScope(_listeningOn, _dispatcher);
+      return new EndpointScope(_listeningOn, _dispatcher, _transactionManager.CreateTransactionScope());
     }
 
     public void Drainstop()
@@ -38,11 +40,11 @@ namespace Machine.Mta.Internal
     readonly Action<object> _dispatcher;
     readonly TransactionScope _scope;
 
-    public EndpointScope(IEndpoint listeningOn, Action<object> dispatcher)
+    public EndpointScope(IEndpoint listeningOn, Action<object> dispatcher, TransactionScope scope)
     {
       _listeningOn = listeningOn;
       _dispatcher = dispatcher;
-      _scope = new TransactionScope();
+      _scope = scope;
     }
 
     public IRunnable Dequeue()

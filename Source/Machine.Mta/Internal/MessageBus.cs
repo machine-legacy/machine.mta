@@ -65,10 +65,12 @@ namespace Machine.Mta.Internal
     private readonly AsyncCallbackMap _asyncCallbackMap;
     private readonly MessageFailureManager _messageFailureManager;
     private readonly ReturnAddressProvider _returnAddressProvider;
+    private readonly ITransactionManager _transactionManager;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ThreadPoolConfiguration threadPoolConfiguration)
+    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ITransactionManager transactionManager, ThreadPoolConfiguration threadPoolConfiguration)
     {
       _endpointResolver = endpointResolver;
+      _transactionManager = transactionManager;
       _dispatcher = dispatcher;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageEndpointLookup = messageEndpointLookup;
@@ -77,14 +79,14 @@ namespace Machine.Mta.Internal
       _listeningOnEndpointName = listeningOnEndpointName;
       _poisonEndpointName = poisonEndpointName;
       _messageEndpointLookup = messageEndpointLookup;
-      _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_listeningOn, EndpointDispatcher)));
+      _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_transactionManager, _listeningOn, EndpointDispatcher)));
       _asyncCallbackMap = new AsyncCallbackMap();
       _messageFailureManager = new MessageFailureManager();
       _returnAddressProvider = new ReturnAddressProvider();
     }
 
-    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
-      : this(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnEndpointName, poisonEndpointName, new ThreadPoolConfiguration(1, 1))
+    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ITransactionManager transactionManager)
+      : this(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnEndpointName, poisonEndpointName, transactionManager, new ThreadPoolConfiguration(1, 1))
     {
     }
 

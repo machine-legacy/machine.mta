@@ -12,10 +12,12 @@ namespace Machine.Mta.Transports.Msmq
     readonly BinaryFormatter _formatter = new BinaryFormatter();
     readonly EndpointName _name;
     readonly MessageQueue _queue;
+    readonly MsmqTransactionManager _transactionManager;
 
-    public MsmqEndpoint(EndpointName name, MessageQueue queue)
+    public MsmqEndpoint(EndpointName name, MessageQueue queue, MsmqTransactionManager transactionManager)
     {
       _name = name;
+      _transactionManager = transactionManager;
       _queue = queue;
     }
 
@@ -30,7 +32,7 @@ namespace Machine.Mta.Transports.Msmq
       systemMessage.Recoverable = true;
       systemMessage.TimeToBeReceived = TimeSpan.MaxValue;
       _formatter.Serialize(systemMessage.BodyStream, transportMessage);
-      _queue.Send(systemMessage, MessageQueueTransactionType.Single);
+      _queue.Send(systemMessage, _transactionManager.SendTransactionType(_queue));
     }
 
     public TransportMessage Receive(TimeSpan timeout)
@@ -41,7 +43,7 @@ namespace Machine.Mta.Transports.Msmq
       }
       try
       {
-        Message systemMessage = _queue.Receive(timeout, MessageQueueTransactionType.Single);
+        Message systemMessage = _queue.Receive(timeout, _transactionManager.ReceiveTransactionType(_queue));
         if (systemMessage == null)
         {
           return null;

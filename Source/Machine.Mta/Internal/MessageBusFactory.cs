@@ -9,10 +9,12 @@ namespace Machine.Mta.Internal
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly MessageDispatcher _messageDispatcher;
+    private readonly ITransactionManager _transactionManager;
 
-    public MessageBusFactory(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher messageDispatcher)
+    public MessageBusFactory(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher messageDispatcher, ITransactionManager transactionManager)
     {
       _endpointResolver = endpointResolver;
+      _transactionManager = transactionManager;
       _messageEndpointLookup = messageEndpointLookup;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageDispatcher = messageDispatcher;
@@ -20,7 +22,7 @@ namespace Machine.Mta.Internal
 
     public IMessageBus CreateMessageBus(EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
     {
-      return new MessageBus(_endpointResolver, _messageEndpointLookup, _transportMessageBodySerializer, _messageDispatcher, listeningOnEndpointName, poisonEndpointName);
+      return new MessageBus(_endpointResolver, _messageEndpointLookup, _transportMessageBodySerializer, _messageDispatcher, listeningOnEndpointName, poisonEndpointName, _transactionManager);
     }
   }
 }
