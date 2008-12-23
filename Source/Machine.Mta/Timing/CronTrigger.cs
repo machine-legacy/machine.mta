@@ -38,6 +38,21 @@ namespace Machine.Mta.Timing
       return new AlwaysTriggered();
     }
 
+    public static ITrigger EveryThirtySeconds()
+    {
+      return EveryNSeconds(30);
+    }
+
+    public static ITrigger EveryTenSeconds()
+    {
+      return EveryNSeconds(10);
+    }
+
+    public static ITrigger EveryNSeconds(Int32 seconds)
+    {
+      return new EveryNSeconds(seconds);
+    }
+
     public static CronTrigger ToTrigger(this List<SimpleCronEntry> entries)
     {
       return new CronTrigger(entries.ToArray());
@@ -72,6 +87,20 @@ namespace Machine.Mta.Timing
     public bool IsFired()
     {
       return true;
+    }
+  }
+  public class EveryNSeconds : ITrigger
+  {
+    readonly Int32 _interval;
+
+    public EveryNSeconds(Int32 interval)
+    {
+      _interval = interval;
+    }
+
+    public bool IsFired()
+    {
+      return ServerClock.Now().Second % _interval == 0;
     }
   }
 }
