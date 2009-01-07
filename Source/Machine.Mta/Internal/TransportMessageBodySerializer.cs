@@ -13,14 +13,14 @@ namespace Machine.Mta.Internal
       _transportMessageBodyFormatter = transportMessageBodyFormatter;
     }
 
-    public byte[] Serialize<T>(params T[] messages) where T : IMessage
+    public MessagePayload Serialize<T>(params T[] messages) where T : IMessage
     {
       using (MemoryStream stream = new MemoryStream())
       {
         IMessage[] nonGeneric = new IMessage[messages.Length];
         Array.Copy(messages, nonGeneric, nonGeneric.Length);
         _transportMessageBodyFormatter.Serialize(nonGeneric, stream);
-        return stream.ToArray();
+        return new MessagePayload(stream.ToArray(), typeof(T).Name);
       }
     }
 

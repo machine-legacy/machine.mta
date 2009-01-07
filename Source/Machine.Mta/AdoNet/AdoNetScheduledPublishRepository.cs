@@ -32,7 +32,7 @@ namespace Machine.Mta.AdoNet
           IDbCommand command = CreateInsertCommand(connection);
           command.Parameter("PublishAt").Value = scheduled.PublishAt;
           command.Parameter("ReturnAddress").Value = destination.ToString();
-          command.Parameter("MessagePayload").Value = scheduled.MessagePayload.ToByteArray();
+          command.Parameter("MessagePayload").Value = scheduled.MessagePayload.MakeString();
           command.Parameter("SagaId").Value = scheduled.SagaId;
           if (command.ExecuteNonQuery() != 1)
           {
@@ -56,9 +56,9 @@ namespace Machine.Mta.AdoNet
           {
             DateTime publishAt = reader.GetDateTime(1);
             string returnAddress = reader.GetString(2);
-            byte[] messagePayload = (byte[])reader.GetValue(3);
+            string messagePayload = reader.GetString(3);
             Guid sagaId = (Guid)reader.GetValue(4);
-            scheduled.Add(new ScheduledPublish(publishAt, new MessagePayload(messagePayload), new[] { EndpointName.FromString(returnAddress) }, sagaId));
+            scheduled.Add(new ScheduledPublish(publishAt, MessagePayload.FromString(messagePayload), new[] { EndpointName.FromString(returnAddress) }, sagaId));
           }
           reader.Close();
         }
@@ -76,7 +76,7 @@ namespace Machine.Mta.AdoNet
       command.CommandText = "INSERT INTO future_publish (CreatedAt, PublishAt, ReturnAddress, MessagePayload, SagaId) VALUES (getutcdate(), @PublishAt, @ReturnAddress, @MessagePayload, @SagaId)";
       command.CreateParameter("PublishAt", DbType.DateTime);
       command.CreateParameter("ReturnAddress", DbType.String);
-      command.CreateParameter("MessagePayload", DbType.Binary);
+      command.CreateParameter("MessagePayload", DbType.String);
       command.CreateParameter("SagaId", DbType.Guid);
       return command;
     }

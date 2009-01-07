@@ -28,7 +28,7 @@ namespace Machine.Mta.Transports.Msmq
         throw new InvalidOperationException("Queue is read-only: " + _name);
       }
       Message systemMessage = new Message();
-      systemMessage.Label = transportMessage.ToLabel();
+      systemMessage.Label = transportMessage.Label;
       systemMessage.Recoverable = true;
       systemMessage.TimeToBeReceived = TimeSpan.MaxValue;
       _formatter.Serialize(systemMessage.BodyStream, transportMessage);

@@ -11,6 +11,7 @@ namespace Machine.Mta
     private readonly Guid _correlationId;
     private readonly Guid _sagaId;
     private readonly byte[] _body;
+    private readonly string _label;
 
     public Guid Id
     {
@@ -42,16 +43,16 @@ namespace Machine.Mta
       get { return _body; }
     }
 
-    public string ToLabel()
+    public string Label
     {
-      return "TM<" + _returnAddress + ">";
+      get { return "TM<" + _label + ">"; }
     }
 
     protected TransportMessage()
     {
     }
 
-    protected TransportMessage(Guid id, EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid sagaId, byte[] body)
+    protected TransportMessage(Guid id, EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid sagaId, byte[] body, string label)
     {
       _id = id;
       _returnAddress = returnAddress;
@@ -59,21 +60,22 @@ namespace Machine.Mta
       _returnCorrelationId = returnCorrelationId;
       _sagaId = sagaId;
       _body = body;
+      _label = label;
     }
 
     public override string ToString()
     {
-      return "TransportMessage from " + _returnAddress + " with " + _body.Length + "bytes";
+      return this.Label + " from " + _returnAddress + " with " + _body.Length + "bytes";
     }
 
-    public static TransportMessage For(EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid sagaId, byte[] body)
+    public static TransportMessage For(EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid sagaId, MessagePayload payload)
     {
       Guid id = Guid.NewGuid();
       if (returnCorrelationId == Guid.Empty)
       {
         returnCorrelationId = id;
       }
-      return new TransportMessage(id, returnAddress, correlationId, returnCorrelationId, sagaId, body);
+      return new TransportMessage(id, returnAddress, correlationId, returnCorrelationId, sagaId, payload.ToByteArray(), payload.Label);
     }
   }
 }

@@ -13,7 +13,7 @@ namespace Machine.Mta
 
     public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
     {
-      return new MessagePayload(Convert.FromBase64String(value.ToString()));
+      return MessagePayload.FromString(value.ToString());
     }
 
     public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
@@ -24,23 +24,41 @@ namespace Machine.Mta
     public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
     {
       MessagePayload payload = (MessagePayload)value;
-      return Convert.ToBase64String(payload.ToByteArray());
+      return payload.MakeString();
     }
   }
   [Serializable]
   [TypeConverter(typeof(MessagePayloadConverter))]
   public class MessagePayload
   {
-    private readonly byte[] _data;
+    readonly byte[] _data;
+    readonly string _label;
 
     public byte[] ToByteArray()
     {
       return _data;
     }
 
-    public MessagePayload(byte[] data)
+    public string Label
+    {
+      get { return _label; }
+    }
+
+    public MessagePayload(byte[] data, string label)
     {
       _data = data;
+      _label = label;
+    }
+
+    public string MakeString()
+    {
+      return Convert.ToBase64String(ToByteArray()) + "," + this.Label;
+    }
+
+    public static MessagePayload FromString(string value)
+    {
+      string[] tokens = value.Split(',');
+      return new MessagePayload(Convert.FromBase64String(tokens[0]), tokens[1]);
     }
   }
 }

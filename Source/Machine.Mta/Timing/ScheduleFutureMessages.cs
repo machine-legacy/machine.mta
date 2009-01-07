@@ -49,7 +49,7 @@ namespace Machine.Mta.Timing
       ISchedulePublishMessage message = _messageFactory.Create<ISchedulePublishMessage>();
       message.PublishAddresses = destinations;
       message.PublishAt = publishAt;
-      message.MessagePayload = new MessagePayload(_transportMessageBodySerializer.Serialize(messages));
+      message.MessagePayload = _transportMessageBodySerializer.Serialize(messages);
       _bus.Send(message);
     }
   }

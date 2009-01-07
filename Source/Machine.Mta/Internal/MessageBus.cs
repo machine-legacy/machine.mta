@@ -215,16 +215,15 @@ namespace Machine.Mta.Internal
 
     private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
     {
-      byte[] body = _transportMessageBodySerializer.Serialize(messages);
-      return CreateTransportMessage(correlatedBy, new MessagePayload(body));
+      MessagePayload payload = _transportMessageBodySerializer.Serialize(messages);
+      return CreateTransportMessage(correlatedBy, payload);
     }
 
     private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
     {
       return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy,
         CurrentCorrelationContext.CurrentCorrelation,
-        CurrentSagaContext.CurrentSagaId,
-        payload.ToByteArray());
+        CurrentSagaContext.CurrentSagaId, payload);
     }
   }
 }
