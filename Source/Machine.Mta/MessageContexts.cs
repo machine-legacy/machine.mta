@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Machine.Mta
 {
@@ -74,15 +75,35 @@ namespace Machine.Mta
     [ThreadStatic]
     static CurrentSagaContext _current;
     readonly Guid[] _sagaIds;
+    readonly CurrentSagaContext _previous;
 
-    public CurrentSagaContext(Guid[] sagaIds)
+    protected CurrentSagaContext(CurrentSagaContext previous, Guid[] sagaIds)
     {
+      _previous = previous;
       _sagaIds = sagaIds;
+    }
+
+    public IEnumerable<Guid> SagaIds
+    {
+      get
+      {
+        if (_previous != null)
+        {
+          foreach (Guid id in _previous.SagaIds)
+          {
+            yield return id;
+          }
+        }
+        foreach (Guid id in _sagaIds)
+        {
+          yield return id;
+        }
+      }
     }
 
     public static CurrentSagaContext Open(params Guid[] sagaIds)
     {
-      return _current = new CurrentSagaContext(sagaIds);
+      return _current = new CurrentSagaContext(_current, sagaIds);
     }
 
     public static Guid[] CurrentSagaIds
@@ -98,7 +119,7 @@ namespace Machine.Mta
           }
           return new Guid[0];
         }
-        return _current._sagaIds;
+        return _current.SagaIds.ToArray();
       }
     }
 
