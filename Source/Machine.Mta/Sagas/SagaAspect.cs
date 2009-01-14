@@ -31,7 +31,7 @@ namespace Machine.Mta.Sagas
       {
         if (!invocation.IsStartedBy())
         {
-          invocation.HandlerLogger.Info("Ignoring");
+          invocation.HandlerLogger.Warn("Ignoring");
           return;
         }
         invocation.HandlerLogger.Info("Starting");
@@ -43,8 +43,12 @@ namespace Machine.Mta.Sagas
         ISagaState state = repository.FindSagaState(sagaId);
         if (state == null)
         {
-          invocation.HandlerLogger.Info("Unable to find state: " + sagaId);
-          return;
+          if (!invocation.IsStartedBy())
+          {
+            invocation.HandlerLogger.Warn("No state:: " + sagaId);
+            return;
+          }
+          invocation.HandlerLogger.Info("Starting (No State): " + sagaId);
         }
         handler.State = state;
       }
