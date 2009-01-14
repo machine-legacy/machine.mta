@@ -73,19 +73,19 @@ namespace Machine.Mta
   {
     [ThreadStatic]
     static CurrentSagaContext _current;
-    readonly Guid _sagaId;
+    readonly Guid[] _sagaIds;
 
-    public CurrentSagaContext(Guid sagaId)
+    public CurrentSagaContext(Guid[] sagaIds)
     {
-      _sagaId = sagaId;
+      _sagaIds = sagaIds;
     }
 
-    public static CurrentSagaContext Open(Guid sagaId)
+    public static CurrentSagaContext Open(params Guid[] sagaIds)
     {
-      return _current = new CurrentSagaContext(sagaId);
+      return _current = new CurrentSagaContext(sagaIds);
     }
 
-    public static Guid CurrentSagaId
+    public static Guid[] CurrentSagaIds
     {
       get
       {
@@ -94,11 +94,11 @@ namespace Machine.Mta
           TransportMessage transportMessage = CurrentMessageContext.Current;
           if (transportMessage != null)
           {
-            return transportMessage.SagaId;
+            return transportMessage.SagaIds;
           }
-          return Guid.Empty;
+          return new Guid[0];
         }
-        return _current._sagaId;
+        return _current._sagaIds;
       }
     }
 

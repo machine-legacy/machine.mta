@@ -64,7 +64,7 @@ namespace Machine.Mta.Timing
 
     public void Consume(ISchedulePublishMessage message)
     {
-      ScheduledPublish scheduled = new ScheduledPublish(message.PublishAt, message.MessagePayload, message.PublishAddresses, CurrentSagaContext.CurrentSagaId);
+      ScheduledPublish scheduled = new ScheduledPublish(message.PublishAt, message.MessagePayload, message.PublishAddresses, CurrentSagaContext.CurrentSagaIds);
       _scheduledPublishRepository.Add(scheduled);
     }
   }
@@ -119,7 +119,7 @@ namespace Machine.Mta.Timing
     {
       foreach (ScheduledPublish scheduled in _scheduledPublishRepository.FindAllExpired())
       {
-        using (CurrentSagaContext.Open(scheduled.SagaId))
+        using (CurrentSagaContext.Open(scheduled.SagaIds))
         {
           foreach (EndpointName destination in scheduled.Addresses)
           {
@@ -132,10 +132,16 @@ namespace Machine.Mta.Timing
   [Serializable]
   public class ScheduledPublish
   {
+    readonly Guid _id;
     readonly DateTime _publishAt;
     readonly MessagePayload _messagePayload;
     readonly EndpointName[] _addresses;
-    readonly Guid _sagaId;
+    readonly Guid[] _sagaIds;
+
+    public Guid Id
+    {
+      get { return _id; }
+    }
 
     public DateTime PublishAt
     {
@@ -152,17 +158,18 @@ namespace Machine.Mta.Timing
       get { return _addresses; }
     }
 
-    public Guid SagaId
+    public Guid[] SagaIds
     {
-      get { return _sagaId; }
+      get { return _sagaIds; }
     }
 
-    public ScheduledPublish(DateTime publishAt, MessagePayload messagePayload, EndpointName[] addresses, Guid sagaId)
+    public ScheduledPublish(DateTime publishAt, MessagePayload messagePayload, EndpointName[] addresses, Guid[] sagaIds)
     {
+      _id = Guid.NewGuid();
       _publishAt = publishAt;
       _messagePayload = messagePayload;
       _addresses = addresses;
-      _sagaId = sagaId;
+      _sagaIds = sagaIds;
     }
   }
 }

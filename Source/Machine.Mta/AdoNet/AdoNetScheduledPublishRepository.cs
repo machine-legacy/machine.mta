@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data;
-
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using Machine.Mta.Timing;
 
 namespace Machine.Mta.AdoNet
@@ -30,10 +31,11 @@ namespace Machine.Mta.AdoNet
         foreach (EndpointName destination in scheduled.Addresses)
         {
           IDbCommand command = CreateInsertCommand(connection);
+          command.Parameter("PublishId").Value = scheduled.Id;
           command.Parameter("PublishAt").Value = scheduled.PublishAt;
           command.Parameter("ReturnAddress").Value = destination.ToString();
           command.Parameter("MessagePayload").Value = scheduled.MessagePayload.MakeString();
-          command.Parameter("SagaId").Value = scheduled.SagaId;
+          command.Parameter("SagaIds").Value = scheduled.SagaIds.MakeString();
           if (command.ExecuteNonQuery() != 1)
           {
             throw new InvalidOperationException();
@@ -54,11 +56,11 @@ namespace Machine.Mta.AdoNet
         {
           while (reader.Read())
           {
-            DateTime publishAt = reader.GetDateTime(1);
-            string returnAddress = reader.GetString(2);
-            string messagePayload = reader.GetString(3);
-            Guid sagaId = (Guid)reader.GetValue(4);
-            scheduled.Add(new ScheduledPublish(publishAt, MessagePayload.FromString(messagePayload), new[] { EndpointName.FromString(returnAddress) }, sagaId));
+            DateTime publishAt = reader.GetDateTime(2);
+            string returnAddress = reader.GetString(3);
+            string messagePayload = reader.GetString(4);
+            string sagaIds = reader.GetString(5);
+            scheduled.Add(new ScheduledPublish(publishAt, MessagePayload.FromString(messagePayload), new[] { EndpointName.FromString(returnAddress) }, sagaIds.ToGuidArray()));
           }
           reader.Close();
         }
@@ -73,11 +75,12 @@ namespace Machine.Mta.AdoNet
     {
       IDbCommand command = connection.CreateCommand();
       command.Connection = connection;
-      command.CommandText = "INSERT INTO future_publish (CreatedAt, PublishAt, ReturnAddress, MessagePayload, SagaId) VALUES (getutcdate(), @PublishAt, @ReturnAddress, @MessagePayload, @SagaId)";
+      command.CommandText = "INSERT INTO future_publish (CreatedAt, PublishId, PublishAt, ReturnAddress, MessagePayload, SagaIds) VALUES (getutcdate(), @PublishId, @PublishAt, @ReturnAddress, @MessagePayload, @SagaIds)";
+      command.CreateParameter("PublishId", DbType.Guid);
       command.CreateParameter("PublishAt", DbType.DateTime);
       command.CreateParameter("ReturnAddress", DbType.String);
       command.CreateParameter("MessagePayload", DbType.String);
-      command.CreateParameter("SagaId", DbType.Guid);
+      command.CreateParameter("SagaIds", DbType.String);
       return command;
     }
 
@@ -85,7 +88,7 @@ namespace Machine.Mta.AdoNet
     {
       IDbCommand command = connection.CreateCommand();
       command.Connection = connection;
-      command.CommandText = "SELECT Id, PublishAt, ReturnAddress, MessagePayload, SagaId FROM future_publish WHERE PublishAt < @Now";
+      command.CommandText = "SELECT Id, PublishId, PublishAt, ReturnAddress, MessagePayload, SagaIds FROM future_publish WHERE PublishAt < @Now";
       command.CreateParameter("Now", DbType.DateTime);
       return command;
     }
@@ -97,6 +100,37 @@ namespace Machine.Mta.AdoNet
       command.CommandText = "DELETE FROM future_publish WHERE PublishAt < @Now";
       command.CreateParameter("Now", DbType.DateTime);
       return command;
+    }
+  }
+  public static class MappingHelpers
+  {
+    static readonly BinaryFormatter _formatter = new BinaryFormatter();
+
+    public static string MakeString(this Guid[] ids)
+    {
+      return MakeString(ids);
+    }
+
+    public static Guid[] ToGuidArray(this string vaule)
+    {
+      return MakeObject<Guid[]>(vaule);
+    }
+
+    public static string MakeString(object obj)
+    {
+      using (MemoryStream stream = new MemoryStream())
+      {
+        _formatter.Serialize(stream, obj);
+        return Convert.ToBase64String(stream.ToArray());
+      }
+    }
+
+    public static T MakeObject<T>(string value)
+    {
+      using (MemoryStream stream = new MemoryStream(Convert.FromBase64String(value)))
+      {
+        return (T)_formatter.Deserialize(stream);
+      }
     }
   }
 }

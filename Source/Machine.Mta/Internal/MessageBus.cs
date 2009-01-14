@@ -223,7 +223,7 @@ namespace Machine.Mta.Internal
     {
       return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy,
         CurrentCorrelationContext.CurrentCorrelation,
-        CurrentSagaContext.CurrentSagaId, payload);
+        CurrentSagaContext.CurrentSagaIds, payload);
     }
   }
 }

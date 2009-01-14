@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
 using Machine.Container.Services;
 using Machine.Mta.Internal;
 
@@ -26,8 +26,8 @@ namespace Machine.Mta.Sagas
       }
       ISagaHandler handler = invocation.SagaHandler();
       ISagaStateRepository<ISagaState> repository = GetRepositoryFor(handler.SagaStateType);
-      Guid sagaId = invocation.RetrieveSagaId();
-      if (sagaId == Guid.Empty)
+      Guid[] sagaIds = invocation.RetrieveSagaIds();
+      if (sagaIds.Length == 0)
       {
         if (!invocation.IsStartedBy())
         {
@@ -39,20 +39,28 @@ namespace Machine.Mta.Sagas
       }
       else
       {
-        invocation.HandlerLogger.Info("Retrieving: " + sagaId);
-        ISagaState state = repository.FindSagaState(sagaId);
+        invocation.HandlerLogger.Info("Retrieving: " + sagaIds.JoinedStrings());
+        ISagaState state = null;
+        foreach (Guid sagaId in sagaIds)
+        {
+          state = repository.FindSagaState(sagaId);
+          if (state != null)
+          {
+            break;
+          }
+        }
         if (state == null)
         {
           if (!invocation.IsStartedBy())
           {
-            invocation.HandlerLogger.Warn("No state:: " + sagaId);
+            invocation.HandlerLogger.Warn("No state:: " + sagaIds.JoinedStrings());
             return;
           }
-          invocation.HandlerLogger.Info("Starting (No State): " + sagaId);
+          invocation.HandlerLogger.Info("Starting (No State): " + sagaIds.JoinedStrings());
         }
         handler.State = state;
       }
-      using (CurrentSagaContext.Open(sagaId))
+      using (CurrentSagaContext.Open(sagaIds))
       {
         invocation.Continue();
       }
@@ -108,21 +116,21 @@ namespace Machine.Mta.Sagas
       return invocation.HandlerType.IsSagaHandler();
     }
     
-    public static Guid RetrieveSagaId(this HandlerInvocation invocation)
+    public static Guid[] RetrieveSagaIds(this HandlerInvocation invocation)
     {
       if (invocation.IsForSagaMessage())
       {
-        return invocation.SagaMessage().SagaId;
+        return new[] { invocation.SagaMessage().SagaId };
       }
       if (CurrentMessageContext.Current != null)
       {
         TransportMessage transportMessage = CurrentMessageContext.Current;
         if (transportMessage != null)
         {
-          return transportMessage.SagaId;
+          return transportMessage.SagaIds;
         }
       }
-      return Guid.Empty;
+      return new Guid[0];
     }
     
     public static ISagaMessage SagaMessage(this HandlerInvocation invocation)
@@ -143,6 +151,25 @@ namespace Machine.Mta.Sagas
     private static bool IsSagaHandler(this Type handlerType)
     {
       return typeof(ISagaHandler).IsAssignableFrom(handlerType);
+    }
+
+    public static string JoinedStrings(this Guid[] guids)
+    {
+      return guids.Select(x => x.ToString()).Join(", ");
+    }
+
+    public static string Join(this IEnumerable<string> values, string separator)
+    {
+      StringBuilder sb = new StringBuilder();
+      foreach (string value in values)
+      {
+        if (sb.Length != 0)
+        {
+          sb.Append(separator);
+        }
+        sb.Append(value);
+      }
+      return sb.ToString();
     }
   }
 }
