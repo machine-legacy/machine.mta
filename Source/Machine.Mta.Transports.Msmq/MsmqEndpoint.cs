@@ -39,6 +39,7 @@ namespace Machine.Mta.Transports.Msmq
     {
       if (!_queue.CanRead)
       {
+        System.Threading.Thread.Sleep(timeout);
         throw new InvalidOperationException("Queue is write-only: " + _name);
       }
       try
