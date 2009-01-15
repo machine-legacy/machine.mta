@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 using Machine.Mta.Sagas;
 
@@ -10,7 +9,6 @@ namespace Machine.Mta.DotNetBinaryStorage
   public abstract class DotNetBinarySagaStateRepository<T> : ISagaStateRepository<T> where T : class, ISagaState
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(DotNetBinarySagaStateRepository<T>));
-    readonly BinaryFormatter _formatter = new BinaryFormatter();
     readonly IFlatFileSystem _flatFileSystem;
     readonly IFlatBinaryFileConfiguration _configuration;
 
@@ -29,7 +27,7 @@ namespace Machine.Mta.DotNetBinaryStorage
       }
       using (Stream stream = _flatFileSystem.Open(path))
       {
-        return (T)_formatter.Deserialize(stream);
+        return (T)Serializers.Binary.Deserialize(stream);
       }
     }
 
@@ -38,7 +36,7 @@ namespace Machine.Mta.DotNetBinaryStorage
       string path = PathForState(sagaState.SagaId);
       using (Stream stream = _flatFileSystem.Create(path))
       {
-        _formatter.Serialize(stream, sagaState);
+        Serializers.Binary.Serialize(stream, sagaState);
       }
     }
 
@@ -57,7 +55,7 @@ namespace Machine.Mta.DotNetBinaryStorage
       {
         using (Stream stream = _flatFileSystem.Open(path))
         {
-          yield return (T)_formatter.Deserialize(stream);
+          yield return (T)Serializers.Binary.Deserialize(stream);
         }
       }
     }

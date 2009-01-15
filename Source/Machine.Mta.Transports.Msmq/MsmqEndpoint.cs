@@ -9,7 +9,6 @@ namespace Machine.Mta.Transports.Msmq
 {
   public class MsmqEndpoint : IEndpoint
   {
-    readonly BinaryFormatter _formatter = new BinaryFormatter();
     readonly EndpointName _name;
     readonly MessageQueue _queue;
     readonly MsmqTransactionManager _transactionManager;
@@ -31,7 +30,7 @@ namespace Machine.Mta.Transports.Msmq
       systemMessage.Label = transportMessage.Label;
       systemMessage.Recoverable = true;
       systemMessage.TimeToBeReceived = TimeSpan.MaxValue;
-      _formatter.Serialize(systemMessage.BodyStream, transportMessage);
+      Serializers.Binary.Serialize(systemMessage.BodyStream, transportMessage);
       _queue.Send(systemMessage, _transactionManager.SendTransactionType(_queue));
     }
 
@@ -49,7 +48,7 @@ namespace Machine.Mta.Transports.Msmq
         {
           return null;
         }
-        return (TransportMessage)_formatter.Deserialize(systemMessage.BodyStream);
+        return (TransportMessage)Serializers.Binary.Deserialize(systemMessage.BodyStream);
       }
       catch (MessageQueueException error)
       {

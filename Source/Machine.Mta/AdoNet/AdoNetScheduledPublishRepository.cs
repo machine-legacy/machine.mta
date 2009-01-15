@@ -104,8 +104,6 @@ namespace Machine.Mta.AdoNet
   }
   public static class MappingHelpers
   {
-    static readonly BinaryFormatter _formatter = new BinaryFormatter();
-
     public static string MakeString(this Guid[] ids)
     {
       return MakeString(ids);
@@ -120,7 +118,7 @@ namespace Machine.Mta.AdoNet
     {
       using (MemoryStream stream = new MemoryStream())
       {
-        _formatter.Serialize(stream, obj);
+        Serializers.Binary.Serialize(stream, obj);
         return Convert.ToBase64String(stream.ToArray());
       }
     }
@@ -129,7 +127,7 @@ namespace Machine.Mta.AdoNet
     {
       using (MemoryStream stream = new MemoryStream(Convert.FromBase64String(value)))
       {
-        return (T)_formatter.Deserialize(stream);
+        return (T)Serializers.Binary.Deserialize(stream);
       }
     }
   }

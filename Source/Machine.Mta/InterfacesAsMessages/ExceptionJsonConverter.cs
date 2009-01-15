@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 using Newtonsoft.Json;
 
@@ -8,8 +7,6 @@ namespace Machine.Mta.InterfacesAsMessages
 {
   public class ExceptionJsonConverter : JsonConverter
   {
-    readonly BinaryFormatter _formatter = new BinaryFormatter();
-
     public override bool CanConvert(Type objectType)
     {
       return typeof(Exception).IsAssignableFrom(objectType);
@@ -20,7 +17,7 @@ namespace Machine.Mta.InterfacesAsMessages
       string base64 = reader.Value.ToString();
       using (MemoryStream stream = new MemoryStream(Convert.FromBase64String(base64)))
       {
-        return _formatter.Deserialize(stream);
+        return Serializers.Binary.Deserialize(stream);
       }
     }
 
@@ -28,7 +25,7 @@ namespace Machine.Mta.InterfacesAsMessages
     {
       using (MemoryStream stream = new MemoryStream())
       {
-        _formatter.Serialize(stream, value);
+        Serializers.Binary.Serialize(stream, value);
         writer.WriteValue(Convert.ToBase64String(stream.ToArray()));
       }
     }

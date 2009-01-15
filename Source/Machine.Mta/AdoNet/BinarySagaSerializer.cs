@@ -5,13 +5,11 @@ namespace Machine.Mta.AdoNet
 {
   public class BinarySagaSerializer
   {
-    readonly BinaryFormatter _formatter = new BinaryFormatter();
-    
     public byte[] Serialize(object state)
     {
       using (MemoryStream stream = new MemoryStream())
       {
-        _formatter.Serialize(stream, state);
+        Serializers.Binary.Serialize(stream, state);
         return stream.ToArray();
       }
     }
@@ -20,7 +18,7 @@ namespace Machine.Mta.AdoNet
     {
       using (MemoryStream stream = new MemoryStream(bytes))
       {
-        return (T)_formatter.Deserialize(stream);
+        return (T)Serializers.Binary.Deserialize(stream);
       }
     }
   }

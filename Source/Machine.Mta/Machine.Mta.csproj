@@ -97,6 +97,7 @@
     <Compile Include="Sagas\Saga.cs" />
     <Compile Include="Sagas\SagaAspect.cs" />
     <Compile Include="Sagas\SagaException.cs" />
+    <Compile Include="Serializers.cs" />
     <Compile Include="Timing\CronTrigger.cs" />
     <Compile Include="Timing\IOnceASecondTask.cs" />
     <Compile Include="Timing\ITrigger.cs" />

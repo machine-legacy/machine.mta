@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 using Machine.Mta.Timing;
@@ -9,7 +8,6 @@ namespace Machine.Mta.DotNetBinaryStorage
 {
   public class DotNetBinaryScheduledPublishRepository : IScheduledPublishRepository
   {
-    readonly BinaryFormatter _formatter = new BinaryFormatter();
     readonly IFlatFileSystem _flatFileSystem;
     readonly IFlatBinaryFileConfiguration _configuration;
     List<ScheduledPublish> _cache;
@@ -57,7 +55,7 @@ namespace Machine.Mta.DotNetBinaryStorage
       {
         using (Stream stream = _flatFileSystem.Open(_configuration.ScheduledPublishesPath))
         {
-          _cache.AddRange((ScheduledPublish[]) _formatter.Deserialize(stream));
+          _cache.AddRange((ScheduledPublish[])Serializers.Binary.Deserialize(stream));
         }
       }
     }
@@ -66,7 +64,7 @@ namespace Machine.Mta.DotNetBinaryStorage
     {
       using (Stream stream = _flatFileSystem.Create(_configuration.ScheduledPublishesPath))
       {
-        _formatter.Serialize(stream, _cache.ToArray());
+        Serializers.Binary.Serialize(stream, _cache.ToArray());
       }
     }
   }
