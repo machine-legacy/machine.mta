@@ -18,7 +18,6 @@ namespace Machine.Mta.InterfacesAsMessages
       _messageInterfaceImplementor = messageInterfaceImplementor;
     }
 
-    #region ITransportMessageBodyFormatter Members
     public void Serialize(IMessage[] messages, Stream stream)
     {
       using (StreamWriter writer = new StreamWriter(stream))
@@ -40,7 +39,6 @@ namespace Machine.Mta.InterfacesAsMessages
         return (IMessage[])serializer.Deserialize(new JsonTextReader(reader), typeof(IMessage[]));
       }
     }
-    #endregion
   }
 
   public class InterfaceMessageJsonConverter : JsonConverter
@@ -86,7 +84,7 @@ namespace Machine.Mta.InterfacesAsMessages
       System.Diagnostics.Debug.Assert(reader.Value.Equals(MessageBodyPropertyName));
      
       // Allow interfaces and non-interfaces...
-      Type deserializeAs = FindTypeNamed(messageTypeName);
+      Type deserializeAs = MessageInterfaceHelpers.FindTypeNamed(messageTypeName, true);
       if (deserializeAs.IsInterface)
       {
         deserializeAs = _messageInterfaceImplementor.GetClassFor(deserializeAs);
@@ -98,24 +96,6 @@ namespace Machine.Mta.InterfacesAsMessages
       object value = serializer.Deserialize(reader, deserializeAs);
       reader.Read();
       return value;
-    }
-
-    private static Type FindTypeNamed(string name)
-    {
-      Type deserializeAs = Type.GetType(name);
-      if (deserializeAs != null)
-      {
-        return deserializeAs;
-      }
-      foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-      {
-        deserializeAs = assembly.GetType(name);
-        if (deserializeAs != null && typeof(IMessage).IsAssignableFrom(deserializeAs))
-        {
-          return deserializeAs;
-        }
-      }
-      throw new InvalidOperationException("Unable to find " + name);
     }
 
     public override void WriteJson(JsonWriter writer, object value)
@@ -141,6 +121,31 @@ namespace Machine.Mta.InterfacesAsMessages
     }
   }
 
+  public static class MessageInterfaceHelpers
+  {
+    public static Type FindTypeNamed(string name, bool throwOnNull)
+    {
+      Type deserializeAs = Type.GetType(name);
+      if (deserializeAs != null)
+      {
+        return deserializeAs;
+      }
+      foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+      {
+        deserializeAs = assembly.GetType(name);
+        if (deserializeAs != null && typeof(IMessage).IsAssignableFrom(deserializeAs))
+        {
+          return deserializeAs;
+        }
+      }
+      if (throwOnNull)
+      {
+        throw new InvalidOperationException("Unable to find " + name);
+      }
+      return null;
+    }
+  }
+
   public class InterfaceFormatterTests
   {
     public interface IUserCreated : IMessage
@@ -154,7 +159,8 @@ namespace Machine.Mta.InterfacesAsMessages
       IUserCreated First { get; set; }
       IUserCreated Second { get; set; }
     }
-    public void Test()
+
+    public void try_serialization_and_deserializing()
     {
       MessageInterfaceImplementations messageInterfaceImplementor = new MessageInterfaceImplementations();
       messageInterfaceImplementor.GenerateImplementationsOf(typeof(IUserCreated), typeof(IHasChildren));
@@ -180,6 +186,38 @@ namespace Machine.Mta.InterfacesAsMessages
       {
         Console.WriteLine("Received: " + msg);
       }
+    }
+
+    public void binary_serialization_of_messages()
+    {
+      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations();
+      implementations.GenerateImplementationsOf(typeof(IMessage));
+      MessageFactory factory = new MessageFactory(implementations);
+      byte[] buffer = null;
+      using (MemoryStream stream = new MemoryStream())
+      {
+        Serializers.Binary.Serialize(stream, new SimpleObjectWithAMessage(factory.Create<IMessage>()));
+        buffer = stream.ToArray();
+      }
+      using (MemoryStream stream = new MemoryStream(buffer))
+      {
+        object target = Serializers.Binary.Deserialize(stream);
+      }
+    }
+  }
+  [Serializable]
+  public class SimpleObjectWithAMessage
+  {
+    readonly IMessage _message;
+
+    public IMessage Message
+    {
+      get { return _message; }
+    }
+
+    public SimpleObjectWithAMessage(IMessage message)
+    {
+      _message = message;
     }
   }
 }

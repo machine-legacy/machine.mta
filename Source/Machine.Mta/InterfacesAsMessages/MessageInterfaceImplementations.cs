@@ -1,10 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.Serialization;
 
 namespace Machine.Mta.InterfacesAsMessages
 {
+  public class MessageInterfaceSerializationBinder : SerializationBinder
+  {
+    public override Type BindToType(string assemblyName, string typeName)
+    {
+      return MessageInterfaceHelpers.FindTypeNamed(typeName, false);
+    }
+  }
   public class MessageInterfaceImplementations
   {
     private readonly Dictionary<Type, Type> _interfaceToClass = new Dictionary<Type, Type>();
