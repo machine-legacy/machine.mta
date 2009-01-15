@@ -128,7 +128,6 @@ namespace Machine.Mta.Internal
 
   public class MessageDispatcher : IMessageDispatcher
   {
-    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageDispatcher));
     readonly IMachineContainer _container;
     readonly HandlerDiscoverer _handlerDiscoverer;
     readonly IMessageAspectsProvider _messageAspectsProvider;
@@ -142,7 +141,7 @@ namespace Machine.Mta.Internal
 
     private void Dispatch(IMessage message)
     {
-      _log.Info("Dispatching " + message);
+      Logging.Dispatch(message);
       foreach (MessageHandlerType messageHandlerType in _handlerDiscoverer.GetHandlerTypesFor(message.GetType()))
       {
         object handler = _container.Resolve.Object(messageHandlerType.TargetType);

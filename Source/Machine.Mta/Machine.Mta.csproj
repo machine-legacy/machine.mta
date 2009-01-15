@@ -83,6 +83,7 @@
     <Compile Include="IMessageDispatcher.cs" />
     <Compile Include="Internal\EndpointQueue.cs" />
     <Compile Include="Internal\ITransactionManager.cs" />
+    <Compile Include="Internal\Logging.cs" />
     <Compile Include="IProvideHandlerOrder.cs">
       <SubType>Code</SubType>
     </Compile>

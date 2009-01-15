@@ -49,9 +49,6 @@ namespace Machine.Mta.Internal
   }
   public class MessageBus : IMessageBus
   {
-    private static readonly log4net.ILog _receivingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Receiving");
-    private static readonly log4net.ILog _poisonLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Poison");
-    private static readonly log4net.ILog _sendingLog = log4net.LogManager.GetLogger(typeof(MessageBus).FullName + ".Sending");
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
     private readonly IMessageEndpointLookup _messageEndpointLookup;
     private readonly IEndpointResolver _endpointResolver;
@@ -113,19 +110,19 @@ namespace Machine.Mta.Internal
 
     public void Send<T>(params T[] messages) where T : class, IMessage
     {
-      foreach (T message in messages) _sendingLog.Info("Sending " + message);
+      Logging.Send(messages);
       SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 
     public void Send<T>(EndpointName destination, params T[] messages) where T : class, IMessage
     {
-      foreach (T message in messages) _sendingLog.Info("Sending " + message + " to " + destination);
+      Logging.Send(destination, messages);
       SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, messages));
     }
 
     public void Send(EndpointName destination, MessagePayload payload)
     {
-      _sendingLog.Info("Sending raw payload to " + destination);
+      Logging.SendMessagePayload(destination, payload);
       SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, payload));
     }
 
@@ -161,7 +158,7 @@ namespace Machine.Mta.Internal
 
     public void Reply<T>(params T[] messages) where T : class, IMessage
     {
-      foreach (T message in messages) _sendingLog.Info("Replying " + message);
+      Logging.Reply(messages);
       TransportMessage transportMessage = CurrentMessageContext.Current;
       EndpointName returnAddress = transportMessage.ReturnAddress;
       SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(transportMessage.ReturnCorrelationId, messages));
@@ -169,7 +166,7 @@ namespace Machine.Mta.Internal
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
-      foreach (T message in messages) _sendingLog.Info("Publishing " + message);
+      Logging.Publish(messages);
       SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 
@@ -182,7 +179,7 @@ namespace Machine.Mta.Internal
       TransportMessage transportMessage = (TransportMessage)obj;
       if (_messageFailureManager.SendToPoisonQueue(transportMessage.Id))
       {
-        _poisonLog.Info("Poison " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
+        Logging.Poison(transportMessage);
         _poison.Send(transportMessage);
         return;
       }
@@ -190,7 +187,7 @@ namespace Machine.Mta.Internal
       {
         using (CurrentMessageContext.Open(transportMessage))
         {
-          _receivingLog.Info("Receiving " + transportMessage.ReturnAddress + " CorrelationId=" + transportMessage.CorrelationId + " Id=" + transportMessage.Id);
+          Logging.Received(transportMessage);
           IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
           if (transportMessage.CorrelationId != Guid.Empty)
           {
