@@ -21,7 +21,7 @@ namespace Machine.Mta.InterfacesAsMessages
 
     public void GenerateImplementationsOf(IEnumerable<Type> types)
     {
-      foreach (KeyValuePair<Type, Type> generated in _messageInterfaceImplementationFactory.GenerateImplementationsOf(types))
+      foreach (KeyValuePair<Type, Type> generated in _messageInterfaceImplementationFactory.ImplementMessageInterfaces(types))
       {
         _interfaceToClass[generated.Key] = generated.Value;
         _classToInterface[generated.Value] = generated.Key;

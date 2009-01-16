@@ -162,7 +162,7 @@ namespace Machine.Mta.InterfacesAsMessages
 
     public void try_serialization_and_deserializing()
     {
-      MessageInterfaceImplementations messageInterfaceImplementor = new MessageInterfaceImplementations(new MessageInterfaceImplementationFactory());
+      MessageInterfaceImplementations messageInterfaceImplementor = new MessageInterfaceImplementations(new FieldBackedMessageInterfaceImplementationFactory());
       messageInterfaceImplementor.GenerateImplementationsOf(typeof(IUserCreated), typeof(IHasChildren));
       IMessageFactory factory = new MessageFactory(messageInterfaceImplementor);
       MemoryStream stream = new MemoryStream();
@@ -190,7 +190,7 @@ namespace Machine.Mta.InterfacesAsMessages
 
     public void binary_serialization_of_messages()
     {
-      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(new MessageInterfaceImplementationFactory());
+      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(new FieldBackedMessageInterfaceImplementationFactory());
       implementations.GenerateImplementationsOf(typeof(IMessage));
       MessageFactory factory = new MessageFactory(implementations);
       byte[] buffer = null;

@@ -35,7 +35,7 @@ namespace Machine.Mta.Specs
       container.Start();  
       IEndpointResolver endpointResolver = new EndpointResolver(container);
       IMessageEndpointLookup messageEndpointLookup = new MessageEndpointLookup();
-      MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations();
+      MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations(new FieldBackedMessageInterfaceImplementationFactory());
       messageInterfaceImplementations.GenerateImplementationsOf(typeof(IMessage), typeof(ISampleMessage), typeof(ISampleSagaMessage));
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
       dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container));

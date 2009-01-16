@@ -74,6 +74,7 @@
     <Compile Include="DotNetBinaryStorage\IFlatFileSystem.cs" />
     <Compile Include="EndpointName.cs" />
     <Compile Include="Helpers\SagaRepositoryServices.cs" />
+    <Compile Include="InterfacesAsMessages\FieldBackedMessageInterfaceImplementationFactory.cs" />
     <Compile Include="InterfacesAsMessages\MessageInterfaceImplementationFactory.cs" />
     <Compile Include="InterfacesAsMessages\MessageInterfaceSerializationBinder.cs" />
     <Compile Include="InterfacesAsMessages\MessageTypeHelpers.cs" />
