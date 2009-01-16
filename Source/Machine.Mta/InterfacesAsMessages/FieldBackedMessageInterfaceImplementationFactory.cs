@@ -4,13 +4,14 @@ using System.Reflection.Emit;
 
 namespace Machine.Mta.InterfacesAsMessages
 {
-  public class FieldBackedMessageInterfaceImplementationFactory : MessageInterfaceImplementationFactory
+  public class FieldBackedMessageInterfaceImplementationFactory : MessageInterfaceImplementationFactory<object>
   {
-    protected override void ImplementMessage(TypeBuilder typeBuilder, Type type)
+    protected override object ImplementMessage(TypeBuilder typeBuilder, Type type)
     {
+      return null;
     }
 
-    protected override void ImplementProperty(TypeBuilder typeBuilder, PropertyInfo property)
+    protected override void ImplementProperty(TypeBuilder typeBuilder, PropertyInfo property, object state)
     {
       FieldBuilder fieldBuilder = typeBuilder.DefineField(MakeFieldName(property), property.PropertyType, FieldAttributes.Private);
       PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(property.Name, PropertyAttributes.None, property.PropertyType, new Type[0]);

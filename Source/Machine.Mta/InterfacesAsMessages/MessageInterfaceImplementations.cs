@@ -7,9 +7,9 @@ namespace Machine.Mta.InterfacesAsMessages
   {
     readonly Dictionary<Type, Type> _interfaceToClass = new Dictionary<Type, Type>();
     readonly Dictionary<Type, Type> _classToInterface = new Dictionary<Type, Type>();
-    readonly MessageInterfaceImplementationFactory _messageInterfaceImplementationFactory;
+    readonly IMessageInterfaceImplementationFactory _messageInterfaceImplementationFactory;
 
-    public MessageInterfaceImplementations(MessageInterfaceImplementationFactory messageInterfaceImplementationFactory)
+    public MessageInterfaceImplementations(IMessageInterfaceImplementationFactory messageInterfaceImplementationFactory)
     {
       _messageInterfaceImplementationFactory = messageInterfaceImplementationFactory;
     }

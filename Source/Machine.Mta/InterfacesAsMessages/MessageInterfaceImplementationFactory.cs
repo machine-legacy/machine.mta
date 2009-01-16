@@ -5,7 +5,11 @@ using System.Reflection.Emit;
 
 namespace Machine.Mta.InterfacesAsMessages
 {
-  public abstract class MessageInterfaceImplementationFactory
+  public interface IMessageInterfaceImplementationFactory
+  {
+    IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types);
+  }
+  public abstract class MessageInterfaceImplementationFactory<T> : IMessageInterfaceImplementationFactory
   {
     static readonly string AssemblyName = "Messages";
     private AssemblyBuilder _assemblyBuilder;
@@ -33,7 +37,7 @@ namespace Machine.Mta.InterfacesAsMessages
       TypeAttributes attributes = TypeAttributes.Public | TypeAttributes.Serializable;
       TypeBuilder typeBuilder = _moduleBuilder.DefineType(newTypeName, attributes);
       typeBuilder.AddInterfaceImplementation(type);
-      ImplementMessage(typeBuilder, type);
+      T state = ImplementMessage(typeBuilder, type);
       foreach (Type interfaceType in MessageTypeHelpers.TypesToGenerateForType(type))
       {
         foreach (PropertyInfo property in interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
@@ -42,15 +46,15 @@ namespace Machine.Mta.InterfacesAsMessages
           {
             throw new InvalidOperationException(type.FullName + "." + property.Name + " property needs getter");
           }
-          ImplementProperty(typeBuilder, property);
+          ImplementProperty(typeBuilder, property, state);
         }
       }
       return typeBuilder.CreateType();
     }
 
-    protected abstract void ImplementMessage(TypeBuilder typeBuilder, Type type);
+    protected abstract T ImplementMessage(TypeBuilder typeBuilder, Type type);
 
-    protected abstract void ImplementProperty(TypeBuilder typeBuilder, PropertyInfo property);
+    protected abstract void ImplementProperty(TypeBuilder typeBuilder, PropertyInfo property, T state);
 
     private static string MakeImplementationName(Type type)
     {
