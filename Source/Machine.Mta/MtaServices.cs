@@ -17,6 +17,8 @@ namespace Machine.Mta
       register.Type<TransportMessageBodySerializer>();
       register.Type<MessageInterfaceImplementations>();
       register.Type<MessageFactory>();
+      register.Type<DefaultMessageInterfaceImplementationFactory>();
+      register.Type<MessageDefinitionFactory>();
       register.Type<MessageDispatcher>();
       register.Type<MessageBusFactory>();
       register.Type<MessageBusManager>();
