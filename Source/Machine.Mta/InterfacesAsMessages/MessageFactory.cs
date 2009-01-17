@@ -32,7 +32,7 @@ namespace Machine.Mta.InterfacesAsMessages
 
     public T Create<T>(object value) where T : class, IMessage
     {
-      IDictionary<string, object> dictionary = value.ToDictionary();
+      IDictionary<string, object> dictionary = value as IDictionary<string, object> ?? value.ToDictionary();
       CheckForErrors(typeof(T), dictionary);
       return (T)Create(typeof(T), dictionary);
     }
