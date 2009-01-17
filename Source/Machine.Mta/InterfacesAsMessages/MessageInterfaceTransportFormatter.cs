@@ -162,9 +162,9 @@ namespace Machine.Mta.InterfacesAsMessages
 
     public void try_serialization_and_deserializing()
     {
-      MessageInterfaceImplementations messageInterfaceImplementor = new MessageInterfaceImplementations(new FieldBackedMessageInterfaceImplementationFactory());
+      MessageInterfaceImplementations messageInterfaceImplementor = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
       messageInterfaceImplementor.GenerateImplementationsOf(typeof(IUserCreated), typeof(IHasChildren));
-      IMessageFactory factory = new MessageFactory(messageInterfaceImplementor);
+      IMessageFactory factory = new MessageFactory(messageInterfaceImplementor, new MessageDefinitionFactory());
       MemoryStream stream = new MemoryStream();
       MessageInterfaceTransportFormatter formatter = new MessageInterfaceTransportFormatter(messageInterfaceImplementor);
       List<IMessage> messages = new List<IMessage>();
@@ -172,11 +172,11 @@ namespace Machine.Mta.InterfacesAsMessages
       created.UserId = Guid.NewGuid();
       created.CreatedAt = DateTime.UtcNow;
       messages.Add(created);
-      IHasChildren hasChildren = factory.Create<IHasChildren>();
-      hasChildren.First = factory.Create<IUserCreated>();
-      hasChildren.First.UserId = Guid.NewGuid();
-      hasChildren.Second = factory.Create<IUserCreated>();
-      hasChildren.Second.UserId = Guid.NewGuid();
+      IUserCreated first = factory.Create<IUserCreated>(new { UserId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow });
+      IUserCreated second = factory.Create<IUserCreated>(new { UserId = Guid.NewGuid(), CreatedAt = DateTime.UtcNow });
+      IHasChildren hasChildren = factory.Create<IHasChildren>(new { First = first, Second = second });
+      hasChildren.First = first;
+      hasChildren.Second = second;
       messages.Add(hasChildren);
       formatter.Serialize(messages.ToArray(), stream);
       string text = System.Text.Encoding.Default.GetString(stream.ToArray());
@@ -190,9 +190,9 @@ namespace Machine.Mta.InterfacesAsMessages
 
     public void binary_serialization_of_messages()
     {
-      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(new FieldBackedMessageInterfaceImplementationFactory());
+      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
       implementations.GenerateImplementationsOf(typeof(IMessage));
-      MessageFactory factory = new MessageFactory(implementations);
+      MessageFactory factory = new MessageFactory(implementations, new MessageDefinitionFactory());
       byte[] buffer = null;
       using (MemoryStream stream = new MemoryStream())
       {

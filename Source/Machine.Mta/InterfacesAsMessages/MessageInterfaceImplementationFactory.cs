@@ -37,7 +37,16 @@ namespace Machine.Mta.InterfacesAsMessages
       TypeAttributes attributes = TypeAttributes.Public | TypeAttributes.Serializable;
       TypeBuilder typeBuilder = _moduleBuilder.DefineType(newTypeName, attributes);
       typeBuilder.AddInterfaceImplementation(type);
-      T state = ImplementMessage(typeBuilder, type);
+      T state = ImplementMessage(typeBuilder, type, Properties(type));
+      foreach (PropertyInfo property in Properties(type))
+      {
+        ImplementProperty(typeBuilder, property, state);
+      }
+      return typeBuilder.CreateType();
+    }
+
+    protected virtual IEnumerable<PropertyInfo> Properties(Type type)
+    {
       foreach (Type interfaceType in MessageTypeHelpers.TypesToGenerateForType(type))
       {
         foreach (PropertyInfo property in interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
@@ -46,13 +55,12 @@ namespace Machine.Mta.InterfacesAsMessages
           {
             throw new InvalidOperationException(type.FullName + "." + property.Name + " property needs getter");
           }
-          ImplementProperty(typeBuilder, property, state);
+          yield return property;
         }
       }
-      return typeBuilder.CreateType();
     }
 
-    protected abstract T ImplementMessage(TypeBuilder typeBuilder, Type type);
+    protected abstract T ImplementMessage(TypeBuilder typeBuilder, Type type, IEnumerable<PropertyInfo> properties);
 
     protected abstract void ImplementProperty(TypeBuilder typeBuilder, PropertyInfo property, T state);
 
