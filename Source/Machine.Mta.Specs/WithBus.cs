@@ -32,6 +32,7 @@ namespace Machine.Mta.Specs
       container.PrepareForServices();
       container.Register.Type<SagaAspect>();
       container.Register.Type<MsmqEndpointFactory>();
+      container.Register.Type<MsmqTransactionManager>();
       container.Start();  
       IEndpointResolver endpointResolver = new EndpointResolver(container);
       IMessageEndpointLookup messageEndpointLookup = new MessageEndpointLookup();
