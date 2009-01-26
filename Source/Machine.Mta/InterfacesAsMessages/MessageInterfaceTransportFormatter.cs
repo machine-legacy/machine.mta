@@ -22,9 +22,8 @@ namespace Machine.Mta.InterfacesAsMessages
     {
       using (StreamWriter writer = new StreamWriter(stream))
       {
-        InterfaceMessageJsonConverter converter = new InterfaceMessageJsonConverter(_messageInterfaceImplementor, false);
-        JsonSerializer serializer = new JsonSerializer();
-        serializer.Converters.Add(converter);
+        JsonSerializer serializer = Serializers.NewJson();
+        serializer.Converters.Add(new InterfaceMessageJsonConverter(_messageInterfaceImplementor, false, serializer));
         serializer.Serialize(writer, messages);
       }
     }
@@ -33,9 +32,8 @@ namespace Machine.Mta.InterfacesAsMessages
     {
       using (StreamReader reader = new StreamReader(stream))
       {
-        InterfaceMessageJsonConverter converter = new InterfaceMessageJsonConverter(_messageInterfaceImplementor, true);
-        JsonSerializer serializer = new JsonSerializer();
-        serializer.Converters.Add(converter);
+        JsonSerializer serializer = Serializers.NewJson();
+        serializer.Converters.Add(new InterfaceMessageJsonConverter(_messageInterfaceImplementor, true, serializer));
         return (IMessage[])serializer.Deserialize(new JsonTextReader(reader), typeof(IMessage[]));
       }
     }
@@ -47,11 +45,13 @@ namespace Machine.Mta.InterfacesAsMessages
     private static readonly string MessageBodyPropertyName = "MessageBody";
     private readonly MessageInterfaceImplementations _messageInterfaceImplementor;
     private readonly bool _ignoreClassesBecauseWeAreReading;
+    private readonly JsonSerializer _serializer;
     private bool _skipNext;
 
-    public InterfaceMessageJsonConverter(MessageInterfaceImplementations messageInterfaceImplementor, bool reading)
+    public InterfaceMessageJsonConverter(MessageInterfaceImplementations messageInterfaceImplementor, bool reading, JsonSerializer serializer)
     {
       _messageInterfaceImplementor = messageInterfaceImplementor;
+      _serializer = serializer;
       _ignoreClassesBecauseWeAreReading = reading;
     }
 
@@ -89,11 +89,7 @@ namespace Machine.Mta.InterfacesAsMessages
       {
         deserializeAs = _messageInterfaceImplementor.GetClassFor(deserializeAs);
       }
-      JsonSerializer serializer = new JsonSerializer();
-      serializer.Converters.Add(this);
-      serializer.Converters.Add(new EndpointNameJsonConverter());
-      serializer.Converters.Add(new ExceptionJsonConverter());
-      object value = serializer.Deserialize(reader, deserializeAs);
+      object value = _serializer.Deserialize(reader, deserializeAs);
       reader.Read();
       return value;
     }
@@ -111,12 +107,8 @@ namespace Machine.Mta.InterfacesAsMessages
       writer.WritePropertyName(MessageTypePropertyName);
       writer.WriteValue(messageType.FullName);
       writer.WritePropertyName(MessageBodyPropertyName);
-      JsonSerializer serializer = new JsonSerializer();
-      serializer.Converters.Add(this);
-      serializer.Converters.Add(new EndpointNameJsonConverter());
-      serializer.Converters.Add(new ExceptionJsonConverter());
       _skipNext = true;
-      serializer.Serialize(writer, value);
+      _serializer.Serialize(writer, value);
       writer.WriteEndObject();
     }
   }
