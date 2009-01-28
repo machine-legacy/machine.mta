@@ -43,7 +43,17 @@ namespace Machine.Mta.Transports.Msmq
       }
       try
       {
-        Message systemMessage = _queue.Receive(timeout, _transactionManager.ReceiveTransactionType(_queue));
+        Message systemMessage = null;
+        // This exception interferes with debugging apparently. This should mitigate that.
+        if (System.Diagnostics.Debugger.IsAttached)
+        {
+          systemMessage = _queue.Receive(_transactionManager.ReceiveTransactionType(_queue));
+        }
+        else
+        {
+          systemMessage = _queue.Receive(timeout, _transactionManager.ReceiveTransactionType(_queue));
+        }
+
         if (systemMessage == null)
         {
           return null;
