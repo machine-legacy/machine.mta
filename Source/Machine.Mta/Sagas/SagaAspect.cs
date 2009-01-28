@@ -31,7 +31,7 @@ namespace Machine.Mta.Sagas
       {
         if (!invocation.IsStartedBy())
         {
-          invocation.HandlerLogger.Warn("Ignoring");
+          invocation.HandlerLogger.Debug("Ignoring");
           return;
         }
         invocation.HandlerLogger.Info("Starting");
@@ -39,7 +39,7 @@ namespace Machine.Mta.Sagas
       }
       else
       {
-        invocation.HandlerLogger.Info("Retrieving: " + sagaIds.JoinedStrings());
+        invocation.HandlerLogger.Debug("Retrieving: " + sagaIds.JoinedStrings());
         ISagaState state = null;
         foreach (Guid sagaId in sagaIds)
         {
@@ -53,7 +53,7 @@ namespace Machine.Mta.Sagas
         {
           if (!invocation.IsStartedBy())
           {
-            invocation.HandlerLogger.Warn("No state:: " + sagaIds.JoinedStrings());
+            invocation.HandlerLogger.Debug("No state: " + sagaIds.JoinedStrings());
             return;
           }
           invocation.HandlerLogger.Info("Starting (No State): " + sagaIds.JoinedStrings());
@@ -76,12 +76,12 @@ namespace Machine.Mta.Sagas
       if (handler.State.IsSagaComplete)
       {
         handler.Complete();
-        invocation.HandlerLogger.Info("Deleting: " + handler.State.SagaId);
+        invocation.HandlerLogger.Info("Complete: " + handler.State.SagaId);
         repository.Delete(handler.State);
       }
       else
       {
-        invocation.HandlerLogger.Info("Saving: " + handler.State.SagaId);
+        invocation.HandlerLogger.Debug("Saving: " + handler.State.SagaId);
         repository.Save(handler.State);
       }
     }

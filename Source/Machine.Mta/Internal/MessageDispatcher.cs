@@ -199,7 +199,7 @@ namespace Machine.Mta.Internal
 
     public log4net.ILog HandlerLogger
     {
-      get { return log4net.LogManager.GetLogger("Machine.Mta.Sagas." + _handlerType.FullName); }
+      get { return log4net.LogManager.GetLogger("Machine.Mta.Sagas.Handlers." + _handlerType.FullName); }
     }
 
     public HandlerInvocation(IMessage message, Type messageType, Type handlerType, object handler, IConsume<IMessage> invoker, Queue<IMessageAspect> aspects)
