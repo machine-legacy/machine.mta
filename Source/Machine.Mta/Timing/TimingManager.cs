@@ -8,6 +8,7 @@ namespace Machine.Mta.Timing
 {
   public class TimingManager : IStartable, IDisposable
   {
+    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(TimingManager));
     readonly static TimeSpan OnceSecond = TimeSpan.FromSeconds(1.0);
     readonly List<IOnceASecondTask> _tasks = new List<IOnceASecondTask>();
     readonly Thread _thread;
@@ -40,7 +41,14 @@ namespace Machine.Mta.Timing
       {
         foreach (IOnceASecondTask task in _tasks)
         {
-          task.OnceASecond();
+          try
+          {
+            task.OnceASecond();
+          }
+          catch (Exception error)
+          {
+            _log.Error(error);
+          }
         }
         Thread.Sleep(OnceSecond);
       }
