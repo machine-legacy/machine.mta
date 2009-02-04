@@ -6,7 +6,7 @@ using Machine.Core.Utility;
 
 namespace Machine.Mta.InterfacesAsMessages
 {
-  public class MessageInterfaceImplementations
+  public class MessageInterfaceImplementations : IMessageRegisterer
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageInterfaceImplementations));
     readonly List<Type> _messageTypes = new List<Type>();
@@ -21,12 +21,12 @@ namespace Machine.Mta.InterfacesAsMessages
       _messageInterfaceImplementationFactory = messageInterfaceImplementationFactory;
     }
 
-    public void GenerateImplementationsOf(params Type[] types)
+    public void AddMessageTypes(params Type[] types)
     {
-      GenerateImplementationsOf(new List<Type>(types));
+      AddMessageTypes(new List<Type>(types));
     }
 
-    public void GenerateImplementationsOf(IEnumerable<Type> types)
+    public void AddMessageTypes(IEnumerable<Type> types)
     {
       using (RWLock.AsWriter(_lock))
       {

@@ -155,7 +155,7 @@ namespace Machine.Mta.InterfacesAsMessages
     public void try_serialization_and_deserializing()
     {
       MessageInterfaceImplementations messageInterfaceImplementor = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
-      messageInterfaceImplementor.GenerateImplementationsOf(typeof(IUserCreated), typeof(IHasChildren));
+      messageInterfaceImplementor.AddMessageTypes(typeof(IUserCreated), typeof(IHasChildren));
       IMessageFactory factory = new MessageFactory(messageInterfaceImplementor, new MessageDefinitionFactory());
       MemoryStream stream = new MemoryStream();
       MessageInterfaceTransportFormatter formatter = new MessageInterfaceTransportFormatter(messageInterfaceImplementor);
@@ -183,7 +183,7 @@ namespace Machine.Mta.InterfacesAsMessages
     public void binary_serialization_of_messages()
     {
       MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
-      implementations.GenerateImplementationsOf(typeof(IMessage));
+      implementations.AddMessageTypes(typeof(IMessage));
       MessageFactory factory = new MessageFactory(implementations, new MessageDefinitionFactory());
       byte[] buffer = null;
       using (MemoryStream stream = new MemoryStream())

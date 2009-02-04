@@ -21,7 +21,7 @@ namespace Machine.Mta.Helpers
           }
         }
       }
-      implementations.GenerateImplementationsOf(types);
+      implementations.AddMessageTypes(types);
     }
   }
 }
