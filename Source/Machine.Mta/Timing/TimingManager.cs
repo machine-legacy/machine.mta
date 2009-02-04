@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
+using Machine.Container;
+
 namespace Machine.Mta.Timing
 {
-  public class TimingManager : IDisposable
+  public class TimingManager : IStartable, IDisposable
   {
     readonly static TimeSpan OnceSecond = TimeSpan.FromSeconds(1.0);
     readonly List<IOnceASecondTask> _tasks = new List<IOnceASecondTask>();
