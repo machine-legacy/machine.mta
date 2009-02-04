@@ -17,16 +17,13 @@ namespace Machine.Mta.Internal
       _container = container;
     }
 
-    #region IMessageBusManager Members
     public IMessageBus UseSingleBus(EndpointName listeningEndpoint, EndpointName poisonEndpoint)
     {
       _bus = _messageBusFactory.CreateMessageBus(listeningEndpoint, poisonEndpoint);
       _container.Register.Type<IMessageBus>().Is(_bus);
       return _bus;
     }
-    #endregion
 
-    #region IDisposable Members
     public void Dispose()
     {
       if (_bus != null)
@@ -34,6 +31,5 @@ namespace Machine.Mta.Internal
         _bus.Dispose();
       }
     }
-    #endregion
   }
 }

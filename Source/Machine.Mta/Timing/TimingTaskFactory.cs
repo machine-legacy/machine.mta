@@ -1,7 +1,5 @@
 using System;
 
-using Machine.Mta.InterfacesAsMessages;
-
 namespace Machine.Mta.Timing
 {
   public class TimingTaskFactory
@@ -17,7 +15,17 @@ namespace Machine.Mta.Timing
 
     public IOnceASecondTask PublishMessage<T>(ITrigger trigger) where T : class, IMessage
     {
-      return new PublishMessageTask<T>(_bus, _factory, trigger);
+      return new PublishEmptyMessageTask<T>(_bus, _factory, trigger);
+    }
+
+    public IOnceASecondTask PublishMessage<T>(ITrigger trigger, Func<IMessageFactory, T> ctor) where T : class, IMessage
+    {
+      return new PublishFuncMessageTask<T>(_bus, _factory, trigger, ctor);
+    }
+
+    public IOnceASecondTask PublishMessage<T>(ITrigger trigger, object value) where T : class, IMessage
+    {
+      return PublishMessage(trigger, x => x.Create<T>(value));
     }
   }
 }

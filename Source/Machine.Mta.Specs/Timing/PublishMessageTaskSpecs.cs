@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using Machine.Mta.InterfacesAsMessages;
 using Machine.Mta.Timing;
 using Machine.Specifications;
 
@@ -15,7 +14,7 @@ namespace Machine.Mta.Specs.Timing.PublishMessageTaskSpecs
 
   public class with_publish_message_task
   {
-    protected static PublishMessageTask<ISimpleMessage> task;
+    protected static PublishEmptyMessageTask<ISimpleMessage> task;
     protected static IMessageBus bus;
     protected static IMessageFactory messageFactory;
     protected static ITrigger trigger;
@@ -26,7 +25,7 @@ namespace Machine.Mta.Specs.Timing.PublishMessageTaskSpecs
       bus = MockRepository.GenerateMock<IMessageBus>();
       messageFactory = MockRepository.GenerateMock<IMessageFactory>();
       trigger = MockRepository.GenerateMock<ITrigger>();
-      task = new PublishMessageTask<ISimpleMessage>(bus, messageFactory, trigger);
+      task = new PublishEmptyMessageTask<ISimpleMessage>(bus, messageFactory, trigger);
       message = MockRepository.GenerateMock<ISimpleMessage>();
       messageFactory.Stub(x => x.Create<ISimpleMessage>()).Return(message);
     };
