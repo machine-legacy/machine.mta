@@ -126,6 +126,11 @@ namespace Machine.Mta.Internal
       SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, payload));
     }
 
+    public void SendLocal<T>(params T[] messages) where T : class, IMessage
+    {
+      Send(this.Address, messages);
+    }
+
     public TransportMessage SendTransportMessage<T>(TransportMessage transportMessage)
     {
       return SendTransportMessage(_messageEndpointLookup.LookupEndpointsFor(typeof(T)), transportMessage);
