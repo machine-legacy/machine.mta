@@ -7,7 +7,7 @@ using Machine.Core.Utility;
 
 namespace Machine.Mta
 {
-  public class MessageEndpointLookup : IMessageEndpointLookup 
+  public class MessageDestinations : IMessageDestinations 
   {
     private readonly Dictionary<Type, List<EndpointAddress>> _map = new Dictionary<Type, List<EndpointAddress>>();
     private readonly List<EndpointAddress> _catchAlls = new List<EndpointAddress>();

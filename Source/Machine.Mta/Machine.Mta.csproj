@@ -119,7 +119,7 @@
     <Compile Include="Timing\TimingTaskFactory.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
-    <Compile Include="IMessageEndpointLookup.cs" />
+    <Compile Include="IMessageDestinations.cs" />
     <Compile Include="IMessageFactory.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -140,7 +140,7 @@
     <Compile Include="Dispatching\MessageDispatcher.cs" />
     <Compile Include="MessageBus.cs" />
     <Compile Include="MessageBusManager.cs" />
-    <Compile Include="MessageEndpointLookup.cs" />
+    <Compile Include="MessageDestinations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransportMessage.cs" />
     <Compile Include="TransportMessageBodySerializer.cs" />

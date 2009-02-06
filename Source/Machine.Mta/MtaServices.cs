@@ -14,7 +14,7 @@ namespace Machine.Mta
     public virtual void RegisterServices(ContainerRegisterer register)
     {
       register.Type<EndpointResolver>();
-      register.Type<MessageEndpointLookup>();
+      register.Type<MessageDestinations>();
       register.Type<MessageInterfaceTransportFormatter>();
       register.Type<TransportMessageBodySerializer>();
       register.Type<MessageInterfaceImplementations>();

@@ -9,23 +9,23 @@ namespace Machine.Mta
   public class MessageBusFactory : IMessageBusFactory
   {
     private readonly IEndpointResolver _endpointResolver;
-    private readonly IMessageEndpointLookup _messageEndpointLookup;
+    private readonly IMessageDestinations _messageDestinations;
     private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     private readonly MessageDispatcher _messageDispatcher;
     private readonly ITransactionManager _transactionManager;
 
-    public MessageBusFactory(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher messageDispatcher, ITransactionManager transactionManager)
+    public MessageBusFactory(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer, MessageDispatcher messageDispatcher, ITransactionManager transactionManager)
     {
       _endpointResolver = endpointResolver;
       _transactionManager = transactionManager;
-      _messageEndpointLookup = messageEndpointLookup;
+      _messageDestinations = messageDestinations;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageDispatcher = messageDispatcher;
     }
 
     public IMessageBus CreateMessageBus(EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress)
     {
-      return new MessageBus(_endpointResolver, _messageEndpointLookup, _transportMessageBodySerializer, _messageDispatcher, listeningOnEndpointAddress, poisonEndpointAddress, _transactionManager);
+      return new MessageBus(_endpointResolver, _messageDestinations, _transportMessageBodySerializer, _messageDispatcher, listeningOnEndpointAddress, poisonEndpointAddress, _transactionManager);
     }
   }
 }

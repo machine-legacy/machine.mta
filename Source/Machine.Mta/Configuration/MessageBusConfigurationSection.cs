@@ -76,7 +76,7 @@ namespace Machine.Mta.Configuration
       }
     }
 
-    public void Apply(MessageBusConfigurationSection configuration, IMessageEndpointLookup lookup)
+    public void Apply(MessageBusConfigurationSection configuration, IMessageDestinations lookup)
     {
       EndpointAddress endpointAddress = configuration.Lookup(this.To);
       if (String.IsNullOrEmpty(_messageType))
@@ -119,11 +119,11 @@ namespace Machine.Mta.Configuration
       throw new KeyNotFoundException("No endpoint configured: " + name);
     }
 
-    public void ApplyForwards(IMessageEndpointLookup messageEndpointLookup)
+    public void ApplyForwards(IMessageDestinations messageDestinations)
     {
       foreach (MessageForward forward in _forwards)
       {
-        forward.Apply(this, messageEndpointLookup);
+        forward.Apply(this, messageDestinations);
       }
     }
 

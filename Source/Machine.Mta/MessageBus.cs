@@ -11,7 +11,7 @@ namespace Machine.Mta
   public class MessageBus : IMessageBus
   {
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
-    private readonly IMessageEndpointLookup _messageEndpointLookup;
+    private readonly IMessageDestinations _messageDestinations;
     private readonly IEndpointResolver _endpointResolver;
     private readonly IMessageDispatcher _dispatcher;
     private readonly IEndpoint _listeningOn;
@@ -25,7 +25,7 @@ namespace Machine.Mta
     private readonly ReturnAddressProvider _returnAddressProvider;
     private readonly ITransactionManager _transactionManager;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer,
+    public MessageBus(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer,
                       IMessageDispatcher dispatcher, EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, ITransactionManager transactionManager,
                       ThreadPoolConfiguration threadPoolConfiguration)
     {
@@ -33,20 +33,20 @@ namespace Machine.Mta
       _transactionManager = transactionManager;
       _dispatcher = dispatcher;
       _transportMessageBodySerializer = transportMessageBodySerializer;
-      _messageEndpointLookup = messageEndpointLookup;
+      _messageDestinations = messageDestinations;
       _listeningOn = _endpointResolver.Resolve(listeningOnEndpointAddress);
       _poison = _endpointResolver.Resolve(poisonEndpointAddress);
       _listeningOnEndpointAddress = listeningOnEndpointAddress;
       _poisonEndpointAddress = poisonEndpointAddress;
-      _messageEndpointLookup = messageEndpointLookup;
+      _messageDestinations = messageDestinations;
       _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_transactionManager, _listeningOn, EndpointDispatcher)));
       _asyncCallbackMap = new AsyncCallbackMap();
       _messageFailureManager = new MessageFailureManager();
       _returnAddressProvider = new ReturnAddressProvider();
     }
 
-    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, ITransactionManager transactionManager)
-      : this(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnEndpointAddress, poisonEndpointAddress, transactionManager, new ThreadPoolConfiguration(1, 1))
+    public MessageBus(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, ITransactionManager transactionManager)
+      : this(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnEndpointAddress, poisonEndpointAddress, transactionManager, new ThreadPoolConfiguration(1, 1))
     {
     }
 
@@ -96,7 +96,7 @@ namespace Machine.Mta
 
     public TransportMessage SendTransportMessage<T>(TransportMessage transportMessage)
     {
-      return SendTransportMessage(_messageEndpointLookup.LookupEndpointsFor(typeof(T)), transportMessage);
+      return SendTransportMessage(_messageDestinations.LookupEndpointsFor(typeof(T)), transportMessage);
     }
 
     public TransportMessage SendTransportMessage(IEnumerable<EndpointAddress> destinations, TransportMessage transportMessage)

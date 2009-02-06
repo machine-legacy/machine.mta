@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Machine.Mta
 {
-  public interface IMessageEndpointLookup
+  public interface IMessageDestinations
   {
     ICollection<EndpointAddress> LookupEndpointsFor(Type messageType);
     void SendMessageTypeTo(Type messageType, EndpointAddress destination);

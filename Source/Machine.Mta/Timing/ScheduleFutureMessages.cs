@@ -20,20 +20,20 @@ namespace Machine.Mta.Timing
   {
     readonly IMessageFactory _messageFactory;
     readonly IMessageBus _bus;
-    readonly IMessageEndpointLookup _messageEndpointLookup;
+    readonly IMessageDestinations _messageDestinations;
     readonly TransportMessageBodySerializer _transportMessageBodySerializer;
 
-    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer)
+    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer)
     {
       _messageFactory = messageFactory;
-      _messageEndpointLookup = messageEndpointLookup;
+      _messageDestinations = messageDestinations;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _bus = bus;
     }
 
     public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage
     {
-      EndpointAddress[] destinations = _messageEndpointLookup.LookupEndpointsFor(typeof(T)).ToArray();
+      EndpointAddress[] destinations = _messageDestinations.LookupEndpointsFor(typeof(T)).ToArray();
       PublishAt(publishAt, destinations, messages);
     }
 
