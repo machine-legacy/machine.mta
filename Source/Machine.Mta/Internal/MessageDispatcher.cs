@@ -40,21 +40,6 @@ namespace Machine.Mta.Internal
     }
   }
 
-  public static class HandlerTypeHelpers
-  {
-    public static IEnumerable<Type> Interfaces(this Type type)
-    {
-      if (type.IsInterface)
-      {
-        yield return type;
-      }
-      foreach (Type interfaceType in type.GetInterfaces())
-      {
-        yield return interfaceType;
-      }
-    }
-  }
-
   public class HandlerDiscoverer
   {
     private readonly IMachineContainer _container;
@@ -64,28 +49,28 @@ namespace Machine.Mta.Internal
       _container = container;
     }
 
+    private IEnumerable<Type> TypesThatAreHandlers()
+    {
+      foreach (ServiceRegistration registration in _container.RegisteredServices)
+      {
+        if (registration.ServiceType.IsImplementationOfGenericType(typeof(IConsume<>)))
+        {
+          yield return registration.ServiceType;
+        }
+      }
+    }
+
     public IEnumerable<MessageHandlerType> GetHandlerTypesFor(Type messageType)
     {
       List<MessageHandlerType> messageHandlerTypes = new List<MessageHandlerType>();
-      
-      foreach (ServiceRegistration registration in _container.RegisteredServices)
+
+      foreach (Type handlerType in TypesThatAreHandlers())
       {
-        Type handlerOfMessageType = typeof(IConsume<>).MakeGenericType(messageType);
-        if (registration.ServiceType.IsGenericlyCompatible(handlerOfMessageType))
+        IEnumerable<Type> handlerConsumes = handlerType.AllGenericVariations(typeof(IConsume<>)).BiggerThan(typeof(IConsume<>).MakeGenericType(messageType));
+        Type smallerType = handlerConsumes.SmallerType();
+        if (smallerType != null)
         {
-          foreach (Type interfaceType in registration.ServiceType.Interfaces())
-          {
-            if (interfaceType.GetGenericArguments().Length > 0)
-            {
-              if (typeof(IConsume<>).MakeGenericType(interfaceType.GetGenericArguments()[0]).Equals(interfaceType))
-              {
-                if (interfaceType.IsGenericlyCompatible(handlerOfMessageType))
-                {
-                  messageHandlerTypes.Add(new MessageHandlerType(registration.ServiceType, interfaceType));
-                }
-              }
-            }
-          }
+          messageHandlerTypes.Add(new MessageHandlerType(handlerType, smallerType));
         }
       }
 

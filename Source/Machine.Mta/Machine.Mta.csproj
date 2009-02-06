@@ -37,11 +37,11 @@
     </Reference>
     <Reference Include="Machine.Container, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5c474de7a495cff1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Machine\Machine.Container.dll</HintPath>
+      <HintPath>..\..\Libraries\Machine\Container\Machine.Container.dll</HintPath>
     </Reference>
     <Reference Include="Machine.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5c474de7a495cff1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Machine\Machine.Core.dll</HintPath>
+      <HintPath>..\..\Libraries\Machine\Container\Machine.Core.dll</HintPath>
     </Reference>
     <Reference Include="Machine.Utility.ThreadPool, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -95,7 +95,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MessagePayload.cs" />
-    <Compile Include="Internal\InvarianceHelpers.cs" />
+    <Compile Include="TypeHelpers.cs" />
     <Compile Include="Internal\MessageBusFactory.cs" />
     <Compile Include="Internal\RequestReply.cs" />
     <Compile Include="MtaServices.cs" />

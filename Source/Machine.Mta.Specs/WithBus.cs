@@ -136,4 +136,29 @@ namespace Machine.Mta.Specs
     It should_call_the_second_handler = () =>
       handler2.AssertWasCalled(x => x.Consume(message2));
   }
+
+  public interface IConsumeMessageAndSampleMessage : IConsume<IMessage>, IConsume<ISampleMessage>
+  {
+  }
+
+  [Subject("Message dispatching")]
+  public class when_dispatching_a_message_two_handler_with_two_applicable_consumers : with_bus
+  {
+    static IConsumeMessageAndSampleMessage handler;
+
+    Establish context = () =>
+    {
+      handler = MockRepository.GenerateMock<IConsumeMessageAndSampleMessage>();
+      container.Register.Type<IConsumeMessageAndSampleMessage>().Is(handler);
+    };
+
+    Because of = () =>
+      dispatcher.Dispatch(new IMessage[] { message2 });
+
+    It should_call_specific_handler = () =>
+      handler.AssertWasCalled(x => x.Consume(message2));
+
+    It should_not_call_general_handler = () =>
+      handler.AssertWasNotCalled(x => x.Consume((IMessage)message2));
+  }
 }

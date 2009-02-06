@@ -88,8 +88,9 @@ namespace Machine.Mta.Sagas
 
     private ISagaStateRepository<ISagaState> GetRepositoryFor(Type sagaStateType)
     {
+      Type repositoryType = typeof(ISagaStateRepository<>).MakeGenericType(sagaStateType);
       object repository = _container.Resolve.All(type => 
-        type.IsGenericlyCompatible(typeof(ISagaStateRepository<>).MakeGenericType(sagaStateType))).FirstOrDefault();
+        repositoryType.IsAssignableFrom(type)).FirstOrDefault();
       if (repository == null)
       {
         throw new SagaStateRepositoryNotFoundException(sagaStateType);

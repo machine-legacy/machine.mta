@@ -3,7 +3,6 @@ using System.Reflection;
 
 using Machine.Container;
 using Machine.Container.Plugins;
-using Machine.Mta.Internal;
 using Machine.Mta.Sagas;
 
 namespace Machine.Mta.Helpers
@@ -23,7 +22,7 @@ namespace Machine.Mta.Helpers
       {
         foreach (Type type in assembly.GetTypes())
         {
-          if (typeof(IConsume<IMessage>).IsGenericlyCompatible(type))
+          if (type.IsImplementationOfGenericType(typeof(IConsume<>)))
           {
             if (typeof(ISagaHandler).IsAssignableFrom(type))
             {
