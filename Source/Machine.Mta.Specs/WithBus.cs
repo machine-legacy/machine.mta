@@ -18,8 +18,8 @@ namespace Machine.Mta.Specs
   {
     protected static MessageBus bus;
     protected static MessageDispatcher dispatcher;
-    protected static EndpointName listeningOnName = EndpointName.ForLocalQueue("test");
-    protected static EndpointName poisonName = EndpointName.ForLocalQueue("error");
+    protected static EndpointAddress listeningOnAddress = EndpointAddress.ForLocalQueue("test");
+    protected static EndpointAddress poisonAddress = EndpointAddress.ForLocalQueue("error");
     protected static IMessageFactory messageFactory;
     protected static IMessage message1;
     protected static ISampleMessage message2;
@@ -42,7 +42,7 @@ namespace Machine.Mta.Specs
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
       dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container));
       messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
-      bus = new MessageBus(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnName, poisonName, new MsmqTransactionManager());
+      bus = new MessageBus(endpointResolver, messageEndpointLookup, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new MsmqTransactionManager());
       message1 = messageFactory.Create<IMessage>();
       message2 = messageFactory.Create<ISampleMessage>();
       message3 = messageFactory.Create<ISampleSagaMessage>();

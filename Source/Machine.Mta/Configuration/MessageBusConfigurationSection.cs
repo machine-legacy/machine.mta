@@ -11,7 +11,7 @@ namespace Machine.Mta.Configuration
   public class MessageBusEndpoint
   {
     string _name;
-    string _address;
+    string _host;
     string _queue;
 
     [XmlAttribute]
@@ -22,10 +22,10 @@ namespace Machine.Mta.Configuration
     }
 
     [XmlAttribute]
-    public string Address
+    public string Host
     {
-      get { return _address; }
-      set { _address = value; }
+      get { return _host; }
+      set { _host = value; }
     }
 
     [XmlAttribute]
@@ -35,13 +35,13 @@ namespace Machine.Mta.Configuration
       set { _queue = value; }
     }
 
-    public EndpointName ToEndpointName()
+    public EndpointAddress ToEndpointAddress()
     {
-      if (String.IsNullOrEmpty(_address))
+      if (String.IsNullOrEmpty(_host))
       {
-        return EndpointName.ForLocalQueue(_queue);
+        return EndpointAddress.ForLocalQueue(_queue);
       }
-      return EndpointName.ForRemoteQueue(_address, _queue);
+      return EndpointAddress.ForRemoteQueue(_host, _queue);
     }
   }
   public class MessageForward
@@ -78,14 +78,14 @@ namespace Machine.Mta.Configuration
 
     public void Apply(MessageBusConfigurationSection configuration, IMessageEndpointLookup lookup)
     {
-      EndpointName endpointName = configuration.Lookup(this.To);
+      EndpointAddress endpointAddress = configuration.Lookup(this.To);
       if (String.IsNullOrEmpty(_messageType))
       {
-        lookup.SendAllTo(endpointName);
+        lookup.SendAllTo(endpointAddress);
       }
       else
       {
-        lookup.SendMessageTypeTo(this.MessageType, endpointName);
+        lookup.SendMessageTypeTo(this.MessageType, endpointAddress);
       }
     }
   }
@@ -107,13 +107,13 @@ namespace Machine.Mta.Configuration
       get { return _forwards; }
     }
 
-    public EndpointName Lookup(string name)
+    public EndpointAddress Lookup(string name)
     {
       foreach (MessageBusEndpoint endpoint in _endpoints)
       {
         if (endpoint.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
         {
-          return endpoint.ToEndpointName();
+          return endpoint.ToEndpointAddress();
         }
       }
       throw new KeyNotFoundException("No endpoint configured: " + name);

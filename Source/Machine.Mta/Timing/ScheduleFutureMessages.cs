@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,14 +7,14 @@ namespace Machine.Mta.Timing
   public interface ISchedulePublishMessage : IMessage
   {
     DateTime PublishAt { get; set; }
-    EndpointName[] PublishAddresses { get; set; }
+    EndpointAddress[] PublishAddresses { get; set; }
     MessagePayload MessagePayload { get; set; }
   }
   public interface IScheduleFutureMessages
   {
     void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage;
-    void PublishAt<T>(DateTime publishAt, EndpointName destination, params T[] messages) where T : class, IMessage;
-    void PublishAt<T>(DateTime publishAt, EndpointName[] destinations, params T[] messages) where T : class, IMessage;
+    void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : class, IMessage;
+    void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : class, IMessage;
   }
   public class ScheduleFutureMessages : IScheduleFutureMessages
   {
@@ -33,16 +33,16 @@ namespace Machine.Mta.Timing
 
     public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage
     {
-      EndpointName[] destinations = _messageEndpointLookup.LookupEndpointsFor(typeof(T)).ToArray();
+      EndpointAddress[] destinations = _messageEndpointLookup.LookupEndpointsFor(typeof(T)).ToArray();
       PublishAt(publishAt, destinations, messages);
     }
 
-    public void PublishAt<T>(DateTime publishAt, EndpointName destination, params T[] messages) where T : class, IMessage
+    public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : class, IMessage
     {
       PublishAt(publishAt, new[] { destination }, messages);
     }
 
-    public void PublishAt<T>(DateTime publishAt, EndpointName[] destinations, params T[] messages) where T : class, IMessage
+    public void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : class, IMessage
     {
       ISchedulePublishMessage message = _messageFactory.Create<ISchedulePublishMessage>();
       message.PublishAddresses = destinations;
@@ -119,7 +119,7 @@ namespace Machine.Mta.Timing
       {
         using (CurrentSagaContext.Open(scheduled.SagaIds))
         {
-          foreach (EndpointName destination in scheduled.Addresses)
+          foreach (EndpointAddress destination in scheduled.Addresses)
           {
             _bus.Send(destination, scheduled.MessagePayload);
           }
@@ -133,7 +133,7 @@ namespace Machine.Mta.Timing
     readonly Guid _id;
     readonly DateTime _publishAt;
     readonly MessagePayload _messagePayload;
-    readonly EndpointName[] _addresses;
+    readonly EndpointAddress[] _addresses;
     readonly Guid[] _sagaIds;
 
     public Guid Id
@@ -151,7 +151,7 @@ namespace Machine.Mta.Timing
       get { return _messagePayload; }
     }
 
-    public EndpointName[] Addresses
+    public EndpointAddress[] Addresses
     {
       get { return _addresses; }
     }
@@ -161,7 +161,7 @@ namespace Machine.Mta.Timing
       get { return _sagaIds; }
     }
 
-    public ScheduledPublish(DateTime publishAt, MessagePayload messagePayload, EndpointName[] addresses, Guid[] sagaIds)
+    public ScheduledPublish(DateTime publishAt, MessagePayload messagePayload, EndpointAddress[] addresses, Guid[] sagaIds)
     {
       _id = Guid.NewGuid();
       _publishAt = publishAt;

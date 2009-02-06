@@ -20,7 +20,7 @@ namespace Machine.Mta
       }
     }
 
-    public static void SendMessagePayload(EndpointName destination, MessagePayload message)
+    public static void SendMessagePayload(EndpointAddress destination, MessagePayload message)
     {
       _sendingLog.Info("Sending Payload " + message + " to " + destination);
     }
@@ -34,7 +34,7 @@ namespace Machine.Mta
       }
     }
 
-    public static void Send(EndpointName destination, IMessage[] messages)
+    public static void Send(EndpointAddress destination, IMessage[] messages)
     {
       foreach (IMessage message in messages)
       {

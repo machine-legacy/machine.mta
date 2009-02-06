@@ -8,13 +8,13 @@ namespace Machine.Mta.Transports.Msmq
 {
   public class MsmqEndpoint : IEndpoint
   {
-    readonly EndpointName _name;
+    readonly EndpointAddress _address;
     readonly MessageQueue _queue;
     readonly MsmqTransactionManager _transactionManager;
 
-    public MsmqEndpoint(EndpointName name, MessageQueue queue, MsmqTransactionManager transactionManager)
+    public MsmqEndpoint(EndpointAddress address, MessageQueue queue, MsmqTransactionManager transactionManager)
     {
-      _name = name;
+      _address = address;
       _transactionManager = transactionManager;
       _queue = queue;
     }
@@ -23,7 +23,7 @@ namespace Machine.Mta.Transports.Msmq
     {
       if (!_queue.CanWrite)
       {
-        throw new InvalidOperationException("Queue is read-only: " + _name);
+        throw new InvalidOperationException("Queue is read-only: " + _address);
       }
       Message systemMessage = new Message();
       systemMessage.Label = transportMessage.Label;
@@ -38,7 +38,7 @@ namespace Machine.Mta.Transports.Msmq
       if (!_queue.CanRead)
       {
         System.Threading.Thread.Sleep(timeout);
-        throw new InvalidOperationException("Queue is write-only: " + _name);
+        throw new InvalidOperationException("Queue is write-only: " + _address);
       }
       try
       {

@@ -5,6 +5,6 @@ namespace Machine.Mta
 {
   public interface IMessageBusManager
   {
-    IMessageBus UseSingleBus(EndpointName listeningEndpoint, EndpointName poisonEndpoint);
+    IMessageBus UseSingleBus(EndpointAddress listeningEndpoint, EndpointAddress poisonEndpoint);
   }
 }

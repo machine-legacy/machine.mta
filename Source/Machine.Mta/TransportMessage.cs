@@ -5,7 +5,7 @@ namespace Machine.Mta
   [Serializable]
   public class TransportMessage
   {
-    private readonly EndpointName _returnAddress;
+    private readonly EndpointAddress _returnAddress;
     private readonly Guid _id;
     private readonly Guid _returnCorrelationId;
     private readonly Guid _correlationId;
@@ -33,7 +33,7 @@ namespace Machine.Mta
       get { return _sagaIds; }
     }
 
-    public EndpointName ReturnAddress
+    public EndpointAddress ReturnAddress
     {
       get { return _returnAddress; }
     }
@@ -52,7 +52,7 @@ namespace Machine.Mta
     {
     }
 
-    protected TransportMessage(Guid id, EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid[] sagaIds, byte[] body, string label)
+    protected TransportMessage(Guid id, EndpointAddress returnAddress, Guid correlationId, Guid returnCorrelationId, Guid[] sagaIds, byte[] body, string label)
     {
       _id = id;
       _returnAddress = returnAddress;
@@ -68,7 +68,7 @@ namespace Machine.Mta
       return this.Label + " from " + _returnAddress + " with " + _body.Length + "bytes";
     }
 
-    public static TransportMessage For(EndpointName returnAddress, Guid correlationId, Guid returnCorrelationId, Guid[] sagaIds, MessagePayload payload)
+    public static TransportMessage For(EndpointAddress returnAddress, Guid correlationId, Guid returnCorrelationId, Guid[] sagaIds, MessagePayload payload)
     {
       Guid id = Guid.NewGuid();
       if (returnCorrelationId == Guid.Empty)

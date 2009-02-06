@@ -17,7 +17,7 @@ namespace Machine.Mta
       _container = container;
     }
 
-    public IMessageBus UseSingleBus(EndpointName listeningEndpoint, EndpointName poisonEndpoint)
+    public IMessageBus UseSingleBus(EndpointAddress listeningEndpoint, EndpointAddress poisonEndpoint)
     {
       _bus = _messageBusFactory.CreateMessageBus(listeningEndpoint, poisonEndpoint);
       _container.Register.Type<IMessageBus>().Is(_bus);

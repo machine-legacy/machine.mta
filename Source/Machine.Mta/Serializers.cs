@@ -18,7 +18,7 @@ namespace Machine.Mta
       _binaryFormatter = new BinaryFormatter();
       _binaryFormatter.Binder = new MessageInterfaceSerializationBinder();
       _jsonSerializer = new JsonSerializer();
-      _jsonSerializer.Converters.Add(new EndpointNameJsonConverter());
+      _jsonSerializer.Converters.Add(new EndpointAddressJsonConverter());
       _jsonSerializer.Converters.Add(new ExceptionJsonConverter());
     }
 

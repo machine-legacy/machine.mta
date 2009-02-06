@@ -9,18 +9,18 @@ namespace Machine.Mta.Endpoints
 {
   public interface IEndpointFactory
   {
-    IEndpoint CreateEndpoint(EndpointName name);
+    IEndpoint CreateEndpoint(EndpointAddress address);
   }
 
   public interface IEndpointResolver
   {
-    IEndpoint Resolve(EndpointName name);
+    IEndpoint Resolve(EndpointAddress address);
   }
 
   public class EndpointResolver : IEndpointResolver
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EndpointResolver));
-    readonly Dictionary<EndpointName, IEndpoint> _cache = new Dictionary<EndpointName, IEndpoint>();
+    readonly Dictionary<EndpointAddress, IEndpoint> _cache = new Dictionary<EndpointAddress, IEndpoint>();
     readonly ReaderWriterLock _lock = new ReaderWriterLock();
     readonly IMachineContainer _container;
 
@@ -29,21 +29,21 @@ namespace Machine.Mta.Endpoints
       _container = container;
     }
 
-    public IEndpoint Resolve(EndpointName name)
+    public IEndpoint Resolve(EndpointAddress address)
     {
       using (RWLock.AsReader(_lock))
       {
-        if (_cache.ContainsKey(name))
+        if (_cache.ContainsKey(address))
         {
-          return _cache[name];
+          return _cache[address];
         }
         foreach (IEndpointFactory factory in _container.Resolve.All<IEndpointFactory>())
         {
-          IEndpoint resolved = factory.CreateEndpoint(name);
+          IEndpoint resolved = factory.CreateEndpoint(address);
           if (resolved != null)
           {
             _lock.UpgradeToWriterLock(Timeout.Infinite);
-            _cache[name] = resolved;
+            _cache[address] = resolved;
             return resolved;
           }
           else
@@ -52,7 +52,7 @@ namespace Machine.Mta.Endpoints
           }
         }
       }
-      throw new InvalidOperationException("Unable to resolve: " + name);
+      throw new InvalidOperationException("Unable to resolve: " + address);
     }
   }
 }

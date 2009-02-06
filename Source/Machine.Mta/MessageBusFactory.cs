@@ -23,9 +23,9 @@ namespace Machine.Mta
       _messageDispatcher = messageDispatcher;
     }
 
-    public IMessageBus CreateMessageBus(EndpointName listeningOnEndpointName, EndpointName poisonEndpointName)
+    public IMessageBus CreateMessageBus(EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress)
     {
-      return new MessageBus(_endpointResolver, _messageEndpointLookup, _transportMessageBodySerializer, _messageDispatcher, listeningOnEndpointName, poisonEndpointName, _transactionManager);
+      return new MessageBus(_endpointResolver, _messageEndpointLookup, _transportMessageBodySerializer, _messageDispatcher, listeningOnEndpointAddress, poisonEndpointAddress, _transactionManager);
     }
   }
 }

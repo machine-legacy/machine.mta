@@ -4,11 +4,11 @@ namespace Machine.Mta
 {
   public class ReturnAddressProvider
   {
-    public virtual EndpointName GetReturnAddress(EndpointName listeningOn)
+    public virtual EndpointAddress GetReturnAddress(EndpointAddress listeningOn)
     {
       if (listeningOn.IsLocal)
       {
-        return EndpointName.ForRemoteQueue(Environment.MachineName, listeningOn.Name);
+        return EndpointAddress.ForRemoteQueue(Environment.MachineName, listeningOn.Name);
       }
       return listeningOn;
     }

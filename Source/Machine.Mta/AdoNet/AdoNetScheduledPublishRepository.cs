@@ -28,7 +28,7 @@ namespace Machine.Mta.AdoNet
     {
       using (IDbConnection connection = OpenConnection())
       {
-        foreach (EndpointName destination in scheduled.Addresses)
+        foreach (EndpointAddress destination in scheduled.Addresses)
         {
           IDbCommand command = CreateInsertCommand(connection);
           command.Parameter("PublishId").Value = scheduled.Id;
@@ -60,7 +60,7 @@ namespace Machine.Mta.AdoNet
             string returnAddress = reader.GetString(3);
             string messagePayload = reader.GetString(4);
             string sagaIds = reader.GetString(5);
-            scheduled.Add(new ScheduledPublish(publishAt, MessagePayload.FromString(messagePayload), new[] { EndpointName.FromString(returnAddress) }, sagaIds.ToGuidArray()));
+            scheduled.Add(new ScheduledPublish(publishAt, MessagePayload.FromString(messagePayload), new[] { EndpointAddress.FromString(returnAddress) }, sagaIds.ToGuidArray()));
           }
           reader.Close();
         }

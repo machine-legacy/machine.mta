@@ -5,6 +5,6 @@ namespace Machine.Mta
 {
   public interface IMessageBusFactory
   {
-    IMessageBus CreateMessageBus(EndpointName listeningOnEndpointName, EndpointName poisonEndpointName);
+    IMessageBus CreateMessageBus(EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress);
   }
 }

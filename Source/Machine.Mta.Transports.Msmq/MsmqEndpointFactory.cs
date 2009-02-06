@@ -15,17 +15,17 @@ namespace Machine.Mta.Transports.Msmq
       _transactionManager = transactionManager;
     }
 
-    public IEndpoint CreateEndpoint(EndpointName name)
+    public IEndpoint CreateEndpoint(EndpointAddress address)
     {
-      MessageQueue queue = new MessageQueue(name.ToPath(), QueueAccessMode.SendAndReceive);
-      return new MsmqEndpoint(name, queue, _transactionManager);
+      MessageQueue queue = new MessageQueue(address.ToPath(), QueueAccessMode.SendAndReceive);
+      return new MsmqEndpoint(address, queue, _transactionManager);
     }
   }
-  public static class EndpointNameHelpers
+  public static class EndpointAddressHelpers
   {
-    public static string ToPath(this EndpointName name)
+    public static string ToPath(this EndpointAddress address)
     {
-      return String.Format(@"FormatName:DIRECT=OS:{0}\Private$\{1}", name.Address, name.Name);
+      return String.Format(@"FormatName:DIRECT=OS:{0}\Private$\{1}", address.Host, address.Name);
     }
   }
 }

@@ -5,12 +5,12 @@ namespace Machine.Mta
 {
   public interface IMessageBus : IDisposable
   {
-    EndpointName PoisonAddress { get; }
-    EndpointName Address { get; }
+    EndpointAddress PoisonAddress { get; }
+    EndpointAddress Address { get; }
     void Start();
     void Send<T>(params T[] messages) where T : class, IMessage;
-    void Send<T>(EndpointName destination, params T[] messages) where T : class, IMessage;
-    void Send(EndpointName destination, MessagePayload payload);
+    void Send<T>(EndpointAddress destination, params T[] messages) where T : class, IMessage;
+    void Send(EndpointAddress destination, MessagePayload payload);
     void SendLocal<T>(params T[] messages) where T : class, IMessage;
     void Stop();
     IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage;

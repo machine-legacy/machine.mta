@@ -72,7 +72,7 @@
     <Compile Include="DotNetBinaryStorage\DotNetBinaryScheduledPublishRepository.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatBinaryFileConfiguration.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatFileSystem.cs" />
-    <Compile Include="EndpointName.cs" />
+    <Compile Include="EndpointAddress.cs" />
     <Compile Include="Helpers\SagaRepositoryServices.cs" />
     <Compile Include="IMessageRegisterer.cs" />
     <Compile Include="InterfacesAsMessages\DefaultMessageInterfaceImplementationFactory.cs" />
