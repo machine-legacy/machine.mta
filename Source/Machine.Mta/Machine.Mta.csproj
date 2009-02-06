@@ -81,25 +81,25 @@
     <Compile Include="InterfacesAsMessages\MessageInterfaceImplementationFactory.cs" />
     <Compile Include="InterfacesAsMessages\MessageInterfaceSerializationBinder.cs" />
     <Compile Include="InterfacesAsMessages\MessageTypeHelpers.cs" />
-    <Compile Include="Internal\IEndpoint.cs" />
-    <Compile Include="Internal\EndpointResolver.cs" />
+    <Compile Include="Endpoints\IEndpoint.cs" />
+    <Compile Include="Endpoints\EndpointResolver.cs" />
     <Compile Include="InterfacesAsMessages\ExceptionJsonConverter.cs" />
     <Compile Include="Helpers\MessageHandlerServices.cs" />
     <Compile Include="Helpers\MessageSetupHelpers.cs" />
     <Compile Include="IConsume.cs" />
-    <Compile Include="IMessageDispatcher.cs" />
-    <Compile Include="Internal\EndpointQueue.cs" />
-    <Compile Include="Internal\ITransactionManager.cs" />
-    <Compile Include="Internal\Logging.cs" />
-    <Compile Include="Internal\MessageFailureManager.cs" />
-    <Compile Include="Internal\ReturnAddressProvider.cs" />
+    <Compile Include="Dispatching\IMessageDispatcher.cs" />
+    <Compile Include="Dispatching\EndpointQueue.cs" />
+    <Compile Include="ITransactionManager.cs" />
+    <Compile Include="Logging.cs" />
+    <Compile Include="MessageFailureManager.cs" />
+    <Compile Include="ReturnAddressProvider.cs" />
     <Compile Include="IProvideHandlerOrder.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MessagePayload.cs" />
     <Compile Include="TypeHelpers.cs" />
-    <Compile Include="Internal\MessageBusFactory.cs" />
-    <Compile Include="Internal\RequestReply.cs" />
+    <Compile Include="MessageBusFactory.cs" />
+    <Compile Include="RequestReply.cs" />
     <Compile Include="MtaServices.cs" />
     <Compile Include="Sagas\ISagaMessage.cs" />
     <Compile Include="Sagas\ISagaState.cs" />
@@ -134,16 +134,16 @@
     </Compile>
     <Compile Include="MessageContexts.cs" />
     <Compile Include="IMessageBusManager.cs" />
-    <Compile Include="Internal\ITransportMessageBodyFormatter.cs" />
+    <Compile Include="ITransportMessageBodyFormatter.cs" />
     <Compile Include="IMessageBusFactory.cs" />
-    <Compile Include="Internal\Invoker.cs" />
-    <Compile Include="Internal\MessageDispatcher.cs" />
-    <Compile Include="Internal\MessageBus.cs" />
-    <Compile Include="Internal\MessageBusManager.cs" />
-    <Compile Include="Internal\MessageEndpointLookup.cs" />
+    <Compile Include="Dispatching\Invokers.cs" />
+    <Compile Include="Dispatching\MessageDispatcher.cs" />
+    <Compile Include="MessageBus.cs" />
+    <Compile Include="MessageBusManager.cs" />
+    <Compile Include="MessageEndpointLookup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransportMessage.cs" />
-    <Compile Include="Internal\TransportMessageBodySerializer.cs" />
+    <Compile Include="TransportMessageBodySerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AdoNet\Tables.sql" />

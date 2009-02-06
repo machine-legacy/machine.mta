@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta
 {
   public class TransportMessageBodySerializer
   {

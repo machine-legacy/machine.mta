@@ -5,8 +5,6 @@ using System.Reflection;
 
 using Newtonsoft.Json;
 
-using Machine.Mta.Internal;
-
 namespace Machine.Mta.InterfacesAsMessages
 {
   public class MessageInterfaceTransportFormatter : ITransportMessageBodyFormatter

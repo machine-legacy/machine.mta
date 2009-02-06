@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 
+using Machine.Mta.Dispatching;
+using Machine.Mta.Endpoints;
 using Machine.Utility.ThreadPool;
 using Machine.Utility.ThreadPool.QueueStrategies;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta
 {
   public class MessageBus : IMessageBus
   {

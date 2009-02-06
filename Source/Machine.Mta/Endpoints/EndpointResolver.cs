@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+
 using Machine.Container.Services;
 using Machine.Core.Utility;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta.Endpoints
 {
   public interface IEndpointFactory
   {
     IEndpoint CreateEndpoint(EndpointName name);
   }
+
   public interface IEndpointResolver
   {
     IEndpoint Resolve(EndpointName name);
   }
+
   public class EndpointResolver : IEndpointResolver
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EndpointResolver));

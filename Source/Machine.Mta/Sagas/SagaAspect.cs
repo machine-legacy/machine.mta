@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using Machine.Container.Services;
-using Machine.Mta.Internal;
+using Machine.Mta.Dispatching;
 
 namespace Machine.Mta.Sagas
 {
   public class SagaAspect : IMessageAspect
   {
-    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(SagaAspect));
     readonly IMachineContainer _container;
 
     public SagaAspect(IMachineContainer container)

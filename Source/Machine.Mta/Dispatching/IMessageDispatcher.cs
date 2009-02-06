@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.Mta
+namespace Machine.Mta.Dispatching
 {
   public interface IMessageDispatcher
   {

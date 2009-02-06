@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta
 {
   public interface ITransportMessageBodyFormatter
   {

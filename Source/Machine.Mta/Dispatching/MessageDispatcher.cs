@@ -6,7 +6,7 @@ using Machine.Mta.Sagas;
 using Machine.Container.Model;
 using Machine.Container.Services;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta.Dispatching
 {
   public class MessageHandlerType
   {

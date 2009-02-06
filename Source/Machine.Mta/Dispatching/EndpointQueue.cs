@@ -2,9 +2,10 @@ using System;
 using System.Transactions;
 
 using Machine.Core.Services;
+using Machine.Mta.Endpoints;
 using Machine.Utility.ThreadPool;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta.Dispatching
 {
   public class EndpointQueue : IQueue
   {

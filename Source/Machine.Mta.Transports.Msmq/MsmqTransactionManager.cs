@@ -2,8 +2,6 @@ using System;
 using System.Messaging;
 using System.Transactions;
 
-using Machine.Mta.Internal;
-
 namespace Machine.Mta.Transports.Msmq
 {
   public class MsmqTransactionManager : ITransactionManager

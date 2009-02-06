@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Machine.Mta.Sagas;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta.Dispatching
 {
   public class ProvideHandlerOrderInvoker<T> : IProvideHandlerOrderFor<IMessage>  where T : class, IMessage
   {
@@ -45,11 +45,11 @@ namespace Machine.Mta.Internal
     }
   }
 
-  public class RepositoryInvoker<T> : ISagaStateRepository<ISagaState> where T : class, ISagaState
+  public class SagaStateRepositoryInvoker<T> : ISagaStateRepository<ISagaState> where T : class, ISagaState
   {
     readonly ISagaStateRepository<T> _target;
 
-    public RepositoryInvoker(ISagaStateRepository<T> target)
+    public SagaStateRepositoryInvoker(ISagaStateRepository<T> target)
     {
       _target = target;
     }
@@ -84,7 +84,7 @@ namespace Machine.Mta.Internal
 
     public static ISagaStateRepository<ISagaState> CreateForRepository(Type sagaStateType, object target)
     {
-      return (ISagaStateRepository<ISagaState>)Activator.CreateInstance(typeof(RepositoryInvoker<>).MakeGenericType(sagaStateType), target);
+      return (ISagaStateRepository<ISagaState>)Activator.CreateInstance(typeof(SagaStateRepositoryInvoker<>).MakeGenericType(sagaStateType), target);
     }
   }
 }

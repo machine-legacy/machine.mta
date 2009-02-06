@@ -1,6 +1,6 @@
 using System;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta
 {
   public class ReturnAddressProvider
   {

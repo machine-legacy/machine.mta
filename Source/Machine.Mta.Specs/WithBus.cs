@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-using Machine.Mta.Sagas;
 using Machine.Container;
 using Machine.Container.Services;
+using Machine.Mta.Dispatching;
 using Machine.Mta.InterfacesAsMessages;
-using Machine.Mta.Internal;
 using Machine.Mta.Transports.Msmq;
+using Machine.Mta.Endpoints;
+using Machine.Mta.Sagas;
 using Machine.Specifications;
 
 using Rhino.Mocks;

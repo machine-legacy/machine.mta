@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Messaging;
 
-using Machine.Mta.Internal;
+using Machine.Mta.Endpoints;
 
 namespace Machine.Mta.Transports.Msmq
 {

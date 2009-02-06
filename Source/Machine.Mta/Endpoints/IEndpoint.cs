@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta.Endpoints
 {
   public interface IEndpoint
   {

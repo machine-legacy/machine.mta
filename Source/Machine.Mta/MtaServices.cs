@@ -1,7 +1,9 @@
 using Machine.Container;
 using Machine.Container.Plugins;
+
+using Machine.Mta.Dispatching;
+using Machine.Mta.Endpoints;
 using Machine.Mta.InterfacesAsMessages;
-using Machine.Mta.Internal;
 using Machine.Mta.Timing;
 using Machine.Mta.Sagas;
 

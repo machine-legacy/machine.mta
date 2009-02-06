@@ -1,7 +1,7 @@
 using System;
 using log4net;
 
-namespace Machine.Mta.Internal
+namespace Machine.Mta
 {
   public static class Logging
   {

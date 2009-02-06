@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace Machine.Mta.Internal
+using Machine.Mta.Dispatching;
+using Machine.Mta.Endpoints;
+
+namespace Machine.Mta
 {
   public class MessageBusFactory : IMessageBusFactory
   {

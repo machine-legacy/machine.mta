@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Machine.Mta.Internal;
-
 namespace Machine.Mta.Timing
 {
   public interface ISchedulePublishMessage : IMessage
