@@ -10,20 +10,18 @@ namespace Machine.Mta
 {
   public class MessageBus : IMessageBus
   {
-    private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
-    private readonly IMessageDestinations _messageDestinations;
-    private readonly IEndpointResolver _endpointResolver;
-    private readonly IMessageDispatcher _dispatcher;
-    private readonly IEndpoint _listeningOn;
-    private readonly IEndpoint _poison;
-    private readonly EndpointAddress _listeningOnEndpointAddress;
-    private readonly EndpointAddress _poisonEndpointAddress;
-    private readonly ThreadPool _threads;
-    private readonly TransportMessageBodySerializer _transportMessageBodySerializer;
-    private readonly AsyncCallbackMap _asyncCallbackMap;
-    private readonly MessageFailureManager _messageFailureManager;
-    private readonly ReturnAddressProvider _returnAddressProvider;
-    private readonly ITransactionManager _transactionManager;
+    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
+    readonly IMessageDestinations _messageDestinations;
+    readonly IEndpointResolver _endpointResolver;
+    readonly IEndpoint _listeningOn;
+    readonly EndpointAddress _listeningOnEndpointAddress;
+    readonly EndpointAddress _poisonEndpointAddress;
+    readonly ThreadPool _threads;
+    readonly TransportMessageBodySerializer _transportMessageBodySerializer;
+    readonly AsyncCallbackMap _asyncCallbackMap;
+    readonly ReturnAddressProvider _returnAddressProvider;
+    readonly ITransactionManager _transactionManager;
+    readonly MessageDispatchAttempter _messageDispatchAttempter;
 
     public MessageBus(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer,
                       IMessageDispatcher dispatcher, EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, ITransactionManager transactionManager,
@@ -31,18 +29,18 @@ namespace Machine.Mta
     {
       _endpointResolver = endpointResolver;
       _transactionManager = transactionManager;
-      _dispatcher = dispatcher;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageDestinations = messageDestinations;
       _listeningOn = _endpointResolver.Resolve(listeningOnEndpointAddress);
-      _poison = _endpointResolver.Resolve(poisonEndpointAddress);
       _listeningOnEndpointAddress = listeningOnEndpointAddress;
       _poisonEndpointAddress = poisonEndpointAddress;
       _messageDestinations = messageDestinations;
-      _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_transactionManager, _listeningOn, EndpointDispatcher)));
       _asyncCallbackMap = new AsyncCallbackMap();
-      _messageFailureManager = new MessageFailureManager();
       _returnAddressProvider = new ReturnAddressProvider();
+      IEndpoint poison = _endpointResolver.Resolve(poisonEndpointAddress);
+      MessageFailureManager messageFailureManager = new MessageFailureManager();
+      _messageDispatchAttempter = new MessageDispatchAttempter(messageFailureManager, dispatcher, _transportMessageBodySerializer, _asyncCallbackMap, poison);
+      _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_transactionManager, _listeningOn, _messageDispatchAttempter.AttemptDispatch)));
     }
 
     public MessageBus(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, ITransactionManager transactionManager)
@@ -138,12 +136,50 @@ namespace Machine.Mta
       SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
     }
 
-    private void EndpointDispatcher(object obj)
+    private void Send(EndpointAddress destination, TransportMessage transportMessage)
     {
-			if (obj == null)
-			{
-			  return;
-			}
+      IEndpoint endpoint = _endpointResolver.Resolve(destination);
+      endpoint.Send(transportMessage);
+    }
+
+    private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
+    {
+      MessagePayload payload = _transportMessageBodySerializer.Serialize(messages);
+      return CreateTransportMessage(correlatedBy, payload);
+    }
+
+    private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
+    {
+      return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy,
+        CurrentCorrelationContext.CurrentCorrelation,
+        CurrentSagaContext.CurrentSagaIds, payload);
+    }
+  }
+
+  public class MessageDispatchAttempter
+  {
+    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
+    readonly MessageFailureManager _messageFailureManager;
+    readonly IMessageDispatcher _dispatcher;
+    readonly TransportMessageBodySerializer _transportMessageBodySerializer;
+    readonly AsyncCallbackMap _asyncCallbackMap;
+    readonly IEndpoint _poison;
+
+    public MessageDispatchAttempter(MessageFailureManager messageFailureManager, IMessageDispatcher dispatcher, TransportMessageBodySerializer transportMessageBodySerializer, AsyncCallbackMap asyncCallbackMap, IEndpoint poison)
+    {
+      _messageFailureManager = messageFailureManager;
+      _dispatcher = dispatcher;
+      _transportMessageBodySerializer = transportMessageBodySerializer;
+      _asyncCallbackMap = asyncCallbackMap;
+      _poison = poison;
+    }
+
+    public void AttemptDispatch(object obj)
+    {
+      if (obj == null)
+      {
+        return;
+      }
       TransportMessage transportMessage = (TransportMessage)obj;
       if (_messageFailureManager.SendToPoisonQueue(transportMessage.Id))
       {
@@ -170,25 +206,6 @@ namespace Machine.Mta
         _messageFailureManager.RecordFailure(transportMessage.Id, error);
         throw;
       }
-    }
-
-    private void Send(EndpointAddress destination, TransportMessage transportMessage)
-    {
-      IEndpoint endpoint = _endpointResolver.Resolve(destination);
-      endpoint.Send(transportMessage);
-    }
-
-    private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
-    {
-      MessagePayload payload = _transportMessageBodySerializer.Serialize(messages);
-      return CreateTransportMessage(correlatedBy, payload);
-    }
-
-    private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
-    {
-      return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy,
-        CurrentCorrelationContext.CurrentCorrelation,
-        CurrentSagaContext.CurrentSagaIds, payload);
     }
   }
 }
