@@ -91,6 +91,8 @@
     <Compile Include="Internal\EndpointQueue.cs" />
     <Compile Include="Internal\ITransactionManager.cs" />
     <Compile Include="Internal\Logging.cs" />
+    <Compile Include="Internal\MessageFailureManager.cs" />
+    <Compile Include="Internal\ReturnAddressProvider.cs" />
     <Compile Include="IProvideHandlerOrder.cs">
       <SubType>Code</SubType>
     </Compile>

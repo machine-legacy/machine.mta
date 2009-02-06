@@ -15,7 +15,6 @@ namespace Machine.Mta.Internal
       _asyncCallbackMap = asyncCallbackMap;
     }
 
-    #region IRequestReplyBuilder Members
     public void OnReply(AsyncCallback callback, object state)
     {
       _asyncCallbackMap.Add(_request.Id, callback, state);
@@ -25,7 +24,6 @@ namespace Machine.Mta.Internal
     {
       OnReply(callback, null);
     }
-    #endregion
   }
 
   public class Reply

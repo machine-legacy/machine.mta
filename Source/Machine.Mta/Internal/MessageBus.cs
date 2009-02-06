@@ -6,47 +6,6 @@ using Machine.Utility.ThreadPool.QueueStrategies;
 
 namespace Machine.Mta.Internal
 {
-  public class MessageFailureManager
-  {
-    readonly Dictionary<Guid, List<Exception>> _errors = new Dictionary<Guid, List<Exception>>();
-    readonly object _lock = new object();
-
-    public void RecordFailure(Guid id, Exception error)
-    {
-      lock (_lock)
-      {
-        if (!_errors.ContainsKey(id))
-        {
-          _errors[id] = new List<Exception>();
-        }
-        _errors[id].Add(error);
-      }
-    }
-
-    public bool SendToPoisonQueue(Guid id)
-    {
-      lock (_lock)
-      {
-        bool hasErrors = _errors.ContainsKey(id);
-        if (hasErrors)
-        {
-          _errors.Remove(id);
-        }
-        return hasErrors;
-      }
-    }
-  }
-  public class ReturnAddressProvider
-  {
-    public virtual EndpointName GetReturnAddress(EndpointName listeningOn)
-    {
-      if (listeningOn.IsLocal)
-      {
-        return EndpointName.ForRemoteQueue(Environment.MachineName, listeningOn.Name);
-      }
-      return listeningOn;
-    }
-  }
   public class MessageBus : IMessageBus
   {
     private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
@@ -64,7 +23,9 @@ namespace Machine.Mta.Internal
     private readonly ReturnAddressProvider _returnAddressProvider;
     private readonly ITransactionManager _transactionManager;
 
-    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ITransactionManager transactionManager, ThreadPoolConfiguration threadPoolConfiguration)
+    public MessageBus(IEndpointResolver endpointResolver, IMessageEndpointLookup messageEndpointLookup, TransportMessageBodySerializer transportMessageBodySerializer,
+                      IMessageDispatcher dispatcher, EndpointName listeningOnEndpointName, EndpointName poisonEndpointName, ITransactionManager transactionManager,
+                      ThreadPoolConfiguration threadPoolConfiguration)
     {
       _endpointResolver = endpointResolver;
       _transactionManager = transactionManager;
