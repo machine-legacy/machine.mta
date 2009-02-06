@@ -68,6 +68,12 @@
     <Compile Include="AdoNet\IAdoNetConnectionString.cs" />
     <Compile Include="AdoNet\IAdoNetSagaRepositoryConfiguration.cs" />
     <Compile Include="Configuration\MessageBusConfigurationSection.cs" />
+    <Compile Include="Dispatching\DefaultMessageAspectsProvider.cs" />
+    <Compile Include="Dispatching\HandlerDiscoverer.cs" />
+    <Compile Include="Dispatching\HandlerInvocation.cs" />
+    <Compile Include="Dispatching\IMessageAspect.cs" />
+    <Compile Include="Dispatching\IMessageAspectsProvider.cs" />
+    <Compile Include="Dispatching\MessageHandlerType.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinarySagaStateRepository.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinaryScheduledPublishRepository.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatBinaryFileConfiguration.cs" />
