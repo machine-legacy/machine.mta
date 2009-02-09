@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Machine.Mta.Sagas
 {
+  [Serializable]
   public class SagaException : Exception
   {
     public SagaException() { }
@@ -11,6 +12,7 @@ namespace Machine.Mta.Sagas
     public SagaException(string message, Exception innerException) : base(message, innerException) { }
     protected SagaException(SerializationInfo info, StreamingContext context) : base(info, context) { }
   }
+  [Serializable]
   public class SagaStateRepositoryNotFoundException : SagaException
   {
     public SagaStateRepositoryNotFoundException() { }
@@ -19,6 +21,7 @@ namespace Machine.Mta.Sagas
     public SagaStateRepositoryNotFoundException(string message, Exception innerException) : base(message, innerException) { }
     protected SagaStateRepositoryNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
   }
+  [Serializable]
   public class SagaStateNotFoundException : SagaException
   {
     public SagaStateNotFoundException() { }

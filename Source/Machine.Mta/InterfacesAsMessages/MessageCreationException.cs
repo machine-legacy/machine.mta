@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 
 namespace Machine.Mta.InterfacesAsMessages
 {
+  [Serializable]
   public class MessageCreationException : Exception
   {
     public MessageCreationException()
