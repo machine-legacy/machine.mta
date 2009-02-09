@@ -106,21 +106,18 @@ namespace Machine.Mta
       return _current = new CurrentSagaContext(_current, sagaIds);
     }
 
-    public static Guid[] CurrentSagaIds
+    public static Guid[] CurrentSagaIds(bool propogateCurrentMessageIds)
     {
-      get
+      if (_current == null)
       {
-        if (_current == null)
+        TransportMessage transportMessage = CurrentMessageContext.Current;
+        if (transportMessage != null && propogateCurrentMessageIds)
         {
-          TransportMessage transportMessage = CurrentMessageContext.Current;
-          if (transportMessage != null)
-          {
-            return transportMessage.SagaIds;
-          }
-          return new Guid[0];
+          return transportMessage.SagaIds;
         }
-        return _current.SagaIds.ToArray();
+        return new Guid[0];
       }
+      return _current.SagaIds.ToArray();
     }
 
     public void Dispose()

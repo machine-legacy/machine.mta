@@ -72,19 +72,19 @@ namespace Machine.Mta
     public void Send<T>(params T[] messages) where T : class, IMessage
     {
       Logging.Send(messages);
-      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
+      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, false, messages));
     }
 
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : class, IMessage
     {
       Logging.Send(destination, messages);
-      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, messages));
+      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, false, messages));
     }
 
     public void Send(EndpointAddress destination, MessagePayload payload)
     {
       Logging.SendMessagePayload(destination, payload);
-      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, payload));
+      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, payload, false));
     }
 
     public void SendLocal<T>(params T[] messages) where T : class, IMessage
@@ -119,7 +119,7 @@ namespace Machine.Mta
 
     public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
     {
-      return new RequestReplyBuilder(SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages)), _asyncCallbackMap);
+      return new RequestReplyBuilder(SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, false, messages)), _asyncCallbackMap);
     }
 
     public void Reply<T>(params T[] messages) where T : class, IMessage
@@ -127,13 +127,13 @@ namespace Machine.Mta
       Logging.Reply(messages);
       TransportMessage transportMessage = CurrentMessageContext.Current;
       EndpointAddress returnAddress = transportMessage.ReturnAddress;
-      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(transportMessage.ReturnCorrelationId, messages));
+      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(transportMessage.ReturnCorrelationId, true, messages));
     }
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
       Logging.Publish(messages);
-      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, messages));
+      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, false, messages));
     }
 
     private void Send(EndpointAddress destination, TransportMessage transportMessage)
@@ -142,17 +142,17 @@ namespace Machine.Mta
       endpoint.Send(transportMessage);
     }
 
-    private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, params T[] messages) where T : class, IMessage
+    private TransportMessage CreateTransportMessage<T>(Guid correlatedBy, bool forReply, params T[] messages) where T : class, IMessage
     {
       MessagePayload payload = _transportMessageBodySerializer.Serialize(messages);
-      return CreateTransportMessage(correlatedBy, payload);
+      return CreateTransportMessage(correlatedBy, payload, forReply);
     }
 
-    private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload)
+    private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload, bool forReply)
     {
       return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy,
         CurrentCorrelationContext.CurrentCorrelation,
-        CurrentSagaContext.CurrentSagaIds, payload);
+        CurrentSagaContext.CurrentSagaIds(forReply), payload);
     }
   }
 
