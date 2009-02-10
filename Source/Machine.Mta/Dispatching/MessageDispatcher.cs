@@ -27,6 +27,10 @@ namespace Machine.Mta.Dispatching
         IConsume<IMessage> invoker = Invokers.CreateForHandler(messageHandlerType.TargetExpectsMessageOfType, handler);
         HandlerInvocation invocation = messageHandlerType.ToInvocation(message, handler, invoker, _messageAspectsProvider.DefaultAspects());
         invocation.Continue();
+        if (CurrentMessageContext.Current.AskedToStopDispatchingCurrentMessageToHandlers)
+        {
+          break;
+        }
       }
     }
 

@@ -125,7 +125,7 @@ namespace Machine.Mta
     public void Reply<T>(params T[] messages) where T : class, IMessage
     {
       Logging.Reply(messages);
-      TransportMessage transportMessage = CurrentMessageContext.Current;
+      TransportMessage transportMessage = CurrentMessageContext.CurrentTransportMessage;
       EndpointAddress returnAddress = transportMessage.ReturnAddress;
       SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(transportMessage.ReturnCorrelationId, true, messages));
     }

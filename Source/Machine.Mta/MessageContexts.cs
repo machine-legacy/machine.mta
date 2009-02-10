@@ -9,6 +9,22 @@ namespace Machine.Mta
     [ThreadStatic]
     static CurrentMessageContext _current;
     readonly TransportMessage _transportMessage;
+    bool _stopDispatching;
+
+    public TransportMessage TransportMessage
+    {
+      get { return _transportMessage; }
+    }
+
+    public bool AskedToStopDispatchingCurrentMessageToHandlers
+    {
+      get { return _stopDispatching; }
+    }
+
+    public void StopDispatchingCurrentMessageToHandlers()
+    {
+      _stopDispatching = true;
+    }
 
     public CurrentMessageContext(TransportMessage transportMessage)
     {
@@ -20,7 +36,7 @@ namespace Machine.Mta
       return _current = new CurrentMessageContext(transportMessage);
     }
 
-    public static TransportMessage Current
+    public static TransportMessage CurrentTransportMessage
     {
       get
       {
@@ -28,7 +44,19 @@ namespace Machine.Mta
         {
           return null;
         }
-        return _current._transportMessage;
+        return _current.TransportMessage;
+      }
+    }
+
+    public static CurrentMessageContext Current
+    {
+      get
+      {
+        if (_current == null)
+        {
+          return null;
+        }
+        return _current;
       }
     }
 
@@ -110,7 +138,7 @@ namespace Machine.Mta
     {
       if (_current == null)
       {
-        TransportMessage transportMessage = CurrentMessageContext.Current;
+        TransportMessage transportMessage = CurrentMessageContext.CurrentTransportMessage;
         if (transportMessage != null && propogateCurrentMessageIds)
         {
           return transportMessage.SagaIds;
