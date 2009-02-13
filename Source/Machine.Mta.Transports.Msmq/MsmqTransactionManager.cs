@@ -4,8 +4,15 @@ using System.Transactions;
 
 namespace Machine.Mta.Transports.Msmq
 {
-  public class MsmqTransactionManager : ITransactionManager
+  public class MsmqTransactionManager
   {
+    readonly ITransactionManager _transactionManager;
+
+    public MsmqTransactionManager(ITransactionManager transactionManager)
+    {
+      _transactionManager = transactionManager;
+    }
+
     public MessageQueueTransactionType SendTransactionType(MessageQueue queue)
     {
       return StandardTransactionType(queue);
@@ -16,9 +23,8 @@ namespace Machine.Mta.Transports.Msmq
       return StandardTransactionType(queue);
     }
 
-    private static MessageQueueTransactionType StandardTransactionType(MessageQueue queue)
+    public virtual MessageQueueTransactionType StandardTransactionType(MessageQueue queue)
     {
-      //if (queue.IsLocalQueue() && !queue.Transactional) return MessageQueueTransactionType.None;
       if (Transaction.Current == null)
       {
         return MessageQueueTransactionType.Single;
@@ -26,9 +32,9 @@ namespace Machine.Mta.Transports.Msmq
       return MessageQueueTransactionType.Automatic;
     }
 
-    public TransactionScope CreateTransactionScope()
+    public virtual TransactionScope CreateTransactionScope()
     {
-      return new TransactionScope();
+      return _transactionManager.CreateTransactionScope();
     }
-  } 
+  }
 }

@@ -8,4 +8,11 @@ namespace Machine.Mta
   {
     TransactionScope CreateTransactionScope();
   }
+  public class TransactionManager : ITransactionManager
+  {
+    public TransactionScope CreateTransactionScope()
+    {
+      return new TransactionScope();
+    }
+  }
 }

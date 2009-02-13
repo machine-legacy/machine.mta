@@ -34,6 +34,7 @@ namespace Machine.Mta.Specs
       container.Register.Type<SagaAspect>();
       container.Register.Type<MsmqEndpointFactory>();
       container.Register.Type<MsmqTransactionManager>();
+      container.Register.Type<TransactionManager>();
       container.Start();  
       IEndpointResolver endpointResolver = new EndpointResolver(container);
       IMessageDestinations messageDestinations = new MessageDestinations();
@@ -42,7 +43,7 @@ namespace Machine.Mta.Specs
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
       dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container));
       messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
-      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new MsmqTransactionManager());
+      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager());
       message1 = messageFactory.Create<IMessage>();
       message2 = messageFactory.Create<ISampleMessage>();
       message3 = messageFactory.Create<ISampleSagaMessage>();
