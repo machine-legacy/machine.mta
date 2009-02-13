@@ -1,0 +1,49 @@
+require 'rake'
+require 'rake/testtask'
+require 'pathname'
+require 'rubygems'
+require 'fileutils'
+include FileUtils
+
+class String
+  def slash(path)
+    if self =~ /\/$/
+      return self + path
+    end
+
+    return self + '/' + path
+  end
+end
+
+desc "Build and run specs"
+task :default => [ "build", "specs:run" ]
+
+desc "Build"
+task :build do
+  system "msbuild Source/Machine.Mta.sln"
+end
+
+namespace :specs do
+  task :view => :run do
+    system "start Specs/Machine.Mta.Specs.html"
+  end
+
+  task :run do
+    system "Libraries/Machine/Specifications/Machine.Specifications.ConsoleRunner.exe Build/Debug/Machine.Mta.Specs.dll --html Specs/Machine.Mta.Specs.html"
+  end
+end
+
+desc "Rebuild"
+task :rebuild do
+  Dir.chdir("Source") do
+    sh "MsBuild Machine.Mta.sln /t:Rebuild"
+  end
+end
+
+desc "Clean"
+task :clean do
+  Dir.chdir("Source") do
+    sh "MsBuild Machine.Mta.sln /t:Clean"
+  end
+end
+
