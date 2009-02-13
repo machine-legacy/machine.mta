@@ -31,6 +31,7 @@ namespace Machine.Mta.Transports.Msmq
       systemMessage.TimeToBeReceived = TimeSpan.MaxValue;
       Serializers.Binary.Serialize(systemMessage.BodyStream, transportMessage);
       _queue.Send(systemMessage, _transactionManager.SendTransactionType(_queue));
+      systemMessage.Dispose();
     }
 
     public TransportMessage Receive(TimeSpan timeout)
@@ -40,9 +41,9 @@ namespace Machine.Mta.Transports.Msmq
         System.Threading.Thread.Sleep(timeout);
         throw new InvalidOperationException("Queue is write-only: " + _address);
       }
+      Message systemMessage = null;
       try
       {
-        Message systemMessage = null;
         // This exception interferes with debugging apparently. This should mitigate that.
         if (System.Diagnostics.Debugger.IsAttached)
         {
@@ -66,6 +67,13 @@ namespace Machine.Mta.Transports.Msmq
           return null;
         }
         throw;
+      }
+      finally
+      {
+        if (systemMessage != null)
+        {
+          systemMessage.Dispose();
+        }
       }
     }
   }
