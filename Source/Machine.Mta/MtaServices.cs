@@ -1,3 +1,4 @@
+using System;
 using Machine.Container;
 using Machine.Container.Plugins;
 
@@ -11,6 +12,18 @@ namespace Machine.Mta
 {
   public class MtaServices : IServiceCollection
   {
+    readonly Type _transactionManagerType;
+
+    public MtaServices()
+      : this(typeof(TransactionManager))
+    {
+    }
+
+    public MtaServices(Type transactionManagerType)
+    {
+      _transactionManagerType = transactionManagerType;
+    }
+
     public virtual void RegisterServices(ContainerRegisterer register)
     {
       register.Type<EndpointResolver>();
@@ -30,7 +43,7 @@ namespace Machine.Mta
       register.Type<ScheduleFutureMessages>();
       register.Type<SchedulePublishHandler>();
       register.Type<SagaAspect>();
-      register.Type<TransactionManager>();
+      register.Type(_transactionManagerType);
     }
   }
 }
