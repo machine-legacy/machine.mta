@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 
 using Machine.Container;
@@ -26,6 +27,10 @@ namespace Machine.Mta.Timing
 
     public void Add(IOnceASecondTask task)
     {
+      if (_thread.IsAlive)
+      {
+        throw new InvalidOperationException("You must add all once a second tasks before you start the TimingManager.");
+      }
       _tasks.Add(task);
     }
 
