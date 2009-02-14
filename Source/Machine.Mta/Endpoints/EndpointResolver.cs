@@ -7,16 +7,6 @@ using Machine.Core.Utility;
 
 namespace Machine.Mta.Endpoints
 {
-  public interface IEndpointFactory
-  {
-    IEndpoint CreateEndpoint(EndpointAddress address);
-  }
-
-  public interface IEndpointResolver
-  {
-    IEndpoint Resolve(EndpointAddress address);
-  }
-
   public class EndpointResolver : IEndpointResolver
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EndpointResolver));

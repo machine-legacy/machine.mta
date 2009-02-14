@@ -79,6 +79,8 @@
     <Compile Include="DotNetBinaryStorage\IFlatBinaryFileConfiguration.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatFileSystem.cs" />
     <Compile Include="EndpointAddress.cs" />
+    <Compile Include="Endpoints\IEndpointFactory.cs" />
+    <Compile Include="Endpoints\IEndpointResolver.cs" />
     <Compile Include="Helpers\SagaRepositoryServices.cs" />
     <Compile Include="IMessageRegisterer.cs" />
     <Compile Include="InterfacesAsMessages\DefaultMessageInterfaceImplementationFactory.cs" />
