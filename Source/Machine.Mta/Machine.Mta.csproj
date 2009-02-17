@@ -67,6 +67,7 @@
     <Compile Include="AdoNet\DatabaseHelpers.cs" />
     <Compile Include="AdoNet\IAdoNetConnectionString.cs" />
     <Compile Include="AdoNet\IAdoNetSagaRepositoryConfiguration.cs" />
+    <Compile Include="AdoNet\IGroupNameProvider.cs" />
     <Compile Include="Configuration\MessageBusConfigurationSection.cs" />
     <Compile Include="Dispatching\DefaultMessageAspectsProvider.cs" />
     <Compile Include="Dispatching\HandlerDiscoverer.cs" />

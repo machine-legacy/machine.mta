@@ -68,6 +68,7 @@ namespace Machine.Mta.Timing
   }
   public interface IScheduledPublishRepository
   {
+    void Clear();
     void Add(ScheduledPublish scheduled);
     ICollection<ScheduledPublish> FindAllExpired();
   }
@@ -75,6 +76,14 @@ namespace Machine.Mta.Timing
   {
     readonly List<ScheduledPublish> _scheduled = new List<ScheduledPublish>();
     readonly object _lock = new object();
+
+    public void Clear()
+    {
+      lock (_lock)
+      {
+        _scheduled.Clear();
+      }
+    }
 
     public void Add(ScheduledPublish scheduled)
     {

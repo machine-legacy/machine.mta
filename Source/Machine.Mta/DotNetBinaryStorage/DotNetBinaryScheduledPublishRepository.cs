@@ -18,6 +18,13 @@ namespace Machine.Mta.DotNetBinaryStorage
       _flatFileSystem = flatFileSystem;
     }
 
+    public void Clear()
+    {
+      ReadFromDisk();
+      _cache.Clear();
+      WriteToDisk();
+    }
+
     public void Add(ScheduledPublish scheduled)
     {
       ReadFromDisk();
