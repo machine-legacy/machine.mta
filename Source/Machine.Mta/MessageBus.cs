@@ -14,7 +14,7 @@ namespace Machine.Mta
     readonly IMessageDestinations _messageDestinations;
     readonly IEndpointResolver _endpointResolver;
     readonly IEndpoint _listeningOn;
-    readonly EndpointAddress _listeningOnEndpointAddress;
+    readonly EndpointAddress _listeningOnAddress;
     readonly EndpointAddress _poisonEndpointAddress;
     readonly ThreadPool _threads;
     readonly TransportMessageBodySerializer _transportMessageBodySerializer;
@@ -32,7 +32,7 @@ namespace Machine.Mta
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageDestinations = messageDestinations;
       _listeningOn = _endpointResolver.Resolve(listeningOnEndpointAddress);
-      _listeningOnEndpointAddress = listeningOnEndpointAddress;
+      _listeningOnAddress = listeningOnEndpointAddress;
       _poisonEndpointAddress = poisonEndpointAddress;
       _messageDestinations = messageDestinations;
       _asyncCallbackMap = new AsyncCallbackMap();
@@ -55,7 +55,7 @@ namespace Machine.Mta
 
     public EndpointAddress Address
     {
-      get { return _listeningOnEndpointAddress; }
+      get { return _listeningOnAddress; }
     }
 
     public void ChangeThreadPoolConfiguration(ThreadPoolConfiguration configuration)
@@ -65,7 +65,7 @@ namespace Machine.Mta
 
     public void Start()
     {
-      _log.Info("Starting");
+      _log.Info("Starting " + _listeningOnAddress);
       _threads.Start();
     }
 
@@ -108,7 +108,7 @@ namespace Machine.Mta
 
     public void Stop()
     {
-      _log.Info("Stopping");
+      _log.Info("Stopping " + _listeningOnAddress);
       _threads.Dispose();
     }
 
