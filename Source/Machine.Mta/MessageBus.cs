@@ -39,7 +39,7 @@ namespace Machine.Mta
       _returnAddressProvider = new ReturnAddressProvider();
       IEndpoint poison = _endpointResolver.Resolve(poisonEndpointAddress);
       MessageFailureManager messageFailureManager = new MessageFailureManager();
-      _messageDispatchAttempter = new MessageDispatchAttempter(messageFailureManager, dispatcher, _transportMessageBodySerializer, _asyncCallbackMap, poison);
+      _messageDispatchAttempter = new MessageDispatchAttempter(messageFailureManager, dispatcher, _transportMessageBodySerializer, _asyncCallbackMap, poison, this);
       _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_transactionManager, _listeningOn, _messageDispatchAttempter.AttemptDispatch)));
     }
 
@@ -164,10 +164,12 @@ namespace Machine.Mta
     readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     readonly AsyncCallbackMap _asyncCallbackMap;
     readonly IEndpoint _poison;
+    readonly IMessageBus _bus;
 
-    public MessageDispatchAttempter(MessageFailureManager messageFailureManager, IMessageDispatcher dispatcher, TransportMessageBodySerializer transportMessageBodySerializer, AsyncCallbackMap asyncCallbackMap, IEndpoint poison)
+    public MessageDispatchAttempter(MessageFailureManager messageFailureManager, IMessageDispatcher dispatcher, TransportMessageBodySerializer transportMessageBodySerializer, AsyncCallbackMap asyncCallbackMap, IEndpoint poison, IMessageBus bus)
     {
       _messageFailureManager = messageFailureManager;
+      _bus = bus;
       _dispatcher = dispatcher;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _asyncCallbackMap = asyncCallbackMap;
@@ -189,15 +191,18 @@ namespace Machine.Mta
       }
       try
       {
-        using (CurrentMessageContext.Open(transportMessage))
+        using (CurrentMessageBus.Open(_bus))
         {
-          Logging.Received(transportMessage);
-          IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
-          if (transportMessage.CorrelationId != Guid.Empty)
+          using (CurrentMessageContext.Open(transportMessage))
           {
-            _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId, messages);
+            Logging.Received(transportMessage);
+            IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
+            if (transportMessage.CorrelationId != Guid.Empty)
+            {
+              _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId, messages);
+            }
+            _dispatcher.Dispatch(messages);
           }
-          _dispatcher.Dispatch(messages);
         }
       }
       catch (Exception error)
