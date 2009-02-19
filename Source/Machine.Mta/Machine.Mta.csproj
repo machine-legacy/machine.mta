@@ -101,6 +101,7 @@
     <Compile Include="Dispatching\EndpointQueue.cs" />
     <Compile Include="ITransactionManager.cs" />
     <Compile Include="Logging.cs" />
+    <Compile Include="MessageBusProxy.cs" />
     <Compile Include="MessageFailureManager.cs" />
     <Compile Include="ReturnAddressProvider.cs" />
     <Compile Include="IProvideHandlerOrder.cs">

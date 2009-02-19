@@ -1,15 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Machine.Container.Services;
+using Machine.Core;
 
 namespace Machine.Mta
 {
   public class MessageBusManager : IMessageBusManager, IDisposable
   {
-    private readonly IMachineContainer _container;
-    private readonly IMessageBusFactory _messageBusFactory;
-    private IMessageBus _bus;
+    readonly IMachineContainer _container;
+    readonly IMessageBusFactory _messageBusFactory;
+    readonly List<IMessageBus> _buses = new List<IMessageBus>();
+
+    public IMessageBus DefaultBus
+    {
+      get { return _buses.First(); }
+    }
 
     public MessageBusManager(IMessageBusFactory messageBusFactory, IMachineContainer container)
     {
@@ -17,18 +24,30 @@ namespace Machine.Mta
       _container = container;
     }
 
-    public IMessageBus UseSingleBus(EndpointAddress listeningEndpoint, EndpointAddress poisonEndpoint)
+    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress)
     {
-      _bus = _messageBusFactory.CreateMessageBus(listeningEndpoint, poisonEndpoint);
-      _container.Register.Type<IMessageBus>().Is(_bus);
-      return _bus;
+      IMessageBus bus = _messageBusFactory.CreateMessageBus(address, poisonAddress);
+      _buses.Add(bus);
+      return bus;
+    }
+
+    public IMessageBus UseSingleBus(EndpointAddress address, EndpointAddress poisonAddress)
+    {
+      IMessageBus bus = AddMessageBus(address, poisonAddress);
+      _container.Register.Type<IMessageBus>().Is(bus);
+      return bus;
+    }
+
+    public void EachBus(Action<IMessageBus> action)
+    {
+      _buses.Each(action);
     }
 
     public void Dispose()
     {
-      if (_bus != null)
+      foreach (IMessageBus bus in _buses)
       {
-        _bus.Dispose();
+        bus.Dispose();
       }
     }
   }
