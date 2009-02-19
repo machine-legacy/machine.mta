@@ -4,6 +4,7 @@ using System.Linq;
 
 using Machine.Container.Services;
 using Machine.Core;
+using Machine.Utility.ThreadPool;
 
 namespace Machine.Mta
 {
@@ -26,7 +27,13 @@ namespace Machine.Mta
 
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress)
     {
-      IMessageBus bus = _messageBusFactory.CreateMessageBus(address, poisonAddress);
+      return AddMessageBus(address, poisonAddress, new ThreadPoolConfiguration(1, 1));
+    }
+
+    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, ThreadPoolConfiguration threadPoolConfiguration)
+    {
+      MessageBus bus = (MessageBus)_messageBusFactory.CreateMessageBus(address, poisonAddress);
+      bus.ChangeThreadPoolConfiguration(threadPoolConfiguration);
       _buses.Add(bus);
       return bus;
     }
