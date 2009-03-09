@@ -1,37 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using Machine.Container.Model;
 using Machine.Container.Services;
 
 namespace Machine.Mta.Dispatching
 {
   public class HandlerDiscoverer
   {
-    private readonly IMachineContainer _container;
+    readonly IMachineContainer _container;
+    readonly IProvideHandlerTypes _handlerTypes;
 
-    public HandlerDiscoverer(IMachineContainer container)
+    public HandlerDiscoverer(IMachineContainer container, IProvideHandlerTypes handlerTypes)
     {
       _container = container;
-    }
-
-    private IEnumerable<Type> TypesThatAreHandlers()
-    {
-      foreach (ServiceRegistration registration in _container.RegisteredServices)
-      {
-        if (registration.ServiceType.IsImplementationOfGenericType(typeof(IConsume<>)))
-        {
-          yield return registration.ServiceType;
-        }
-      }
+      _handlerTypes = handlerTypes;
     }
 
     public IEnumerable<MessageHandlerType> GetHandlerTypesFor(Type messageType)
     {
       List<MessageHandlerType> messageHandlerTypes = new List<MessageHandlerType>();
 
-      foreach (Type handlerType in TypesThatAreHandlers())
+      foreach (Type handlerType in _handlerTypes.HandlerTypes())
       {
         IEnumerable<Type> handlerConsumes = handlerType.AllGenericVariations(typeof(IConsume<>)).BiggerThan(typeof(IConsume<>).MakeGenericType(messageType));
         Type smallerType = handlerConsumes.SmallerType();

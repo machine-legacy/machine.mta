@@ -11,14 +11,14 @@ namespace Machine.Mta.Dispatching
     readonly HandlerDiscoverer _handlerDiscoverer;
     readonly IMessageAspectsProvider _messageAspectsProvider;
 
-    public MessageDispatcher(IMachineContainer container, IMessageAspectsProvider messageAspectsProvider)
+    public MessageDispatcher(IMachineContainer container, IMessageAspectsProvider messageAspectsProvider, IProvideHandlerTypes handlerTypes)
     {
       _container = container;
       _messageAspectsProvider = messageAspectsProvider;
-      _handlerDiscoverer = new HandlerDiscoverer(container);
+      _handlerDiscoverer = new HandlerDiscoverer(container, handlerTypes);
     }
 
-    private void Dispatch(IMessage message)
+    private void Dispatch( IMessage message)
     {
       Logging.Dispatch(message);
       foreach (MessageHandlerType messageHandlerType in _handlerDiscoverer.GetHandlerTypesFor(message.GetType()))
