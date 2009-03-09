@@ -4,12 +4,14 @@ using System.Linq;
 
 using Machine.Container.Services;
 using Machine.Core;
+using Machine.Mta.Dispatching;
 using Machine.Utility.ThreadPool;
 
 namespace Machine.Mta
 {
   public class MessageBusManager : IMessageBusManager, IDisposable
   {
+    static readonly ThreadPoolConfiguration _defaultThreadPoolConfiguration = new ThreadPoolConfiguration(1, 1);
     readonly IMachineContainer _container;
     readonly IMessageBusFactory _messageBusFactory;
     readonly List<IMessageBus> _buses = new List<IMessageBus>();
@@ -27,12 +29,22 @@ namespace Machine.Mta
 
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress)
     {
-      return AddMessageBus(address, poisonAddress, new ThreadPoolConfiguration(1, 1));
+      return AddMessageBus(address, poisonAddress, new AllHandlersInContainer(_container), _defaultThreadPoolConfiguration);
     }
 
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, ThreadPoolConfiguration threadPoolConfiguration)
     {
-      MessageBus bus = (MessageBus)_messageBusFactory.CreateMessageBus(address, poisonAddress);
+      return AddMessageBus(address, poisonAddress, new AllHandlersInContainer(_container), threadPoolConfiguration);
+    }
+    
+    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes)
+    {
+      return AddMessageBus(address, poisonAddress, handlerTypes, _defaultThreadPoolConfiguration);
+    }
+    
+    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes, ThreadPoolConfiguration threadPoolConfiguration)
+    {
+      MessageBus bus = (MessageBus)_messageBusFactory.CreateMessageBus(address, poisonAddress, handlerTypes);
       bus.ChangeThreadPoolConfiguration(threadPoolConfiguration);
       _buses.Add(bus);
       return bus;
