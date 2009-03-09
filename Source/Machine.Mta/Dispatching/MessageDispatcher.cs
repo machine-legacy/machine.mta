@@ -8,8 +8,8 @@ namespace Machine.Mta.Dispatching
   public class MessageDispatcher : IMessageDispatcher
   {
     readonly IMachineContainer _container;
-    readonly HandlerDiscoverer _handlerDiscoverer;
     readonly IMessageAspectsProvider _messageAspectsProvider;
+    readonly HandlerDiscoverer _handlerDiscoverer;
 
     public MessageDispatcher(IMachineContainer container, IMessageAspectsProvider messageAspectsProvider, IProvideHandlerTypes handlerTypes)
     {
@@ -18,7 +18,7 @@ namespace Machine.Mta.Dispatching
       _handlerDiscoverer = new HandlerDiscoverer(container, handlerTypes);
     }
 
-    private void Dispatch( IMessage message)
+    private void Dispatch(IMessage message)
     {
       Logging.Dispatch(message);
       foreach (MessageHandlerType messageHandlerType in _handlerDiscoverer.GetHandlerTypesFor(message.GetType()))

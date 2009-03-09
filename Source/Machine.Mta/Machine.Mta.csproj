@@ -71,8 +71,10 @@
     <Compile Include="Configuration\MessageBusConfigurationSection.cs" />
     <Compile Include="Dispatching\AllHandlersInContainer.cs" />
     <Compile Include="Dispatching\DefaultMessageAspectsProvider.cs" />
+    <Compile Include="Dispatching\EndpointHandlerRules.cs" />
     <Compile Include="Dispatching\HandlerDiscoverer.cs" />
     <Compile Include="Dispatching\HandlerInvocation.cs" />
+    <Compile Include="Dispatching\IEndpointHandlerRules.cs" />
     <Compile Include="Dispatching\IMessageAspect.cs" />
     <Compile Include="Dispatching\IMessageAspectsProvider.cs" />
     <Compile Include="Dispatching\IProvideHandlerTypes.cs" />

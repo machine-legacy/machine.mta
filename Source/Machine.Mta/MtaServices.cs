@@ -43,6 +43,7 @@ namespace Machine.Mta
       register.Type<ScheduleFutureMessages>();
       register.Type<SchedulePublishHandler>();
       register.Type<SagaAspect>();
+      register.Type<EndpointHandlerRules>();
       register.Type(_transactionManagerType);
     }
   }
