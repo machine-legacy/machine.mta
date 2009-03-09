@@ -52,10 +52,16 @@ namespace Machine.Mta
       }
     }
 
-    public static void Dispatch(IMessage message)
+    public static void NoHandlersInDispatch(IMessage message)
     {
-      _dispatcherLog.Info("Dispatching " + message);
-      ForMessage(message).Info("Dispatching " + message);
+      _dispatcherLog.Info("No handlers for " + message);
+      ForMessage(message).Info("No handlers for " + message);
+    }
+
+    public static void Dispatch(IMessage message, Type handlerType)
+    {
+      _dispatcherLog.Info("Dispatching " + message + " to " + handlerType);
+      ForMessage(message).Info("Dispatching " + message + " to " + handlerType);
     }
 
     public static void Poison(TransportMessage message)

@@ -20,9 +20,11 @@ namespace Machine.Mta.Dispatching
 
     private void Dispatch(IMessage message)
     {
-      Logging.Dispatch(message);
+      bool noHandlers = true;
       foreach (MessageHandlerType messageHandlerType in _handlerDiscoverer.GetHandlerTypesFor(message.GetType()))
       {
+        noHandlers = false;
+        Logging.Dispatch(message, messageHandlerType.TargetType);
         object handler = _container.Resolve.Object(messageHandlerType.TargetType);
         IConsume<IMessage> invoker = Invokers.CreateForHandler(messageHandlerType.TargetExpectsMessageOfType, handler);
         HandlerInvocation invocation = messageHandlerType.ToInvocation(message, handler, invoker, _messageAspectsProvider.DefaultAspects());
@@ -31,6 +33,10 @@ namespace Machine.Mta.Dispatching
         {
           break;
         }
+      }
+      if (noHandlers)
+      {
+        Logging.NoHandlersInDispatch(message);
       }
     }
 
