@@ -13,11 +13,10 @@ namespace Machine.Mta
 
     public static void Publish(IMessage[] messages)
     {
-      foreach (IMessage message in messages)
-      {
-        _sendingLog.Info("Publishing " + message);
-        ForMessage(message).Info("Publishing " + message);
-      }
+      if (messages.Length == 0) return;
+      string message = "Publishing " + messages[0].GetType() + " x " + messages.Length;
+      _sendingLog.Info(message);
+      ForMessage(messages[0]).Info(message);
     }
 
     public static void SendMessagePayload(EndpointAddress destination, MessagePayload message)
@@ -27,29 +26,26 @@ namespace Machine.Mta
 
     public static void Reply(IMessage[] messages)
     {
-      foreach (IMessage message in messages)
-      {
-        _sendingLog.Info("Publishing " + message);
-        ForMessage(message).Info("Publishing " + message);
-      }
+      if (messages.Length == 0) return;
+      string message = "Replying " + messages[0].GetType() + " x " + messages.Length;
+      _sendingLog.Info(message);
+      ForMessage(messages[0]).Info(message);
     }
 
     public static void Send(EndpointAddress destination, IMessage[] messages)
     {
-      foreach (IMessage message in messages)
-      {
-        _sendingLog.Info("Sending " + message + " to " + destination);
-        ForMessage(message).Info("Sending " + message + " to " + destination);
-      }
+      if (messages.Length == 0) return;
+      string message = "Sending " + messages[0].GetType() + " to " + destination + " x " + messages.Length;
+      _sendingLog.Info(message);
+      ForMessage(messages[0]).Info(message);
     }
 
     public static void Send(IMessage[] messages)
     {
-      foreach (IMessage message in messages)
-      {
-        _sendingLog.Info("Sending " + message);
-        ForMessage(message).Info("Sending " + message);
-      }
+      if (messages.Length == 0) return;
+      string message = "Sending " + messages[0].GetType() + " x " + messages.Length;
+      _sendingLog.Info(message);
+      ForMessage(messages[0]).Info(message);
     }
 
     public static void NoHandlersInDispatch(IMessage message)
