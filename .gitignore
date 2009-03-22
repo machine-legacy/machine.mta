@@ -11,6 +11,4 @@ _ReSharper.*
 InstallUtil.InstallLog
 NDependOut
 Specifications.html
-Libraries/Machine
-Libraries/NHibernate
 .setup-done
