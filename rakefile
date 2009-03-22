@@ -48,7 +48,7 @@ namespace :specs do
 
   task :run do
     puts 'Running Specs...'
-    sh "Libraries/Machine/Specifications/Machine.Specifications.ConsoleRunner.exe", "Build/Debug/Machine.Mta.Specs.dll", "--html", "Specs/#{project}.Specs.html"
+    sh "Libraries/Machine/Specifications/Machine.Specifications.ConsoleRunner.exe", "Build/Debug/#{project}.Specs.dll", "--html", "Specs/#{project}.Specs.html"
     puts "Wrote specs to Specs/#{project}.Specs.html, run 'rake specs:view' to see them"
   end
 end
