@@ -15,35 +15,57 @@ class String
   end
 end
 
+version = 'v3.5'
+compileTarget = 'debug'
+project = "Machine.Mta"
+frameworkDir = File.join(ENV['windir'].dup, 'Microsoft.NET', 'Framework', version)
+msbuild = File.join(frameworkDir, 'msbuild.exe')
+
+task :setup => [ "setup:all" ]
+
+file ".setup-done" => [ "rakefile" ] do
+  Rake::Task["setup:all"].invoke
+end
+
+namespace :setup do
+  task :all do
+    touch ".setup-done"
+  end
+end
+
 desc "Build and run specs"
 task :default => [ "build", "specs:run" ]
 
 desc "Build"
-task :build do
-  system "msbuild Source/Machine.Mta.sln"
+task :build => [ ".setup-done" ] do
+  sh "#{msbuild} Source/#{project}.sln"
 end
 
 namespace :specs do
   task :view => :run do
-    system "start Specs/Machine.Mta.Specs.html"
+    system "start Specs/#{project}.Specs.html"
   end
 
   task :run do
-    system "Libraries/Machine/Specifications/Machine.Specifications.ConsoleRunner.exe Build/Debug/Machine.Mta.Specs.dll --html Specs/Machine.Mta.Specs.html"
+    puts 'Running Specs...'
+    sh "Libraries/Machine/Specifications/Machine.Specifications.ConsoleRunner.exe", "Build/Debug/Machine.Mta.Specs.dll", "--html", "Specs/#{project}.Specs.html"
+    puts "Wrote specs to Specs/#{project}.Specs.html, run 'rake specs:view' to see them"
+  end
+end
+
+desc "Open solution in VS"
+task :sln do
+  Thread.new do
+    system "devenv Source/#{project}.sln"
   end
 end
 
 desc "Rebuild"
-task :rebuild do
-  Dir.chdir("Source") do
-    sh "MsBuild Machine.Mta.sln /t:Rebuild"
-  end
+task :rebuild => [ ".setup-done" ] do
+  sh "#{msbuild} #{project}.sln /t:Rebuild"
 end
 
 desc "Clean"
 task :clean do
-  Dir.chdir("Source") do
-    sh "MsBuild Machine.Mta.sln /t:Clean"
-  end
+  sh "#{msbuild} #{project}.sln /t:Clean"
 end
-
