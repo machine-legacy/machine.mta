@@ -31,15 +31,15 @@ namespace Machine.Mta
       _transactionManager = transactionManager;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _messageDestinations = messageDestinations;
-      _listeningOn = _endpointResolver.Resolve(listeningOnEndpointAddress);
       _listeningOnAddress = listeningOnEndpointAddress;
       _poisonEndpointAddress = poisonEndpointAddress;
       _messageDestinations = messageDestinations;
       _asyncCallbackMap = new AsyncCallbackMap();
       _returnAddressProvider = new ReturnAddressProvider();
+      _listeningOn = _endpointResolver.Resolve(listeningOnEndpointAddress);
       IEndpoint poison = _endpointResolver.Resolve(poisonEndpointAddress);
-      _messageDispatchAttempter = new MessageDispatchAttempter(messageFailureManager, dispatcher, _transportMessageBodySerializer, _asyncCallbackMap, poison, this);
-      _threads = new WorkerFactoryThreadPool(threadPoolConfiguration, new WorkerFactory(_transactionManager, messageFailureManager, _listeningOn, _messageDispatchAttempter.AttemptDispatch));
+      _messageDispatchAttempter = new MessageDispatchAttempter(dispatcher, _transportMessageBodySerializer, _asyncCallbackMap);
+      _threads = new WorkerFactoryThreadPool(threadPoolConfiguration, new WorkerFactory(this, _transactionManager, messageFailureManager, _listeningOn, poison, _messageDispatchAttempter.AttemptDispatch));
     }
 
     public EndpointAddress PoisonAddress
@@ -153,57 +153,26 @@ namespace Machine.Mta
   public class MessageDispatchAttempter
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
-    readonly IMessageFailureManager _messageFailureManager;
     readonly IMessageDispatcher _dispatcher;
     readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     readonly AsyncCallbackMap _asyncCallbackMap;
-    readonly IEndpoint _poison;
-    readonly IMessageBus _bus;
 
-    public MessageDispatchAttempter(IMessageFailureManager messageFailureManager, IMessageDispatcher dispatcher, TransportMessageBodySerializer transportMessageBodySerializer, AsyncCallbackMap asyncCallbackMap, IEndpoint poison, IMessageBus bus)
+    public MessageDispatchAttempter(IMessageDispatcher dispatcher, TransportMessageBodySerializer transportMessageBodySerializer, AsyncCallbackMap asyncCallbackMap)
     {
-      _messageFailureManager = messageFailureManager;
-      _bus = bus;
       _dispatcher = dispatcher;
       _transportMessageBodySerializer = transportMessageBodySerializer;
       _asyncCallbackMap = asyncCallbackMap;
-      _poison = poison;
     }
 
     public void AttemptDispatch(TransportMessage transportMessage)
     {
-      if (transportMessage == null)
+      Logging.Received(transportMessage);
+      IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
+      if (transportMessage.CorrelationId != Guid.Empty)
       {
-        return;
+        _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId, messages);
       }
-      if (_messageFailureManager.IsPoison(transportMessage))
-      {
-        Logging.Poison(transportMessage);
-        _poison.Send(transportMessage);
-        return;
-      }
-      try
-      {
-        using (CurrentMessageBus.Open(_bus))
-        {
-          using (CurrentMessageContext.Open(transportMessage))
-          {
-            Logging.Received(transportMessage);
-            IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
-            if (transportMessage.CorrelationId != Guid.Empty)
-            {
-              _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId, messages);
-            }
-            _dispatcher.Dispatch(messages);
-          }
-        }
-      }
-      catch (Exception error)
-      {
-        _log.Error(error);
-        _messageFailureManager.RecordFailure(transportMessage, error);
-        throw;
-      }
+      _dispatcher.Dispatch(messages);
     }
   }
 }
