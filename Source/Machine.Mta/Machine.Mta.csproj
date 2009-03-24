@@ -104,7 +104,7 @@
     <Compile Include="Helpers\MessageSetupHelpers.cs" />
     <Compile Include="IConsume.cs" />
     <Compile Include="Dispatching\IMessageDispatcher.cs" />
-    <Compile Include="Dispatching\EndpointQueue.cs" />
+    <Compile Include="Dispatching\BusWorker.cs" />
     <Compile Include="ITransactionManager.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="MessageBusProxy.cs" />

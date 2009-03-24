@@ -44,8 +44,7 @@ namespace Machine.Mta
     
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes, ThreadPoolConfiguration threadPoolConfiguration)
     {
-      MessageBus bus = (MessageBus)_messageBusFactory.CreateMessageBus(address, poisonAddress, handlerTypes);
-      bus.ChangeThreadPoolConfiguration(threadPoolConfiguration);
+      IMessageBus bus = _messageBusFactory.CreateMessageBus(address, poisonAddress, handlerTypes, threadPoolConfiguration);
       _buses.Add(bus);
       return bus;
     }

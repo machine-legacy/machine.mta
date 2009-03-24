@@ -16,7 +16,7 @@ namespace Machine.Mta
     readonly IEndpoint _listeningOn;
     readonly EndpointAddress _listeningOnAddress;
     readonly EndpointAddress _poisonEndpointAddress;
-    readonly ThreadPool _threads;
+    readonly AbstractThreadPool _threads;
     readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     readonly AsyncCallbackMap _asyncCallbackMap;
     readonly ReturnAddressProvider _returnAddressProvider;
@@ -25,7 +25,7 @@ namespace Machine.Mta
 
     public MessageBus(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer,
                       IMessageDispatcher dispatcher, EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, ITransactionManager transactionManager,
-                      ThreadPoolConfiguration threadPoolConfiguration)
+                      IMessageFailureManager messageFailureManager, ThreadPoolConfiguration threadPoolConfiguration)
     {
       _endpointResolver = endpointResolver;
       _transactionManager = transactionManager;
@@ -38,14 +38,8 @@ namespace Machine.Mta
       _asyncCallbackMap = new AsyncCallbackMap();
       _returnAddressProvider = new ReturnAddressProvider();
       IEndpoint poison = _endpointResolver.Resolve(poisonEndpointAddress);
-      MessageFailureManager messageFailureManager = new MessageFailureManager();
       _messageDispatchAttempter = new MessageDispatchAttempter(messageFailureManager, dispatcher, _transportMessageBodySerializer, _asyncCallbackMap, poison, this);
-      _threads = new ThreadPool(threadPoolConfiguration, new SingleQueueStrategy(new EndpointQueue(_transactionManager, _listeningOn, _messageDispatchAttempter.AttemptDispatch)));
-    }
-
-    public MessageBus(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer, IMessageDispatcher dispatcher, EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, ITransactionManager transactionManager)
-      : this(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnEndpointAddress, poisonEndpointAddress, transactionManager, new ThreadPoolConfiguration(1, 1))
-    {
+      _threads = new WorkerFactoryThreadPool(threadPoolConfiguration, new WorkerFactory(_transactionManager, messageFailureManager, _listeningOn, _messageDispatchAttempter.AttemptDispatch));
     }
 
     public EndpointAddress PoisonAddress
@@ -159,14 +153,14 @@ namespace Machine.Mta
   public class MessageDispatchAttempter
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageBus));
-    readonly MessageFailureManager _messageFailureManager;
+    readonly IMessageFailureManager _messageFailureManager;
     readonly IMessageDispatcher _dispatcher;
     readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     readonly AsyncCallbackMap _asyncCallbackMap;
     readonly IEndpoint _poison;
     readonly IMessageBus _bus;
 
-    public MessageDispatchAttempter(MessageFailureManager messageFailureManager, IMessageDispatcher dispatcher, TransportMessageBodySerializer transportMessageBodySerializer, AsyncCallbackMap asyncCallbackMap, IEndpoint poison, IMessageBus bus)
+    public MessageDispatchAttempter(IMessageFailureManager messageFailureManager, IMessageDispatcher dispatcher, TransportMessageBodySerializer transportMessageBodySerializer, AsyncCallbackMap asyncCallbackMap, IEndpoint poison, IMessageBus bus)
     {
       _messageFailureManager = messageFailureManager;
       _bus = bus;
@@ -176,14 +170,13 @@ namespace Machine.Mta
       _poison = poison;
     }
 
-    public void AttemptDispatch(object obj)
+    public void AttemptDispatch(TransportMessage transportMessage)
     {
-      if (obj == null)
+      if (transportMessage == null)
       {
         return;
       }
-      TransportMessage transportMessage = (TransportMessage)obj;
-      if (_messageFailureManager.SendToPoisonQueue(transportMessage.Id))
+      if (_messageFailureManager.IsPoison(transportMessage))
       {
         Logging.Poison(transportMessage);
         _poison.Send(transportMessage);
@@ -208,7 +201,7 @@ namespace Machine.Mta
       catch (Exception error)
       {
         _log.Error(error);
-        _messageFailureManager.RecordFailure(transportMessage.Id, error);
+        _messageFailureManager.RecordFailure(transportMessage, error);
         throw;
       }
     }

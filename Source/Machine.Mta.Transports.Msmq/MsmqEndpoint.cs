@@ -34,26 +34,44 @@ namespace Machine.Mta.Transports.Msmq
       systemMessage.Dispose();
     }
 
-    public TransportMessage Receive(TimeSpan timeout)
+    public bool HasAnyPendingMessages(TimeSpan timeout)
     {
-      if (!_queue.CanRead)
-      {
-        System.Threading.Thread.Sleep(timeout);
-        throw new InvalidOperationException("Queue is write-only: " + _address);
-      }
-      Message systemMessage = null;
+      CheckForWriteOnly(timeout);
       try
       {
+        Message message;
         // This exception interferes with debugging apparently. This should mitigate that.
         if (System.Diagnostics.Debugger.IsAttached)
         {
-          systemMessage = _queue.Receive(_transactionManager.ReceiveTransactionType(_queue));
+          message = _queue.Peek();
         }
         else
         {
-          systemMessage = _queue.Receive(timeout, _transactionManager.ReceiveTransactionType(_queue));
+          message = _queue.Peek(timeout);
         }
+        if (message != null)
+        {
+          message.Dispose();
+        }
+        return true;
+      }
+      catch (MessageQueueException error)
+      {
+        if (error.MessageQueueErrorCode == MessageQueueErrorCode.IOTimeout)
+        {
+          return false;
+        }
+        throw;
+      }
+    }
 
+    public TransportMessage Receive(TimeSpan timeout)
+    {
+      CheckForWriteOnly(timeout);
+      Message systemMessage = null;
+      try
+      {
+        systemMessage = _queue.Receive(timeout, _transactionManager.ReceiveTransactionType(_queue));
         if (systemMessage == null)
         {
           return null;
@@ -74,6 +92,15 @@ namespace Machine.Mta.Transports.Msmq
         {
           systemMessage.Dispose();
         }
+      }
+    }
+
+    private void CheckForWriteOnly(TimeSpan timeout)
+    {
+      if (!_queue.CanRead)
+      {
+        System.Threading.Thread.Sleep(timeout);
+        throw new InvalidOperationException("Queue is write-only: " + _address);
       }
     }
   }

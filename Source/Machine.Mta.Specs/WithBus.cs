@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-
+using System.Threading;
 using Machine.Container;
 using Machine.Container.Services;
 using Machine.Mta.Dispatching;
@@ -9,7 +9,7 @@ using Machine.Mta.Transports.Msmq;
 using Machine.Mta.Endpoints;
 using Machine.Mta.Sagas;
 using Machine.Specifications;
-
+using Machine.Utility.ThreadPool;
 using Rhino.Mocks;
 
 namespace Machine.Mta.Specs
@@ -43,7 +43,7 @@ namespace Machine.Mta.Specs
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
       dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container), new AllHandlersInContainer(container));
       messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
-      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager());
+      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager(), new MessageFailureManager(), ThreadPoolConfiguration.OneAndOne);
       message1 = messageFactory.Create<IMessage>();
       message2 = messageFactory.Create<ISampleMessage>();
       message3 = messageFactory.Create<ISampleSagaMessage>();

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Machine.Container.Services;
 using Machine.Mta.Dispatching;
 using Machine.Mta.Endpoints;
+using Machine.Utility.ThreadPool;
 
 namespace Machine.Mta
 {
@@ -16,10 +17,12 @@ namespace Machine.Mta
     readonly IMachineContainer _container;
     readonly IMessageAspectsProvider _messageAspectsProvider;
     readonly IEndpointHandlerRules _handlerRules;
+    readonly IMessageFailureManager _messageFailureManager;
 
-    public MessageBusFactory(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer, ITransactionManager transactionManager, IMachineContainer container, IMessageAspectsProvider messageAspectsProvider, IEndpointHandlerRules handlerRules)
+    public MessageBusFactory(IEndpointResolver endpointResolver, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer, ITransactionManager transactionManager, IMachineContainer container, IMessageAspectsProvider messageAspectsProvider, IEndpointHandlerRules handlerRules, IMessageFailureManager messageFailureManager)
     {
       _endpointResolver = endpointResolver;
+      _messageFailureManager = messageFailureManager;
       _handlerRules = handlerRules;
       _messageAspectsProvider = messageAspectsProvider;
       _container = container;
@@ -28,10 +31,10 @@ namespace Machine.Mta
       _transportMessageBodySerializer = transportMessageBodySerializer;
     }
 
-    public IMessageBus CreateMessageBus(EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, IProvideHandlerTypes handlerTypes)
+    public IMessageBus CreateMessageBus(EndpointAddress listeningOnEndpointAddress, EndpointAddress poisonEndpointAddress, IProvideHandlerTypes handlerTypes, ThreadPoolConfiguration threadPoolConfiguration)
     {
       MessageDispatcher dispatcher = new MessageDispatcher(_container, _messageAspectsProvider, new EndpointHandlerFilter(_handlerRules, listeningOnEndpointAddress, handlerTypes));
-      return new MessageBus(_endpointResolver, _messageDestinations, _transportMessageBodySerializer, dispatcher, listeningOnEndpointAddress, poisonEndpointAddress, _transactionManager);
+      return new MessageBus(_endpointResolver, _messageDestinations, _transportMessageBodySerializer, dispatcher, listeningOnEndpointAddress, poisonEndpointAddress, _transactionManager, _messageFailureManager, threadPoolConfiguration);
     }
   }
 
