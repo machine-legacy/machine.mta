@@ -88,7 +88,7 @@ namespace Machine.Mta.Dispatching
         {
           if (transportMessage != null)
           {
-            _messageFailureManager.RecordFailure(transportMessage, error);
+            _messageFailureManager.RecordFailure(_bus.Address, transportMessage, error);
           }
           base.Error(error);
         }

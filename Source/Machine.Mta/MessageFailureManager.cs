@@ -8,7 +8,7 @@ namespace Machine.Mta
     readonly Dictionary<Guid, List<Exception>> _errors = new Dictionary<Guid, List<Exception>>();
     readonly object _lock = new object();
 
-    public virtual void RecordFailure(TransportMessage transportMessage, Exception error)
+    public virtual void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error)
     {
       lock (_lock)
       {
@@ -18,6 +18,10 @@ namespace Machine.Mta
           _errors[id] = new List<Exception>();
         }
         _errors[id].Add(error);
+      }
+      if (Failure != null)
+      {
+        Failure(address, transportMessage, error);
       }
     }
 
@@ -34,11 +38,13 @@ namespace Machine.Mta
         return hasErrors;
       }
     }
+
+    public static Action<EndpointAddress, TransportMessage, Exception> Failure;
   }
 
   public interface IMessageFailureManager
   {
-    void RecordFailure(TransportMessage transportMessage, Exception error);
+    void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error);
     bool IsPoison(TransportMessage transportMessage);
   }
 }
