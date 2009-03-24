@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using Newtonsoft.Json;
@@ -17,7 +18,8 @@ namespace Machine.Mta
     static Serializers()
     { 
       _binaryFormatter = new BinaryFormatter();
-      _binaryFormatter.Binder = new EndpointNameSerializationBinder(new MessageInterfaceSerializationBinder());
+      _binaryFormatter.AssemblyFormat = FormatterAssemblyStyle.Simple;
+      _binaryFormatter.Binder = new TransportMessageBinder();
       _jsonSerializer = new JsonSerializer();
       _jsonSerializer.Converters.Add(new EndpointAddressJsonConverter());
       _jsonSerializer.Converters.Add(new ExceptionJsonConverter());
@@ -50,22 +52,20 @@ namespace Machine.Mta
       return newSerializer;
     };
   }
-  public class EndpointNameSerializationBinder : SerializationBinder
+
+  public class TransportMessageBinder : SerializationBinder
   {
-    readonly SerializationBinder _binder;
-
-    public EndpointNameSerializationBinder(SerializationBinder binder)
-    {
-      _binder = binder;
-    }
-
     public override Type BindToType(string assemblyName, string typeName)
     {
-      if (typeName == "Machine.Mta.EndpointName")
+      if (typeName == typeof(TransportMessage).FullName)
+      {
+        return typeof(TransportMessage);
+      }
+      if (typeName == typeof(EndpointAddress).FullName)
       {
         return typeof(EndpointAddress);
       }
-      return _binder.BindToType(assemblyName, typeName);
+      return null;
     }
   }
 }
