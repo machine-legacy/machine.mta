@@ -109,11 +109,13 @@
     <Compile Include="Logging.cs" />
     <Compile Include="MessageBusProxy.cs" />
     <Compile Include="MessageFailureManager.cs" />
+    <Compile Include="RetryAttemptsAttribute.cs" />
     <Compile Include="ReturnAddressProvider.cs" />
     <Compile Include="IProvideHandlerOrder.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MessagePayload.cs" />
+    <Compile Include="TimeToBeReceivedAttribute.cs" />
     <Compile Include="TypeHelpers.cs" />
     <Compile Include="MessageBusFactory.cs" />
     <Compile Include="RequestReply.cs" />
