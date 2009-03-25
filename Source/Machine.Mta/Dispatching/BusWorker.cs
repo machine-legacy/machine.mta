@@ -86,8 +86,9 @@ namespace Machine.Mta.Dispatching
         }
         catch (Exception error)
         {
-          base.Error(error);
+          Logging.Error(error);
           _messageFailureManager.RecordFailure(_bus.Address, transportMessage, error);
+          base.Error(error);
         }
       }
     }

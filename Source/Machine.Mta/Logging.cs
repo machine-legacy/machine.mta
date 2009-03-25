@@ -10,6 +10,7 @@ namespace Machine.Mta
     static readonly ILog _receivingLog = LogManager.GetLogger(_loggerPrefix + ".Receiving");
     static readonly ILog _poisonLog = LogManager.GetLogger(_loggerPrefix + ".Poison");
     static readonly ILog _dispatcherLog = LogManager.GetLogger(_loggerPrefix + ".Dispatching");
+    static readonly ILog _errorLog = LogManager.GetLogger("Machine.Mta.Errors");
 
     public static void Publish(IMessage[] messages)
     {
@@ -68,6 +69,11 @@ namespace Machine.Mta
     public static void Received(TransportMessage message)
     {
       _receivingLog.Info("Receiving " + message.ReturnAddress + " CorrelationId=" + message.CorrelationId + " Id=" + message.Id);
+    }
+
+    public static void Error(Exception error)
+    {
+      _errorLog.Error(error);
     }
 
     private static ILog ForMessage(IMessage message)
