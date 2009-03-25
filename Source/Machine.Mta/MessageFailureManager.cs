@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 
+using Machine.Container;
+using Machine.Mta.Errors;
+using Machine.Mta.Timing;
+
 namespace Machine.Mta
 {
   public class MessageFailureManager : IMessageFailureManager
@@ -10,14 +14,17 @@ namespace Machine.Mta
 
     public virtual void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error)
     {
-      lock (_lock)
+      if (transportMessage != null)
       {
-        Guid id = transportMessage.Id;
-        if (!_errors.ContainsKey(id))
+        lock (_lock)
         {
-          _errors[id] = new List<Exception>();
+          Guid id = transportMessage.Id;
+          if (!_errors.ContainsKey(id))
+          {
+            _errors[id] = new List<Exception>();
+          }
+          _errors[id].Add(error);
         }
-        _errors[id].Add(error);
       }
       if (Failure != null)
       {
@@ -46,5 +53,27 @@ namespace Machine.Mta
   {
     void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error);
     bool IsPoison(TransportMessage transportMessage);
+  }
+
+  public class PublishErrorMessages : IStartable
+  {
+    readonly IMessageBus _bus;
+    readonly IMessageFactory _factory;
+
+    public PublishErrorMessages(IMessageBus bus, IMessageFactory factory)
+    {
+      _bus = bus;
+      _factory = factory;
+    }
+
+    public void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error)
+    {
+      _bus.Publish(_factory.ErrorMessage(ServerClock.Now(), error, address, transportMessage));
+    }
+
+    public void Start()
+    {
+      MessageFailureManager.Failure = RecordFailure;
+    }
   }
 }

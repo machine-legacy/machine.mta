@@ -89,6 +89,7 @@
     <Compile Include="Endpoints\IEndpointFactory.cs" />
     <Compile Include="Endpoints\IEndpointResolver.cs" />
     <Compile Include="Helpers\SagaRepositoryServices.cs" />
+    <Compile Include="Errors\IErrorMessage.cs" />
     <Compile Include="IMessageCollection.cs" />
     <Compile Include="IMessageRegisterer.cs" />
     <Compile Include="InterfacesAsMessages\DefaultMessageInterfaceImplementationFactory.cs" />
