@@ -113,7 +113,7 @@ namespace Machine.Mta
 
     public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
     {
-      return new RequestReplyBuilder(SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, false, messages)), _asyncCallbackMap);
+      return new RequestReplyBuilder(CreateTransportMessage(Guid.Empty, false, messages), (x) => SendTransportMessage<T>(x), _asyncCallbackMap);
     }
 
     public void Reply<T>(params T[] messages) where T : class, IMessage

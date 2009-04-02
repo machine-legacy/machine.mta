@@ -6,23 +6,26 @@ namespace Machine.Mta
 {
   public class RequestReplyBuilder : IRequestReplyBuilder
   {
-    private readonly TransportMessage _request;
-    private readonly AsyncCallbackMap _asyncCallbackMap;
+    readonly TransportMessage _request;
+    readonly Action<TransportMessage> _sendRequest;
+    readonly AsyncCallbackMap _asyncCallbackMap;
 
-    public RequestReplyBuilder(TransportMessage request, AsyncCallbackMap asyncCallbackMap)
+    public RequestReplyBuilder(TransportMessage request, Action<TransportMessage> sendRequest, AsyncCallbackMap asyncCallbackMap)
     {
       _request = request;
+      _sendRequest = sendRequest;
       _asyncCallbackMap = asyncCallbackMap;
-    }
-
-    public void OnReply(AsyncCallback callback, object state)
-    {
-      _asyncCallbackMap.Add(_request.Id, callback, state);
     }
 
     public void OnReply(AsyncCallback callback)
     {
       OnReply(callback, null);
+    }
+
+    public void OnReply(AsyncCallback callback, object state)
+    {
+      _asyncCallbackMap.Add(_request.Id, callback, state);
+      _sendRequest(_request);
     }
   }
 
