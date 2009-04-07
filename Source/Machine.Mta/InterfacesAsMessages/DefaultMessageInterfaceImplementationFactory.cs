@@ -8,6 +8,17 @@ namespace Machine.Mta.InterfacesAsMessages
   public class GeneratedMessage
   {
     readonly Dictionary<string, FieldBuilder> _fields = new Dictionary<string, FieldBuilder>();
+    readonly Type _messageType;
+
+    public GeneratedMessage(Type messageType)
+    {
+      _messageType = messageType;
+    }
+
+    public Type MessageType
+    {
+      get { return _messageType; }
+    }
 
     public FieldBuilder this[string name]
     {
@@ -29,7 +40,7 @@ namespace Machine.Mta.InterfacesAsMessages
   {
     protected override GeneratedMessage ImplementMessage(TypeBuilder typeBuilder, Type type, IEnumerable<PropertyInfo> properties)
     {
-      GeneratedMessage generatedMessage = new GeneratedMessage();
+      GeneratedMessage generatedMessage = new GeneratedMessage(type);
       foreach (PropertyInfo property in properties)
       {
         FieldBuilder fieldBuilder = typeBuilder.DefineField(MakeFieldName(property), property.PropertyType, FieldAttributes.Private);
@@ -41,7 +52,115 @@ namespace Machine.Mta.InterfacesAsMessages
         il.Emit(OpCodes.Ret);
       }
       GenerateDictionaryConstructor(typeBuilder, generatedMessage);
+      GenerateEquals(typeBuilder, generatedMessage);
+      GenerateGetHashCode(typeBuilder, generatedMessage);
       return generatedMessage;
+    }
+
+    protected void GenerateEquals(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
+    {
+      Type type = generatedMessage.MessageType;
+      MethodInfo objectEquals = typeof(Object).GetMethod("Equals", new [] { typeof(Object), typeof(Object) });
+      MethodBuilder method = typeBuilder.DefineMethod("Equals", MethodAttributes.Virtual | MethodAttributes.Public, typeof (bool), new[] { typeof (Object) });
+      ILGenerator il = method.GetILGenerator();
+      LocalBuilder local = il.DeclareLocal(type);
+      il.Emit(OpCodes.Ldarg_1);
+      il.Emit(OpCodes.Isinst, type);
+      il.Emit(OpCodes.Stloc_0);
+      il.Emit(OpCodes.Ldloc_0);
+      ReturnIfNull(il, () => {
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Ret);
+      });
+      foreach (var pair in generatedMessage.Fields)
+      {
+        FieldInfo field = pair.Value;
+        Label label = il.DefineLabel();
+        if (field.FieldType.IsValueType && !field.FieldType.IsEnum)
+        {
+          MethodInfo valueEquals = field.FieldType.GetMethod("Equals", new [] { field.FieldType });
+          il.Emit(OpCodes.Ldarg_0);
+          il.Emit(OpCodes.Ldflda, field);
+          il.Emit(OpCodes.Ldloc_0);
+          il.Emit(OpCodes.Ldfld, field);
+          il.Emit(OpCodes.Callvirt, valueEquals);
+        }
+        else
+        {
+          il.Emit(OpCodes.Ldarg_0);
+          il.Emit(OpCodes.Ldfld, field);
+          if (field.FieldType.IsValueType)
+          {
+            il.Emit(OpCodes.Box, field.FieldType);
+          }
+          il.Emit(OpCodes.Ldloc_0);
+          il.Emit(OpCodes.Ldfld, field);
+          if (field.FieldType.IsValueType)
+          {
+            il.Emit(OpCodes.Box, field.FieldType);
+          }
+          il.Emit(OpCodes.Call, objectEquals);
+        }
+        il.Emit(OpCodes.Brtrue, label);
+        il.Emit(OpCodes.Ldc_I4_0);
+        il.Emit(OpCodes.Ret);
+        il.MarkLabel(label);
+      }
+      il.Emit(OpCodes.Ldc_I4_1);
+      il.Emit(OpCodes.Ret);
+    }
+
+    protected void GenerateGetHashCode(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
+    {
+      MethodBuilder method = typeBuilder.DefineMethod("GetHashCode", MethodAttributes.Virtual | MethodAttributes.Public, typeof(Int32), new Type[0]);
+      ILGenerator il = method.GetILGenerator();
+
+      bool hasState = false;
+      foreach (var pair in generatedMessage.Fields)
+      {
+        FieldInfo field = pair.Value;
+        MethodInfo getHashCode = field.FieldType.GetMethod("GetHashCode", new Type[0]);
+        if (getHashCode == null)
+        {
+          getHashCode = typeof(Object).GetMethod("GetHashCode", new Type[0]);
+        }
+        il.Emit(OpCodes.Ldarg_0);
+        if (field.FieldType.IsValueType)
+        {
+          if (field.FieldType.IsEnum)
+          {
+            il.Emit(OpCodes.Ldfld, field);
+            il.Emit(OpCodes.Box, field.FieldType);
+            il.Emit(OpCodes.Callvirt, getHashCode);
+          }
+          else
+          {
+            il.Emit(OpCodes.Ldflda, field);
+            il.Emit(OpCodes.Call, getHashCode);
+          }
+        }
+        else
+        {
+          il.Emit(OpCodes.Ldfld, field);
+          IfNull(il, delegate() { il.Emit(OpCodes.Ldc_I4_0); }, delegate() {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, field);
+            il.Emit(OpCodes.Callvirt, getHashCode);
+          });
+        }
+        if (hasState)
+        {
+          il.Emit(OpCodes.Ldc_I4, 29);
+          il.Emit(OpCodes.Mul);
+          il.Emit(OpCodes.Add);
+        }
+        hasState = true;
+      }
+      if (!hasState)
+      {
+        il.Emit(OpCodes.Ldc_I4_0);
+      }
+      il.Emit(OpCodes.Ret);
     }
 
     protected static void GenerateDictionaryConstructor(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
@@ -100,6 +219,30 @@ namespace Machine.Mta.InterfacesAsMessages
     private static string MakeFieldName(PropertyInfo property)
     {
       return "_" + property.Name;
+    }
+    
+    private static void ReturnIfNull(ILGenerator il, Action ifNull)
+    {
+      Label nope = il.DefineLabel();
+      il.Emit(OpCodes.Brtrue, nope);
+      ifNull();
+      il.MarkLabel(nope);
+    }
+
+    private static void IfNull(ILGenerator il, Action isTrue, Action isFalse)
+    {
+      Label nope = il.DefineLabel();
+      Label done = il.DefineLabel();
+      il.Emit(OpCodes.Ldnull);
+      il.Emit(OpCodes.Ceq); // Has 1 if NULL
+      il.Emit(OpCodes.Ldc_I4_0);
+      il.Emit(OpCodes.Ceq); // Has 1 if NOT NULL
+      il.Emit(OpCodes.Brtrue, nope);
+      isTrue();
+      il.Emit(OpCodes.Br, done);
+      il.MarkLabel(nope);
+      isFalse();
+      il.MarkLabel(done);
     }
   }
 }
