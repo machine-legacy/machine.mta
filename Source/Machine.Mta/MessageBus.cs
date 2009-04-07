@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Machine.Mta.Dispatching;
 using Machine.Mta.Endpoints;
 using Machine.Utility.ThreadPool;
-using Machine.Utility.ThreadPool.QueueStrategies;
 
 namespace Machine.Mta
 {
@@ -118,10 +117,13 @@ namespace Machine.Mta
 
     public void Reply<T>(params T[] messages) where T : class, IMessage
     {
+      Reply(CurrentMessageContext.Current.ReturnAddress, CurrentMessageContext.Current.CorrelationId, messages);
+    }
+
+    public void Reply<T>(EndpointAddress destination, Guid correlationId, params T[] messages) where T : class, IMessage
+    {
       Logging.Reply(messages);
-      TransportMessage transportMessage = CurrentMessageContext.CurrentTransportMessage;
-      EndpointAddress returnAddress = transportMessage.ReturnAddress;
-      SendTransportMessage(new[] { returnAddress }, CreateTransportMessage(transportMessage.ReturnCorrelationId, true, messages));
+      SendTransportMessage(new[] { destination }, CreateTransportMessage(correlationId, true, messages));
     }
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
@@ -145,7 +147,6 @@ namespace Machine.Mta
     private TransportMessage CreateTransportMessage(Guid correlatedBy, MessagePayload payload, bool forReply)
     {
       return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlatedBy,
-        CurrentCorrelationContext.CurrentCorrelation,
         CurrentSagaContext.CurrentSagaIds(forReply), payload);
     }
   }

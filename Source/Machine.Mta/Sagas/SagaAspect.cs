@@ -124,11 +124,7 @@ namespace Machine.Mta.Sagas
       }
       if (CurrentMessageContext.Current != null)
       {
-        TransportMessage transportMessage = CurrentMessageContext.CurrentTransportMessage;
-        if (transportMessage != null)
-        {
-          return transportMessage.SagaIds;
-        }
+        return CurrentMessageContext.Current.SagaIds;
       }
       return new Guid[0];
     }

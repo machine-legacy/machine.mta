@@ -52,12 +52,12 @@ namespace Machine.Mta
     {
     }
 
-    protected TransportMessage(Guid id, EndpointAddress returnAddress, Guid correlationId, Guid returnCorrelationId, Guid[] sagaIds, byte[] body, string label)
+    protected TransportMessage(Guid id, EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds, byte[] body, string label)
     {
       _id = id;
       _returnAddress = returnAddress;
       _correlationId = correlationId;
-      _returnCorrelationId = returnCorrelationId;
+      _returnCorrelationId = Guid.Empty;
       _sagaIds = sagaIds;
       _body = body;
       _label = label;
@@ -68,14 +68,14 @@ namespace Machine.Mta
       return this.Label + " from " + _returnAddress + " with " + _body.Length + "bytes";
     }
 
-    public static TransportMessage For(EndpointAddress returnAddress, Guid correlationId, Guid returnCorrelationId, Guid[] sagaIds, MessagePayload payload)
+    public static TransportMessage For(EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds, MessagePayload payload)
     {
       Guid id = Guid.NewGuid();
-      if (returnCorrelationId == Guid.Empty)
+      if (correlationId == Guid.Empty)
       {
-        returnCorrelationId = id;
+        correlationId = id;
       }
-      return new TransportMessage(id, returnAddress, correlationId, returnCorrelationId, sagaIds, payload.ToByteArray(), payload.Label);
+      return new TransportMessage(id, returnAddress, correlationId, sagaIds, payload.ToByteArray(), payload.Label);
     }
   }
 }

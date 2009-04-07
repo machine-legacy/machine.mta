@@ -42,12 +42,25 @@ namespace Machine.Mta
   {
     [ThreadStatic]
     static CurrentMessageContext _current;
-    readonly TransportMessage _transportMessage;
+    readonly EndpointAddress _returnAddress;
+    readonly Guid _correlationId;
+    readonly Guid[] _sagaIds;
+    readonly CurrentMessageContext _parentContext;
     bool _stopDispatching;
 
-    public TransportMessage TransportMessage
+    public EndpointAddress ReturnAddress
     {
-      get { return _transportMessage; }
+      get { return _returnAddress; }
+    }
+
+    public Guid[] SagaIds
+    {
+      get { return _sagaIds; }
+    }
+
+    public Guid CorrelationId
+    {
+      get { return _correlationId; }
     }
 
     public bool AskedToStopDispatchingCurrentMessageToHandlers
@@ -60,77 +73,32 @@ namespace Machine.Mta
       _stopDispatching = true;
     }
 
-    public CurrentMessageContext(TransportMessage transportMessage)
+    public CurrentMessageContext(EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds, CurrentMessageContext parentContext)
     {
-      _transportMessage = transportMessage;
+      _returnAddress = returnAddress;
+      _sagaIds = sagaIds;
+      _correlationId = correlationId;
+      _parentContext = parentContext;
+    }
+
+    public static CurrentMessageContext SendRepliesTo(EndpointAddress returnAddress)
+    {
+      return _current = new CurrentMessageContext(returnAddress, _current.CorrelationId, _current.SagaIds, _current);
     }
 
     public static CurrentMessageContext Open(TransportMessage transportMessage)
     {
-      return _current = new CurrentMessageContext(transportMessage);
-    }
-
-    public static TransportMessage CurrentTransportMessage
-    {
-      get
-      {
-        if (_current == null)
-        {
-          return null;
-        }
-        return _current.TransportMessage;
-      }
+      return _current = new CurrentMessageContext(transportMessage.ReturnAddress, transportMessage.CorrelationId, transportMessage.SagaIds, _current);
     }
 
     public static CurrentMessageContext Current
     {
-      get
-      {
-        if (_current == null)
-        {
-          return null;
-        }
-        return _current;
-      }
+      get { return _current; }
     }
 
     public void Dispose()
     {
-      _current = null;
-    }
-  }
-  
-  public class CurrentCorrelationContext : IDisposable
-  {
-    [ThreadStatic]
-    static CurrentCorrelationContext _current;
-    readonly Guid _correlationId;
-
-    public CurrentCorrelationContext(Guid correlationId)
-    {
-      _correlationId = correlationId;
-    }
-
-    public static CurrentCorrelationContext Open(TransportMessage transportMessage)
-    {
-      return _current = new CurrentCorrelationContext(transportMessage.Id);
-    }
-
-    public static Guid CurrentCorrelation
-    {
-      get
-      {
-        if (_current == null)
-        {
-          return Guid.Empty;
-        }
-        return _current._correlationId;
-      }
-    }
-
-    public void Dispose()
-    {
-      _current = null;
+      _current = _parentContext;
     }
   }
   
@@ -174,10 +142,9 @@ namespace Machine.Mta
     {
       if (_current == null)
       {
-        TransportMessage transportMessage = CurrentMessageContext.CurrentTransportMessage;
-        if (transportMessage != null && propogateCurrentMessageIds)
+        if (CurrentMessageContext.Current != null && propogateCurrentMessageIds)
         {
-          return transportMessage.SagaIds;
+          return CurrentMessageContext.Current.SagaIds;
         }
         return new Guid[0];
       }
@@ -186,7 +153,7 @@ namespace Machine.Mta
 
     public void Dispose()
     {
-      _current = null;
+      _current = _previous;
     }
   }
 }

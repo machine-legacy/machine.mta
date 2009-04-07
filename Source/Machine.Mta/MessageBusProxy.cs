@@ -57,6 +57,11 @@ namespace Machine.Mta
       CurrentBus().Reply(messages);
     }
 
+    public void Reply<T>(EndpointAddress destination, Guid correlationId, params T[] messages) where T : class, IMessage
+    {
+      CurrentBus().Reply(destination, correlationId, messages);
+    }
+
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
       CurrentBus().Publish(messages);

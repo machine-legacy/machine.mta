@@ -24,7 +24,7 @@ namespace Machine.Mta
 
     public void OnReply(AsyncCallback callback, object state)
     {
-      _asyncCallbackMap.Add(_request.Id, callback, state);
+      _asyncCallbackMap.Add(_request.CorrelationId, callback, state);
       _sendRequest(_request);
     }
   }
@@ -90,17 +90,17 @@ namespace Machine.Mta
     {
       _reply = new Reply(_state, messages);
       _completed = true;
-      _waitHandle.Set();
       if (_callback != null)
       {
         _callback(this);
       }
+      _waitHandle.Set();
     }
   }
 
   public class AsyncCallbackMap
   {
-    private readonly Dictionary<Guid, MessageBusAsyncResult> _map = new Dictionary<Guid, MessageBusAsyncResult>();
+    readonly Dictionary<Guid, MessageBusAsyncResult> _map = new Dictionary<Guid, MessageBusAsyncResult>();
 
     public void Add(Guid id, AsyncCallback callback, object state)
     {

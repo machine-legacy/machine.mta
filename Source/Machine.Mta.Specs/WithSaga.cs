@@ -26,7 +26,7 @@ namespace Machine.Mta.Specs
       saga.InitialState = state;
       container.Register.Type<SampleSaga>().Is(saga);
       container.Register.Type<ISagaStateRepository<ISagaState>>().Is(repository);
-      CurrentMessageContext.Open(TransportMessage.For(EndpointAddress.Null, Guid.Empty, Guid.Empty, new Guid[0], new MessagePayload(new byte[0], "NULL")));
+      CurrentMessageContext.Open(TransportMessage.For(EndpointAddress.Null, Guid.Empty, new Guid[0], new MessagePayload(new byte[0], "NULL")));
     };
   }
 
