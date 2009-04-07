@@ -5,10 +5,6 @@ using System.Reflection.Emit;
 
 namespace Machine.Mta.InterfacesAsMessages
 {
-  public interface IMessageInterfaceImplementationFactory
-  {
-    IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types);
-  }
   public abstract class MessageInterfaceImplementationFactory<T> : IMessageInterfaceImplementationFactory
   {
     static readonly string AssemblyName = "Messages";
@@ -73,5 +69,10 @@ namespace Machine.Mta.InterfacesAsMessages
       }
       return "A" + name;
     }
+  }
+
+  public interface IMessageInterfaceImplementationFactory
+  {
+    IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types);
   }
 }

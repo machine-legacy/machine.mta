@@ -81,14 +81,19 @@ namespace Machine.Mta
       _parentContext = parentContext;
     }
 
+    public static CurrentMessageContext Open(EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds)
+    {
+      return _current = new CurrentMessageContext(returnAddress, correlationId, sagaIds, _current);
+    }
+
     public static CurrentMessageContext SendRepliesTo(EndpointAddress returnAddress)
     {
-      return _current = new CurrentMessageContext(returnAddress, _current.CorrelationId, _current.SagaIds, _current);
+      return Open(returnAddress, _current.CorrelationId, _current.SagaIds);
     }
 
     public static CurrentMessageContext Open(TransportMessage transportMessage)
     {
-      return _current = new CurrentMessageContext(transportMessage.ReturnAddress, transportMessage.CorrelationId, transportMessage.SagaIds, _current);
+      return Open(transportMessage.ReturnAddress, transportMessage.CorrelationId, transportMessage.SagaIds);
     }
 
     public static CurrentMessageContext Current

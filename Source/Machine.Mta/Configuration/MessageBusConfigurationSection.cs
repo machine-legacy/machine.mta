@@ -44,6 +44,7 @@ namespace Machine.Mta.Configuration
       return EndpointAddress.ForRemoteQueue(_host, _queue);
     }
   }
+  
   public class MessageForward
   {
     string _toQueue;
@@ -89,6 +90,7 @@ namespace Machine.Mta.Configuration
       }
     }
   }
+  
   [XmlRoot("messaging")]
   public class MessageBusConfigurationSection
   {
@@ -132,14 +134,27 @@ namespace Machine.Mta.Configuration
       return (MessageBusConfigurationSection)ConfigurationManager.GetSection(name);
     }
 
+    private static MessageBusConfigurationSection _configuration;
+
+    public static void UseConfiguration(MessageBusConfigurationSection configuration)
+    {
+      _configuration = configuration;
+    }
+
     public static MessageBusConfigurationSection Read()
     {
-      return Read("messaging");
+      if (_configuration != null)
+      {
+        return _configuration;
+      }
+      return _configuration = Read("messaging");
     }
   }
+  
   public class MessageBusConfigurationSectionHandler : GenericConfigurationSectionHandler<MessageBusConfigurationSection>
   {
   }
+  
   public abstract class GenericConfigurationSectionHandler<TCfg> : IConfigurationSectionHandler where TCfg : class
   {
     public object Create(object parent, object configContext, XmlNode section)
