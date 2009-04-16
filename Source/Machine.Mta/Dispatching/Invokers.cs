@@ -7,9 +7,9 @@ namespace Machine.Mta.Dispatching
 {
   public class ProvideHandlerOrderInvoker<T> : IProvideHandlerOrderFor<IMessage>  where T : class, IMessage
   {
-    private readonly IProvideHandlerOrderFor<T> _target;
+    private readonly IProvideHandlerOrder _target;
 
-    public ProvideHandlerOrderInvoker(IProvideHandlerOrderFor<T> target)
+    public ProvideHandlerOrderInvoker(IProvideHandlerOrder target)
     {
       _target = target;
     }
@@ -77,9 +77,9 @@ namespace Machine.Mta.Dispatching
       return (IConsume<IMessage>)Activator.CreateInstance(typeof(HandlerInvoker<>).MakeGenericType(messageType), target);
     }
 
-    public static IProvideHandlerOrderFor<IMessage> CreateForHandlerOrderProvider(Type messageType, object target)
+    public static IProvideHandlerOrder CreateForHandlerOrderProvider(Type messageType, object target)
     {
-      return (IProvideHandlerOrderFor<IMessage>)Activator.CreateInstance(typeof(ProvideHandlerOrderInvoker<>).MakeGenericType(messageType), target);
+      return (IProvideHandlerOrder)target;
     }
 
     public static ISagaStateRepository<ISagaState> CreateForRepository(Type sagaStateType, object target)

@@ -62,7 +62,7 @@ namespace Machine.Mta.Dispatching
       {
         return new List<Type>();
       }
-      IProvideHandlerOrderFor<IMessage> orderProvider = Invokers.CreateForHandlerOrderProvider(messageType, orderer);
+      IProvideHandlerOrder orderProvider = Invokers.CreateForHandlerOrderProvider(messageType, orderer);
       return orderProvider.GetHandlerOrder();
     }
   }
