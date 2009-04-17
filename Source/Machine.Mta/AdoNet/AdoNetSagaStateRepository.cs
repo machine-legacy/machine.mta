@@ -19,13 +19,6 @@ namespace Machine.Mta.AdoNet
       _connectionString = connectionString;
     }
 
-    private IDbConnection OpenConnection()
-    {
-      IDbConnection connection = new SqlConnection(_connectionString.ConnectionString);
-      connection.Open();
-      return connection;
-    }
-
     public IEnumerable<T> FindAll()
     {
       using (IDbConnection connection = OpenConnection())
@@ -102,52 +95,66 @@ namespace Machine.Mta.AdoNet
       }
     }
 
-    private static IDbCommand CreateInsertCommand(IDbConnection connection)
+    protected virtual IDbConnection OpenConnection()
+    {
+      IDbConnection connection = new SqlConnection(_connectionString.ConnectionString);
+      connection.Open();
+      return connection;
+    }
+
+    protected virtual IDbCommand CreateCommand(IDbConnection connection)
     {
       IDbCommand command = connection.CreateCommand();
       command.Connection = connection;
-      command.CommandText = "INSERT INTO saga (SagaId, SagaType, SagaState, StartedAt, LastUpdatedAt) VALUES (@SagaId, @SagaType, @SagaState, getutcdate(), getutcdate())";
+      return command;
+    }
+
+    protected virtual string TableName()
+    {
+      return "saga";
+    }
+
+    private IDbCommand CreateInsertCommand(IDbConnection connection)
+    {
+      IDbCommand command = CreateCommand(connection);
+      command.CommandText = "INSERT INTO " + TableName() + " (SagaId, SagaType, SagaState, StartedAt, LastUpdatedAt) VALUES (@SagaId, @SagaType, @SagaState, getutcdate(), getutcdate())";
       command.CreateParameter("SagaType", DbType.String);
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaState", DbType.Binary);
       return command;
     }
 
-    private static IDbCommand CreateUpdateCommand(IDbConnection connection)
+    private IDbCommand CreateUpdateCommand(IDbConnection connection)
     {
-      IDbCommand command = connection.CreateCommand();
-      command.Connection = connection;
-      command.CommandText = "UPDATE saga SET SagaState = @SagaState, LastUpdatedAt = getutcdate() WHERE SagaId = @SagaId AND SagaType = @SagaType";
+      IDbCommand command = CreateCommand(connection);
+      command.CommandText = "UPDATE " + TableName() + " SET SagaState = @SagaState, LastUpdatedAt = getutcdate() WHERE SagaId = @SagaId AND SagaType = @SagaType";
       command.CreateParameter("SagaType", DbType.String);
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaState", DbType.Binary);
       return command;
     }
 
-    private static IDbCommand CreateSelectAllCommand(IDbConnection connection)
+    private IDbCommand CreateSelectAllCommand(IDbConnection connection)
     {
-      IDbCommand command = connection.CreateCommand();
-      command.Connection = connection;
-      command.CommandText = "SELECT SagaId, SagaState FROM saga WHERE SagaType = @SagaType";
+      IDbCommand command = CreateCommand(connection);
+      command.CommandText = "SELECT SagaId, SagaState FROM " + TableName() + " WHERE SagaType = @SagaType";
       command.CreateParameter("SagaType", DbType.String);
       return command;
     }
 
-    private static IDbCommand CreateSelectCommand(IDbConnection connection)
+    private IDbCommand CreateSelectCommand(IDbConnection connection)
     {
-      IDbCommand command = connection.CreateCommand();
-      command.Connection = connection;
-      command.CommandText = "SELECT SagaState FROM saga WHERE SagaId = @SagaId AND SagaType = @SagaType";
+      IDbCommand command = CreateCommand(connection);
+      command.CommandText = "SELECT SagaState FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType";
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaType", DbType.String);
       return command;
     }
 
-    private static IDbCommand CreateDeleteCommand(IDbConnection connection)
+    private IDbCommand CreateDeleteCommand(IDbConnection connection)
     {
-      IDbCommand command = connection.CreateCommand();
-      command.Connection = connection;
-      command.CommandText = "DELETE FROM saga WHERE SagaId = @SagaId AND SagaType = @SagaType";
+      IDbCommand command = CreateCommand(connection);
+      command.CommandText = "DELETE FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType";
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaType", DbType.String);
       return command;
