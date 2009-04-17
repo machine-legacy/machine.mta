@@ -18,9 +18,8 @@ namespace Machine.Mta.AdoNet
 
     public IEnumerable<T> FindAll()
     {
-      using (IDbConnection connection = OpenConnection())
+      using (IDbCommand command = CreateSelectAllCommand())
       {
-        IDbCommand command = CreateSelectAllCommand(connection);
         command.Parameter("SagaType").Value = typeof(T).FullName;
         using (IDataReader reader = command.ExecuteReader())
         {
@@ -38,9 +37,8 @@ namespace Machine.Mta.AdoNet
 
     public void Delete(T sagaState)
     {
-      using (IDbConnection connection = OpenConnection())
+      using (IDbCommand command = CreateDeleteCommand())
       {
-        IDbCommand command = CreateDeleteCommand(connection);
         command.Parameter("SagaId").Value = sagaState.SagaId;
         command.Parameter("SagaType").Value = typeof(T).FullName;
         command.ExecuteNonQuery();
@@ -49,9 +47,8 @@ namespace Machine.Mta.AdoNet
 
     public T FindSagaState(Guid sagaId)
     {
-      using (IDbConnection connection = OpenConnection())
+      using (IDbCommand command = CreateSelectCommand())
       {
-        IDbCommand command = CreateSelectCommand(connection);
         command.Parameter("SagaId").Value = sagaId;
         command.Parameter("SagaType").Value = typeof(T).FullName;
         using (IDataReader reader = command.ExecuteReader())
@@ -68,47 +65,46 @@ namespace Machine.Mta.AdoNet
       }
     }
 
-    public void Save(T sagaState)
+    public void Add(T sagaState)
     {
-      using (IDbConnection connection = OpenConnection())
+      byte[] serialized = _binarySagaSerializer.Serialize(sagaState);
+      using (IDbCommand command = CreateInsertCommand())
       {
-        byte[] serialized = _binarySagaSerializer.Serialize(sagaState);
-        bool success = false;
-        foreach (IDbCommand command in new [] { CreateUpdateCommand(connection), CreateInsertCommand(connection) })
-        {
-          command.Parameter("SagaId").Value = sagaState.SagaId;
-          command.Parameter("SagaState").Value = serialized;
-          command.Parameter("SagaType").Value = typeof(T).FullName;
-          if (command.ExecuteNonQuery() == 1)
-          {
-            success = true;
-            break;
-          }
-        }
-        if (!success)
+        command.Parameter("SagaId").Value = sagaState.SagaId;
+        command.Parameter("SagaState").Value = serialized;
+        command.Parameter("SagaType").Value = typeof (T).FullName;
+        if (command.ExecuteNonQuery() != 1)
         {
           throw new SagaStateNotFoundException();
         }
       }
     }
 
-    protected abstract IDbConnection OpenConnection();
-
-    protected virtual IDbCommand CreateCommand(IDbConnection connection)
+    public void Save(T sagaState)
     {
-      IDbCommand command = connection.CreateCommand();
-      command.Connection = connection;
-      return command;
+      byte[] serialized = _binarySagaSerializer.Serialize(sagaState);
+      using (IDbCommand command = CreateUpdateCommand())
+      {
+        command.Parameter("SagaId").Value = sagaState.SagaId;
+        command.Parameter("SagaState").Value = serialized;
+        command.Parameter("SagaType").Value = typeof (T).FullName;
+        if (command.ExecuteNonQuery() != 1)
+        {
+          throw new SagaStateNotFoundException();
+        }
+      }
     }
+
+    protected abstract IDbCommand CreateCommand();
 
     protected virtual string TableName()
     {
       return "saga";
     }
 
-    private IDbCommand CreateInsertCommand(IDbConnection connection)
+    private IDbCommand CreateInsertCommand()
     {
-      IDbCommand command = CreateCommand(connection);
+      IDbCommand command = CreateCommand();
       command.CommandText = "INSERT INTO " + TableName() + " (SagaId, SagaType, SagaState, StartedAt, LastUpdatedAt) VALUES (@SagaId, @SagaType, @SagaState, getutcdate(), getutcdate())";
       command.CreateParameter("SagaType", DbType.String);
       command.CreateParameter("SagaId", DbType.Guid);
@@ -116,39 +112,41 @@ namespace Machine.Mta.AdoNet
       return command;
     }
 
-    private IDbCommand CreateUpdateCommand(IDbConnection connection)
+    private IDbCommand CreateUpdateCommand()
     {
-      IDbCommand command = CreateCommand(connection);
-      command.CommandText = "UPDATE " + TableName() + " SET SagaState = @SagaState, LastUpdatedAt = getutcdate() WHERE SagaId = @SagaId AND SagaType = @SagaType";
+      IDbCommand command = CreateCommand();
+      command.CommandText = "UPDATE " + TableName() + " SET SagaState = @SagaState, LastUpdatedAt = getutcdate() WHERE SagaId = @SagaId AND SagaType = @SagaType AND LastUpdatedAt = @LastUpdatedAt";
       command.CreateParameter("SagaType", DbType.String);
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaState", DbType.Binary);
+      command.CreateParameter("LastUpdatedAt", DbType.DateTime);
       return command;
     }
 
-    private IDbCommand CreateSelectAllCommand(IDbConnection connection)
+    private IDbCommand CreateSelectAllCommand()
     {
-      IDbCommand command = CreateCommand(connection);
+      IDbCommand command = CreateCommand();
       command.CommandText = "SELECT SagaId, SagaState FROM " + TableName() + " WHERE SagaType = @SagaType";
       command.CreateParameter("SagaType", DbType.String);
       return command;
     }
 
-    private IDbCommand CreateSelectCommand(IDbConnection connection)
+    private IDbCommand CreateSelectCommand()
     {
-      IDbCommand command = CreateCommand(connection);
-      command.CommandText = "SELECT SagaState FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType";
+      IDbCommand command = CreateCommand();
+      command.CommandText = "SELECT SagaState, LastUpdatedAt FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType";
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaType", DbType.String);
       return command;
     }
 
-    private IDbCommand CreateDeleteCommand(IDbConnection connection)
+    private IDbCommand CreateDeleteCommand()
     {
-      IDbCommand command = CreateCommand(connection);
-      command.CommandText = "DELETE FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType";
+      IDbCommand command = CreateCommand();
+      command.CommandText = "DELETE FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType AND LastUpdatedAt = @LastUpdatedAt";
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaType", DbType.String);
+      command.CreateParameter("LastUpdatedAt", DbType.DateTime);
       return command;
     }
   }
