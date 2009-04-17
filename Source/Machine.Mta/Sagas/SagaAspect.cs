@@ -60,14 +60,15 @@ namespace Machine.Mta.Sagas
         }
         handler.State = state;
       }
+      bool newState = handler.State == null;
       using (CurrentSagaContext.Open(sagaIds))
       {
         invocation.Continue();
       }
-      SaveOrDeleteState(invocation, handler, repository);
+      SaveOrDeleteState(invocation, handler, repository, newState);
     }
 
-    private static void SaveOrDeleteState(HandlerInvocation invocation, ISagaHandler handler, ISagaStateRepository<ISagaState> repository)
+    private static void SaveOrDeleteState(HandlerInvocation invocation, ISagaHandler handler, ISagaStateRepository<ISagaState> repository, bool newState)
     {
       if (handler.State == null)
       {
@@ -81,8 +82,16 @@ namespace Machine.Mta.Sagas
       }
       else
       {
-        invocation.HandlerLogger.Debug("Saving: " + handler.State.SagaId);
-        repository.Save(handler.State);
+        if (newState)
+        {
+          invocation.HandlerLogger.Debug("Adding: " + handler.State.SagaId);
+          repository.Add(handler.State);
+        }
+        else
+        {
+          invocation.HandlerLogger.Debug("Saving: " + handler.State.SagaId);
+          repository.Save(handler.State);
+        }
       }
     }
 

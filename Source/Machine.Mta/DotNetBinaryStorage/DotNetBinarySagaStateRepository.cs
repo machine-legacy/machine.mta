@@ -31,6 +31,15 @@ namespace Machine.Mta.DotNetBinaryStorage
       }
     }
 
+    public void Add(T sagaState)
+    {
+      string path = PathForState(sagaState.SagaId);
+      using (Stream stream = _flatFileSystem.Create(path))
+      {
+        Serializers.Binary.Serialize(stream, sagaState);
+      }
+    }
+
     public void Save(T sagaState)
     {
       string path = PathForState(sagaState.SagaId);

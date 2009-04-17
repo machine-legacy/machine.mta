@@ -59,6 +59,11 @@ namespace Machine.Mta.Dispatching
       return _target.FindSagaState(sagaId);
     }
 
+    public void Add(ISagaState sagaState)
+    {
+      _target.Add((T)sagaState);
+    }
+
     public void Save(ISagaState sagaState)
     {
       _target.Save((T)sagaState);
