@@ -1,22 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Data.SqlClient;
 using System.Data;
 
 using Machine.Mta.Sagas;
 
 namespace Machine.Mta.AdoNet
 {
-  public class AdoNetSagaStateRepository<T> : ISagaStateRepository<T> where T : class, ISagaState
+  public abstract class AdoNetSagaStateRepository<T> : ISagaStateRepository<T> where T : class, ISagaState
   {
-    readonly IAdoNetConnectionString _connectionString;
     readonly BinarySagaSerializer _binarySagaSerializer;
 
-    public AdoNetSagaStateRepository(IAdoNetConnectionString connectionString)
+    protected AdoNetSagaStateRepository()
     {
       _binarySagaSerializer = new BinarySagaSerializer();
-      _connectionString = connectionString;
     }
 
     public IEnumerable<T> FindAll()
@@ -95,12 +92,7 @@ namespace Machine.Mta.AdoNet
       }
     }
 
-    protected virtual IDbConnection OpenConnection()
-    {
-      IDbConnection connection = new SqlConnection(_connectionString.ConnectionString);
-      connection.Open();
-      return connection;
-    }
+    protected abstract IDbConnection OpenConnection();
 
     protected virtual IDbCommand CreateCommand(IDbConnection connection)
     {
