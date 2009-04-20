@@ -60,6 +60,7 @@ namespace Machine.Mta.InterfacesAsMessages
     protected void GenerateEquals(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
     {
       Type type = generatedMessage.MessageType;
+      MethodInfo arrayEquals = typeof(ArrayHelpers).GetMethod("AreArraysEqual", new[] { typeof(Array), typeof(Array) });
       MethodInfo objectEquals = typeof(Object).GetMethod("Equals", new [] { typeof(Object), typeof(Object) });
       MethodBuilder method = typeBuilder.DefineMethod("Equals", MethodAttributes.Virtual | MethodAttributes.Public, typeof (bool), new[] { typeof (Object) });
       ILGenerator il = method.GetILGenerator();
@@ -76,7 +77,15 @@ namespace Machine.Mta.InterfacesAsMessages
       {
         FieldInfo field = pair.Value;
         Label label = il.DefineLabel();
-        if (field.FieldType.IsValueType && !field.FieldType.IsEnum && !field.FieldType.IsNullableType())
+        if (field.FieldType.IsArray)
+        {
+          il.Emit(OpCodes.Ldarg_0);
+          il.Emit(OpCodes.Ldfld, field);
+          il.Emit(OpCodes.Ldloc_0);
+          il.Emit(OpCodes.Ldfld, field);
+          il.Emit(OpCodes.Call, arrayEquals);
+        }
+        else if (field.FieldType.IsValueType && !field.FieldType.IsEnum && !field.FieldType.IsNullableType())
         {
           MethodInfo valueEquals = field.FieldType.GetMethod("Equals", new [] { field.FieldType });
           il.Emit(OpCodes.Ldarg_0);
@@ -112,6 +121,7 @@ namespace Machine.Mta.InterfacesAsMessages
 
     protected void GenerateGetHashCode(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
     {
+      MethodInfo arrayGetHashCode = typeof(ArrayHelpers).GetMethod("GetHashCode", new[] { typeof(Array) });
       MethodBuilder method = typeBuilder.DefineMethod("GetHashCode", MethodAttributes.Virtual | MethodAttributes.Public, typeof(Int32), new Type[0]);
       ILGenerator il = method.GetILGenerator();
 
@@ -125,7 +135,12 @@ namespace Machine.Mta.InterfacesAsMessages
           getHashCode = typeof(Object).GetMethod("GetHashCode", new Type[0]);
         }
         il.Emit(OpCodes.Ldarg_0);
-        if (field.FieldType.IsValueType)
+        if (field.FieldType.IsArray)
+        {
+          il.Emit(OpCodes.Ldfld, field);
+          il.Emit(OpCodes.Call, arrayGetHashCode);
+        }
+        else if (field.FieldType.IsValueType)
         {
           if (field.FieldType.IsEnum)
           {

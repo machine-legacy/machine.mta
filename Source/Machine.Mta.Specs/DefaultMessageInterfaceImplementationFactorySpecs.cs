@@ -217,24 +217,28 @@ namespace Machine.Mta.Specs
 
     Because of = () =>
     {
+      var now = DateTime.UtcNow;
       message1 = messageFactory.Create<IComplexMessage>(new {
         Id = objectId,
         Integer = 1,
-        DateTime = DateTime.UtcNow,
-        NullableDateTime = DateTime.UtcNow,
+        DateTime = now,
+        NullableDateTime = now,
         ArrayOfEnums = new [] { DayOfWeek.Tuesday }
       });
       message2 = messageFactory.Create<IComplexMessage>(new {
         Id = objectId,
         Integer = 1,
-        DateTime = DateTime.UtcNow,
-        NullableDateTime = DateTime.UtcNow,
+        DateTime = now,
+        NullableDateTime = now,
         ArrayOfEnums = new [] { DayOfWeek.Tuesday }
       });
     };
 
     It should_be_equal = () =>
       message1.ShouldEqual(message2);
+
+    It should_have_the_same_hash_code = () =>
+      message1.GetHashCode().ShouldEqual(message2.GetHashCode());
   }
 
   [Subject("Message Interfaces")]
