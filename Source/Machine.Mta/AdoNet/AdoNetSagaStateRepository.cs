@@ -115,11 +115,10 @@ namespace Machine.Mta.AdoNet
     private IDbCommand CreateUpdateCommand()
     {
       IDbCommand command = CreateCommand();
-      command.CommandText = "UPDATE " + TableName() + " SET SagaState = @SagaState, LastUpdatedAt = getutcdate() WHERE SagaId = @SagaId AND SagaType = @SagaType AND LastUpdatedAt = @LastUpdatedAt";
+      command.CommandText = "UPDATE " + TableName() + " SET SagaState = @SagaState, LastUpdatedAt = getutcdate() WHERE SagaId = @SagaId AND SagaType = @SagaType";
       command.CreateParameter("SagaType", DbType.String);
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaState", DbType.Binary);
-      command.CreateParameter("LastUpdatedAt", DbType.DateTime);
       return command;
     }
 
@@ -143,10 +142,9 @@ namespace Machine.Mta.AdoNet
     private IDbCommand CreateDeleteCommand()
     {
       IDbCommand command = CreateCommand();
-      command.CommandText = "DELETE FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType AND LastUpdatedAt = @LastUpdatedAt";
+      command.CommandText = "DELETE FROM " + TableName() + " WHERE SagaId = @SagaId AND SagaType = @SagaType";
       command.CreateParameter("SagaId", DbType.Guid);
       command.CreateParameter("SagaType", DbType.String);
-      command.CreateParameter("LastUpdatedAt", DbType.DateTime);
       return command;
     }
   }
