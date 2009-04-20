@@ -64,7 +64,7 @@ namespace Machine.Mta.Specs
       saga.State.ShouldEqual(state);
 
     It should_save_state = () =>
-      repository.AssertWasCalled(x => x.Save(state));
+      repository.AssertWasCalled(x => x.Add(state));
   }
 
   [Subject("Message dispatching with Sagas")]
