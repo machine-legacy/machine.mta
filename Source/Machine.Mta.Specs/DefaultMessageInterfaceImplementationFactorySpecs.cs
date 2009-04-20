@@ -209,6 +209,58 @@ namespace Machine.Mta.Specs
       message1.ShouldNotEqual(randomObject);
   }
 
+  [Subject("Message Interfaces")]
+  public class with_a_message_with_nullable_types : DefaultMessageInterfaceImplementationFactorySpecs
+  {
+    static IComplexMessage message1;
+    static IComplexMessage message2;
+
+    Because of = () =>
+    {
+      message1 = messageFactory.Create<IComplexMessage>(new {
+        Id = objectId,
+        Integer = 1,
+        DateTime = DateTime.UtcNow,
+        NullableDateTime = DateTime.UtcNow,
+        ArrayOfEnums = new [] { DayOfWeek.Tuesday }
+      });
+      message2 = messageFactory.Create<IComplexMessage>(new {
+        Id = objectId,
+        Integer = 1,
+        DateTime = DateTime.UtcNow,
+        NullableDateTime = DateTime.UtcNow,
+        ArrayOfEnums = new [] { DayOfWeek.Tuesday }
+      });
+    };
+
+    It should_be_equal = () =>
+      message1.ShouldEqual(message2);
+  }
+
+  [Subject("Message Interfaces")]
+  public class with_a_message_with_no_setters : DefaultMessageInterfaceImplementationFactorySpecs
+  {
+    static IAnotherMessage message1;
+    static IAnotherMessage message2;
+
+    Because of = () =>
+    {
+      message1 = messageFactory.Create<IAnotherMessage>(new {
+        ObjectId = objectId,
+        Integer = 1,
+        DayOfWeek = DayOfWeek.Tuesday
+      });
+      message2 = messageFactory.Create<IAnotherMessage>(new {
+        ObjectId = objectId,
+        Integer = 1,
+        DayOfWeek = DayOfWeek.Tuesday
+      });
+    };
+
+    It should_be_equal = () =>
+      message1.ShouldEqual(message2);
+  }
+
   public class DefaultMessageInterfaceImplementationFactorySpecs
   {
     protected static DefaultMessageInterfaceImplementationFactory factory;
@@ -221,7 +273,7 @@ namespace Machine.Mta.Specs
       factory = new DefaultMessageInterfaceImplementationFactory();
       MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(factory);
       messageFactory = new MessageFactory(implementations, new MessageDefinitionFactory());
-      implementations.AddMessageTypes(typeof(IAmAMessage), typeof(IHaveAChildMessage), typeof(ISampleMessage));
+      implementations.AddMessageTypes(typeof(IAmAMessage), typeof(IHaveAChildMessage), typeof(ISampleMessage), typeof(IComplexMessage), typeof(IAnotherMessage));
     };
   }
 
@@ -234,5 +286,21 @@ namespace Machine.Mta.Specs
   public interface IHaveAChildMessage : IMessage
   {
     IAmAMessage Child { get; set; }
+  }
+
+  public interface IComplexMessage : IMessage
+  {
+    Guid Id { get; set; }
+    Int32 Integer { get; set; }
+    DateTime DateTime { get; set; }
+    DateTime? NullableDateTime { get; set; }
+    DayOfWeek[] ArrayOfEnums { get; set; }
+  }
+
+  public interface IAnotherMessage : IMessage
+  {
+    Guid ObjectId { get; }
+    Int32 Integer { get; }
+    DayOfWeek DayOfWeek { get; }
   }
 }
