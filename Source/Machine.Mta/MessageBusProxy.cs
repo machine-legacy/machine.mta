@@ -52,6 +52,11 @@ namespace Machine.Mta
       return CurrentBus().Request(messages);
     }
 
+    public IRequestReplyBuilder Request<T>(Guid correlationId, params T[] messages) where T : class, IMessage
+    {
+      return CurrentBus().Request(correlationId, messages);
+    }
+
     public void Reply<T>(params T[] messages) where T : class, IMessage
     {
       CurrentBus().Reply(messages);
@@ -60,6 +65,11 @@ namespace Machine.Mta
     public void Reply<T>(EndpointAddress destination, Guid correlationId, params T[] messages) where T : class, IMessage
     {
       CurrentBus().Reply(destination, correlationId, messages);
+    }
+
+    public void Reply<T>(Guid correlationId, params T[] messages) where T : class, IMessage
+    {
+      CurrentBus().Reply(correlationId, messages);
     }
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
