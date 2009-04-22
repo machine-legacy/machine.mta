@@ -7,9 +7,9 @@ namespace Machine.Mta
   public interface IMessageDestinations
   {
     ICollection<EndpointAddress> LookupEndpointsFor(Type messageType);
-    void SendMessageTypeTo(Type messageType, EndpointAddress destination);
-    void SendMessageTypeTo<T>(EndpointAddress destination);
+    void SendMessageTypeTo(Type messageType, params EndpointAddress[] destinations);
+    void SendMessageTypeTo<T>(params EndpointAddress[] destinations);
     void SendAllFromAssemblyTo<T>(Assembly assembly, EndpointAddress destination);
-    void SendAllTo(EndpointAddress destination);
+    void SendAllTo(params EndpointAddress[] destination);
   }
 }

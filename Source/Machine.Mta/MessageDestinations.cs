@@ -39,7 +39,7 @@ namespace Machine.Mta
       }
     }
 
-    public void SendMessageTypeTo(Type messageType, EndpointAddress destination)
+    public void SendMessageTypeTo(Type messageType, params EndpointAddress[] destinations)
     {
       using (RWLock.AsWriter(_lock))
       {
@@ -47,16 +47,19 @@ namespace Machine.Mta
         {
           _map[messageType] = new List<EndpointAddress>();
         }
-        if (!_map[messageType].Contains(destination))
+        foreach (EndpointAddress destination in destinations)
         {
-          _map[messageType].Add(destination);
+          if (!_map[messageType].Contains(destination))
+          {
+            _map[messageType].Add(destination);
+          }
         }
       }
     }
 
-    public void SendMessageTypeTo<T>(EndpointAddress destination)
+    public void SendMessageTypeTo<T>(params EndpointAddress[] destinations)
     {
-      SendMessageTypeTo(typeof(T), destination);
+      SendMessageTypeTo(typeof(T), destinations);
     }
 
     public void SendAllFromAssemblyTo<T>(Assembly assembly, EndpointAddress destination)
@@ -70,13 +73,16 @@ namespace Machine.Mta
       }
     }
     
-    public void SendAllTo(EndpointAddress destination)
+    public void SendAllTo(params EndpointAddress[] destinations)
     {
       using (RWLock.AsWriter(_lock))
       {
-        if (!_catchAlls.Contains(destination))
+        foreach (EndpointAddress destination in destinations)
         {
-          _catchAlls.Add(destination);
+          if (!_catchAlls.Contains(destination))
+          {
+            _catchAlls.Add(destination);
+          }
         }
       }
     }

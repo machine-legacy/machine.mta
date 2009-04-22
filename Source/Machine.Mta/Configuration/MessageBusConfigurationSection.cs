@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Xml.Serialization;
 using System.Xml;
+using System.Linq;
 
 using Machine.Core.Utility;
 
@@ -79,14 +80,14 @@ namespace Machine.Mta.Configuration
 
     public void Apply(MessageBusConfigurationSection configuration, IMessageDestinations lookup)
     {
-      EndpointAddress endpointAddress = configuration.Lookup(this.To);
+      IEnumerable<EndpointAddress> addresses = configuration.Lookup(this.To);
       if (String.IsNullOrEmpty(_messageType))
       {
-        lookup.SendAllTo(endpointAddress);
+        lookup.SendAllTo(addresses.ToArray());
       }
       else
       {
-        lookup.SendMessageTypeTo(this.MessageType, endpointAddress);
+        lookup.SendMessageTypeTo(this.MessageType, addresses.ToArray());
       }
     }
   }
@@ -109,13 +110,13 @@ namespace Machine.Mta.Configuration
       get { return _forwards; }
     }
 
-    public EndpointAddress Lookup(string name)
+    public IEnumerable<EndpointAddress> Lookup(string name)
     {
       foreach (MessageBusEndpoint endpoint in _endpoints)
       {
         if (endpoint.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
         {
-          return endpoint.ToEndpointAddress();
+          yield return endpoint.ToEndpointAddress();
         }
       }
       throw new KeyNotFoundException("No endpoint configured: " + name);
