@@ -43,7 +43,7 @@ namespace Machine.Mta
     [ThreadStatic]
     static CurrentMessageContext _current;
     readonly EndpointAddress _returnAddress;
-    readonly Guid _correlationId;
+    readonly string _correlationId;
     readonly Guid[] _sagaIds;
     readonly CurrentMessageContext _parentContext;
     bool _stopDispatching;
@@ -58,7 +58,7 @@ namespace Machine.Mta
       get { return _sagaIds; }
     }
 
-    public Guid CorrelationId
+    public string CorrelationId
     {
       get { return _correlationId; }
     }
@@ -73,7 +73,7 @@ namespace Machine.Mta
       _stopDispatching = true;
     }
 
-    public CurrentMessageContext(EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds, CurrentMessageContext parentContext)
+    public CurrentMessageContext(EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, CurrentMessageContext parentContext)
     {
       _returnAddress = returnAddress;
       _sagaIds = sagaIds;
@@ -81,7 +81,7 @@ namespace Machine.Mta
       _parentContext = parentContext;
     }
 
-    public static CurrentMessageContext Open(EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds)
+    public static CurrentMessageContext Open(EndpointAddress returnAddress, string correlationId, Guid[] sagaIds)
     {
       return _current = new CurrentMessageContext(returnAddress, correlationId, sagaIds, _current);
     }

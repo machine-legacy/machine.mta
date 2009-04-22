@@ -9,7 +9,7 @@ namespace Machine.Mta
 {
   public class MessageFailureManager : IMessageFailureManager
   {
-    readonly Dictionary<Guid, List<Exception>> _errors = new Dictionary<Guid, List<Exception>>();
+    readonly Dictionary<string, List<Exception>> _errors = new Dictionary<string, List<Exception>>();
     readonly object _lock = new object();
 
     public virtual void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error)
@@ -18,7 +18,7 @@ namespace Machine.Mta
       {
         lock (_lock)
         {
-          Guid id = transportMessage.Id;
+          string id = transportMessage.Id;
           if (!_errors.ContainsKey(id))
           {
             _errors[id] = new List<Exception>();
@@ -36,7 +36,7 @@ namespace Machine.Mta
     {
       lock (_lock)
       {
-        Guid id = transportMessage.Id;
+        string id = transportMessage.Id;
         bool hasErrors = _errors.ContainsKey(id);
         if (hasErrors)
         {

@@ -29,9 +29,12 @@ namespace Machine.Mta.Transports.Msmq
       systemMessage.Label = transportMessage.Label;
       systemMessage.Recoverable = true;
       systemMessage.TimeToBeReceived = TimeSpan.MaxValue;
+      systemMessage.CorrelationId = transportMessage.CorrelationId;
+      systemMessage.ResponseQueue = new MessageQueue(transportMessage.ReturnAddress.ToPath());
       Serializers.Binary.Serialize(systemMessage.BodyStream, transportMessage);
       _queue.Send(systemMessage, _transactionManager.SendTransactionType(_queue));
       systemMessage.Dispose();
+      transportMessage.Id = systemMessage.Id;
     }
 
     public bool HasAnyPendingMessages(TimeSpan timeout)
@@ -76,7 +79,9 @@ namespace Machine.Mta.Transports.Msmq
         {
           return null;
         }
-        return (TransportMessage)Serializers.Binary.Deserialize(systemMessage.BodyStream);
+        TransportMessage transportMessage = (TransportMessage)Serializers.Binary.Deserialize(systemMessage.BodyStream);
+        transportMessage.Id = systemMessage.Id;
+        return transportMessage;
       }
       catch (MessageQueueException error)
       {

@@ -5,25 +5,20 @@ namespace Machine.Mta
   [Serializable]
   public class TransportMessage
   {
-    private readonly EndpointAddress _returnAddress;
-    private readonly Guid _id;
-    private readonly Guid _returnCorrelationId;
-    private readonly Guid _correlationId;
-    private readonly Guid[] _sagaIds;
-    private readonly byte[] _body;
-    private readonly string _label;
+    string _id;
+    readonly EndpointAddress _returnAddress;
+    readonly string _correlationId;
+    readonly Guid[] _sagaIds;
+    readonly byte[] _body;
+    readonly string _label;
 
-    public Guid Id
+    public string Id
     {
       get { return _id; }
+      set { _id = value; }
     }
 
-    public Guid ReturnCorrelationId
-    {
-      get { return _returnCorrelationId; }
-    }
-
-    public Guid CorrelationId
+    public string CorrelationId
     {
       get { return _correlationId; }
     }
@@ -52,12 +47,11 @@ namespace Machine.Mta
     {
     }
 
-    protected TransportMessage(Guid id, EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds, byte[] body, string label)
+    protected TransportMessage(string id, EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, byte[] body, string label)
     {
       _id = id;
       _returnAddress = returnAddress;
       _correlationId = correlationId;
-      _returnCorrelationId = Guid.Empty;
       _sagaIds = sagaIds;
       _body = body;
       _label = label;
@@ -68,14 +62,14 @@ namespace Machine.Mta
       return this.Label + " from " + _returnAddress + " with " + _body.Length + "bytes";
     }
 
-    public static TransportMessage For(EndpointAddress returnAddress, Guid correlationId, Guid[] sagaIds, MessagePayload payload)
+    public static TransportMessage For(string id, EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, MessagePayload payload)
     {
-      Guid id = Guid.NewGuid();
-      if (correlationId == Guid.Empty)
-      {
-        correlationId = id;
-      }
       return new TransportMessage(id, returnAddress, correlationId, sagaIds, payload.ToByteArray(), payload.Label);
+    }
+
+    public static TransportMessage For(EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, MessagePayload payload)
+    {
+      return new TransportMessage(null, returnAddress, correlationId, sagaIds, payload.ToByteArray(), payload.Label);
     }
   }
 }

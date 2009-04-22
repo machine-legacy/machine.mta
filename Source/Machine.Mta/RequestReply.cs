@@ -100,9 +100,9 @@ namespace Machine.Mta
 
   public class AsyncCallbackMap
   {
-    readonly Dictionary<Guid, MessageBusAsyncResult> _map = new Dictionary<Guid, MessageBusAsyncResult>();
+    readonly Dictionary<string, MessageBusAsyncResult> _map = new Dictionary<string, MessageBusAsyncResult>();
 
-    public void Add(Guid id, AsyncCallback callback, object state)
+    public void Add(string id, AsyncCallback callback, object state)
     {
       lock (_map)
       {
@@ -110,7 +110,7 @@ namespace Machine.Mta
       }
     }
 
-    public void InvokeAndRemove(Guid id, IMessage[] messages)
+    public void InvokeAndRemove(string id, IMessage[] messages)
     {
       MessageBusAsyncResult ar;
       lock (_map)

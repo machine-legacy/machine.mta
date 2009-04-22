@@ -47,7 +47,7 @@ namespace Machine.Mta.Specs
       message1 = messageFactory.Create<IMessage>();
       message2 = messageFactory.Create<ISampleMessage>();
       message3 = messageFactory.Create<ISampleSagaMessage>();
-      CurrentMessageContext.Open(TransportMessage.For(EndpointAddress.Null, Guid.Empty, new Guid[0], new MessagePayload(new byte[0], "NULL")));
+      CurrentMessageContext.Open(TransportMessage.For(EndpointAddress.Null, null, new Guid[0], new MessagePayload(new byte[0], "NULL")));
     };
   }
 

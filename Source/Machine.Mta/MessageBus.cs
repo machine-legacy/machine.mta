@@ -65,19 +65,19 @@ namespace Machine.Mta
     public void Send<T>(params T[] messages) where T : class, IMessage
     {
       Logging.Send(messages);
-      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, false, messages));
+      SendTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : class, IMessage
     {
       Logging.Send(destination, messages);
-      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, false, messages));
+      SendTransportMessage(new[] { destination }, CreateTransportMessage(null, false, messages));
     }
 
     public void Send(EndpointAddress destination, MessagePayload payload)
     {
       Logging.SendMessagePayload(destination, payload);
-      SendTransportMessage(new[] { destination }, CreateTransportMessage(Guid.Empty, payload, false));
+      SendTransportMessage(new[] { destination }, CreateTransportMessage(null, payload, false));
     }
 
     public void SendLocal<T>(params T[] messages) where T : class, IMessage
@@ -112,10 +112,10 @@ namespace Machine.Mta
 
     public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
     {
-      return new RequestReplyBuilder(CreateTransportMessage(Guid.Empty, false, messages), (x) => SendTransportMessage<T>(x), _asyncCallbackMap);
+      return new RequestReplyBuilder(CreateTransportMessage(null, false, messages), (x) => SendTransportMessage<T>(x), _asyncCallbackMap);
     }
 
-    public IRequestReplyBuilder Request<T>(Guid correlationId, params T[] messages) where T : class, IMessage
+    public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : class, IMessage
     {
       return new RequestReplyBuilder(CreateTransportMessage(correlationId, false, messages), (x) => SendTransportMessage<T>(x), _asyncCallbackMap);
     }
@@ -125,13 +125,13 @@ namespace Machine.Mta
       Reply(CurrentMessageContext.Current.ReturnAddress, CurrentMessageContext.Current.CorrelationId, messages);
     }
 
-    public void Reply<T>(EndpointAddress destination, Guid correlationId, params T[] messages) where T : class, IMessage
+    public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : class, IMessage
     {
       Logging.Reply(messages);
       SendTransportMessage(new[] { destination }, CreateTransportMessage(correlationId, true, messages));
     }
 
-    public void Reply<T>(Guid correlationId, params T[] messages) where T : class, IMessage
+    public void Reply<T>(string correlationId, params T[] messages) where T : class, IMessage
     {
       Logging.Reply(messages);
       SendTransportMessage<T>(CreateTransportMessage(correlationId, true, messages));
@@ -140,7 +140,7 @@ namespace Machine.Mta
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
       Logging.Publish(messages);
-      SendTransportMessage<T>(CreateTransportMessage(Guid.Empty, false, messages));
+      SendTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
     private void Send(EndpointAddress destination, TransportMessage transportMessage)
@@ -149,13 +149,13 @@ namespace Machine.Mta
       endpoint.Send(transportMessage);
     }
 
-    private TransportMessage CreateTransportMessage<T>(Guid correlationId, bool forReply, params T[] messages) where T : class, IMessage
+    private TransportMessage CreateTransportMessage<T>(string correlationId, bool forReply, params T[] messages) where T : class, IMessage
     {
       MessagePayload payload = _transportMessageBodySerializer.Serialize(messages);
       return CreateTransportMessage(correlationId, payload, forReply);
     }
 
-    private TransportMessage CreateTransportMessage(Guid correlationId, MessagePayload payload, bool forReply)
+    private TransportMessage CreateTransportMessage(string correlationId, MessagePayload payload, bool forReply)
     {
       return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlationId,
         CurrentSagaContext.CurrentSagaIds(forReply), payload);
@@ -180,7 +180,7 @@ namespace Machine.Mta
     {
       Logging.Received(transportMessage);
       IMessage[] messages = _transportMessageBodySerializer.Deserialize(transportMessage.Body);
-      if (transportMessage.CorrelationId != Guid.Empty)
+      if (transportMessage.CorrelationId != null)
       {
         _asyncCallbackMap.InvokeAndRemove(transportMessage.CorrelationId, messages);
       }
