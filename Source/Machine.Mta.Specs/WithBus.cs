@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
+
 using Machine.Container;
 using Machine.Container.Services;
 using Machine.Mta.Dispatching;
@@ -10,47 +10,11 @@ using Machine.Mta.Endpoints;
 using Machine.Mta.Sagas;
 using Machine.Specifications;
 using Machine.Utility.ThreadPool;
+
 using Rhino.Mocks;
 
 namespace Machine.Mta.Specs
 {
-  public class with_bus
-  {
-    protected static MessageBus bus;
-    protected static MessageDispatcher dispatcher;
-    protected static EndpointAddress listeningOnAddress = EndpointAddress.ForLocalQueue("test");
-    protected static EndpointAddress poisonAddress = EndpointAddress.ForLocalQueue("error");
-    protected static IMessageFactory messageFactory;
-    protected static IMessage message1;
-    protected static ISampleMessage message2;
-    protected static ISampleSagaMessage message3;
-    protected static IMachineContainer container;
-
-    Establish context = () =>
-    {
-      container = new MachineContainer();
-      container.Initialize();
-      container.PrepareForServices();
-      container.Register.Type<SagaAspect>();
-      container.Register.Type<MsmqEndpointFactory>();
-      container.Register.Type<MsmqTransactionManager>();
-      container.Register.Type<TransactionManager>();
-      container.Start();  
-      IEndpointResolver endpointResolver = new EndpointResolver(container);
-      IMessageDestinations messageDestinations = new MessageDestinations();
-      MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
-      messageInterfaceImplementations.AddMessageTypes(typeof(IMessage), typeof(ISampleMessage), typeof(ISampleSagaMessage));
-      TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
-      dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container), new AllHandlersInContainer(container));
-      messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
-      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager(), new MessageFailureManager(), ThreadPoolConfiguration.OneAndOne);
-      message1 = messageFactory.Create<IMessage>();
-      message2 = messageFactory.Create<ISampleMessage>();
-      message3 = messageFactory.Create<ISampleSagaMessage>();
-      CurrentMessageContext.Open(TransportMessage.For(EndpointAddress.Null, null, new Guid[0], new MessagePayload(new byte[0], "NULL")));
-    };
-  }
-
   public interface ISampleMessage : IMessage
   {
   }
@@ -60,7 +24,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching")]
-  public class when_dispatching_a_message_with_no_handlers : with_bus
+  public class when_dispatching_a_message_with_no_handlers : DispatchSpecs
   {
     static Exception error;
 
@@ -72,7 +36,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching")]
-  public class when_dispatching_a_message : with_bus
+  public class when_dispatching_a_message : DispatchSpecs
   {
     static IConsume<ISampleMessage> handler;
 
@@ -90,7 +54,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching")]
-  public class when_dispatching_a_message_with_two_applicable_handlers : with_bus
+  public class when_dispatching_a_message_with_two_applicable_handlers : DispatchSpecs
   {
     static IConsume<IMessage> handler1;
     static IConsume<ISampleMessage> handler2;
@@ -114,7 +78,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching")]
-  public class when_dispatching_a_message_with_inapplicable_handlers : with_bus
+  public class when_dispatching_a_message_with_inapplicable_handlers : DispatchSpecs
   {
     static IConsume<IMessage> handler1;
     static IConsume<ISampleMessage> handler2;
@@ -145,7 +109,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching")]
-  public class when_dispatching_a_message_two_handler_with_two_applicable_consumers : with_bus
+  public class when_dispatching_a_message_two_handler_with_two_applicable_consumers : DispatchSpecs
   {
     static IConsumeMessageAndSampleMessage handler;
 
@@ -163,5 +127,50 @@ namespace Machine.Mta.Specs
 
     It should_not_call_general_handler = () =>
       handler.AssertWasNotCalled(x => x.Consume((IMessage)message2));
+  }
+
+  public class BusSpecs
+  {
+    protected static MessageBus bus;
+    protected static MessageDispatcher dispatcher;
+    protected static EndpointAddress listeningOnAddress = EndpointAddress.ForLocalQueue("test");
+    protected static EndpointAddress poisonAddress = EndpointAddress.ForLocalQueue("error");
+    protected static IMessageFactory messageFactory;
+    protected static IMessage message1;
+    protected static ISampleMessage message2;
+    protected static ISampleSagaMessage message3;
+    protected static IMachineContainer container;
+    protected static IMessageDestinations messageDestinations;
+
+    Establish context = () =>
+    {
+      container = new MachineContainer();
+      container.Initialize();
+      container.PrepareForServices();
+      container.Register.Type<SagaAspect>();
+      container.Register.Type<MsmqEndpointFactory>();
+      container.Register.Type<MsmqTransactionManager>();
+      container.Register.Type<TransactionManager>();
+      container.Start();
+      IEndpointResolver endpointResolver = new EndpointResolver(container);
+      messageDestinations = new MessageDestinations();
+      MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
+      messageInterfaceImplementations.AddMessageTypes(typeof(IMessage), typeof(ISampleMessage), typeof(ISampleSagaMessage));
+      TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
+      dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container), new AllHandlersInContainer(container));
+      messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
+      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager(), new MessageFailureManager(), ThreadPoolConfiguration.OneAndOne);
+      message1 = messageFactory.Create<IMessage>();
+      message2 = messageFactory.Create<ISampleMessage>();
+      message3 = messageFactory.Create<ISampleSagaMessage>();
+    };
+  }
+
+  public class DispatchSpecs : BusSpecs
+  {
+    Establish context = () =>
+    {
+      CurrentMessageContext.Open(TransportMessage.For(EndpointAddress.Null, null, new Guid[0], new MessagePayload(new byte[0], "NULL")));
+    };
   }
 }

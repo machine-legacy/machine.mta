@@ -8,7 +8,7 @@ using Rhino.Mocks;
 
 namespace Machine.Mta.Specs
 {
-  public class with_saga : with_bus
+  public class SagaSpecs : DispatchSpecs
   {
     protected static SampleSaga saga;
     protected static ISagaState state;
@@ -26,12 +26,11 @@ namespace Machine.Mta.Specs
       saga.InitialState = state;
       container.Register.Type<SampleSaga>().Is(saga);
       container.Register.Type<ISagaStateRepository<ISagaState>>().Is(repository);
-      CurrentMessageContext.Open(TransportMessage.For(EndpointAddress.Null, null, new Guid[0], new MessagePayload(new byte[0], "NULL")));
     };
   }
 
   [Subject("Message dispatching with Sagas")]
-  public class when_dispatching_non_saga_message_to_saga : with_saga
+  public class when_dispatching_non_saga_message_to_saga : SagaSpecs
   {
     Establish context = () =>
     {
@@ -52,7 +51,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching with Sagas")]
-  public class when_dispatching_non_saga_message_to_saga_that_creates_new_state : with_saga
+  public class when_dispatching_non_saga_message_to_saga_that_creates_new_state : SagaSpecs
   {
     Because of = () =>
       dispatcher.Dispatch(new IMessage[] { message3 });
@@ -68,7 +67,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching with Sagas")]
-  public class when_dispatching_saga_message_to_saga : with_saga
+  public class when_dispatching_saga_message_to_saga : SagaSpecs
   {
     Establish context = () =>
       repository.Stub(x => x.FindSagaState(sagaMessage.SagaId)).Return(state);
@@ -87,7 +86,7 @@ namespace Machine.Mta.Specs
   }
 
   [Subject("Message dispatching with Sagas")]
-  public class when_dispatching_saga_message_to_saga_that_completes_the_saga : with_saga
+  public class when_dispatching_saga_message_to_saga_that_completes_the_saga : SagaSpecs
   {
     Establish context = () =>
     {

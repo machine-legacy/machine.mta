@@ -40,7 +40,7 @@ namespace Machine.Mta
 
     public string Label
     {
-      get { return "TM<" + _label + ">"; }
+      get { return _label; }
     }
 
     protected TransportMessage()
@@ -62,9 +62,9 @@ namespace Machine.Mta
       return this.Label + " from " + _returnAddress + " with " + _body.Length + "bytes";
     }
 
-    public static TransportMessage For(string id, EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, MessagePayload payload)
+    public static TransportMessage For(string id, EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, byte[] payload, string label)
     {
-      return new TransportMessage(id, returnAddress, correlationId, sagaIds, payload.ToByteArray(), payload.Label);
+      return new TransportMessage(id, returnAddress, correlationId, sagaIds, payload, label);
     }
 
     public static TransportMessage For(EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, MessagePayload payload)
