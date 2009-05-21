@@ -119,7 +119,6 @@ namespace Machine.Mta.Configuration
           yield return endpoint.ToEndpointAddress();
         }
       }
-      throw new KeyNotFoundException("No endpoint configured: " + name);
     }
 
     public void ApplyForwards(IMessageDestinations messageDestinations)
