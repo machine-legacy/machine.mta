@@ -49,7 +49,11 @@ namespace Machine.Mta
 
     public void Dispose()
     {
-      _batch(_messages.ToArray());
+      var outgoing = _messages.ToArray();
+      if (outgoing.Length > 0)
+      {
+        _batch(outgoing);
+      }
       _messages.Clear();
     }
   }
