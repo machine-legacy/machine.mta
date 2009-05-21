@@ -53,6 +53,8 @@ namespace Machine.Mta.Dispatching
   {
     public static HandlerInvocation ToInvocation(this MessageHandlerType messageHandlerType, IMessage message, object handler, IConsume<IMessage> invoker, Queue<IMessageAspect> aspects)
     {
+      LastMessageAspect lastAspect = new LastMessageAspect(invoker, message);
+      aspects.Enqueue(lastAspect);
       return new HandlerInvocation(message, messageHandlerType.TargetExpectsMessageOfType, messageHandlerType.TargetType, handler, invoker, aspects);
     }
   }

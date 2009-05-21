@@ -11,6 +11,7 @@ namespace Machine.Mta.Dispatching
     readonly object _handler;
     readonly Queue<IMessageAspect> _aspects;
     readonly IConsume<IMessage> _invoker;
+    readonly Stack<IMessageAspect> _completed;
 
     public IMessage Message
     {
@@ -45,18 +46,44 @@ namespace Machine.Mta.Dispatching
       _handlerType = handlerType;
       _handler = handler;
       _invoker = invoker;
+      _completed = new Stack<IMessageAspect>();
     }
 
     public void Continue()
     {
-      if (_aspects.Count > 0)
+      if (_aspects.Count == 0)
       {
-        _aspects.Dequeue().Continue(this);
+        throw new InvalidOperationException();
       }
-      else
+      var aspect = _aspects.Dequeue();
+      aspect.Continue(this);
+      _completed.Push(aspect);
+    }
+
+    public void Retry()
+    {
+      if (_completed.Count == 0)
       {
-        _invoker.Consume(_message);
+        throw new InvalidOperationException();
       }
+      _completed.Peek().Continue(this);
+    }
+  }
+
+  public class LastMessageAspect : IMessageAspect
+  {
+    readonly IConsume<IMessage> _invoker;
+    readonly IMessage _message;
+
+    public LastMessageAspect(IConsume<IMessage> invoker, IMessage message)
+    {
+      _invoker = invoker;
+      _message = message;
+    }
+
+    public void Continue(HandlerInvocation invocation)
+    {
+      _invoker.Consume(_message);
     }
   }
 }
