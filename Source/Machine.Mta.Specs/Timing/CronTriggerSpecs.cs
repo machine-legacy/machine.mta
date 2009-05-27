@@ -12,7 +12,10 @@ namespace Machine.Mta.Specs.Timing.CronTriggerSpecs
     protected static bool triggered;
 
     Establish context = () =>
+    {
+      ServerClock.Now = (() => new DateTime(2008, 1, 1, 10, 10, 10));
       trigger = CronTriggerFactory.EveryHalfHour();
+    };
 
     Because of = () =>
       triggered = trigger.IsFired();
