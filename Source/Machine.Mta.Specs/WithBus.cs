@@ -159,7 +159,7 @@ namespace Machine.Mta.Specs
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
       dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container), new AllHandlersInContainer(container));
       messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
-      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager(), new MessageFailureManager(), ThreadPoolConfiguration.OneAndOne);
+      bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager(), new MessageFailureManager(new FailureConfiguration(1)), ThreadPoolConfiguration.OneAndOne);
       message1 = messageFactory.Create<IMessage>();
       message2 = messageFactory.Create<ISampleMessage>();
       message3 = messageFactory.Create<ISampleSagaMessage>();
