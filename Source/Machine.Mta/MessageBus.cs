@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Machine.Mta.Dispatching;
 using Machine.Mta.Endpoints;
@@ -65,19 +66,19 @@ namespace Machine.Mta
     public void Send<T>(params T[] messages) where T : class, IMessage
     {
       Logging.Send(messages);
-      SendTransportMessage<T>(CreateTransportMessage(null, false, messages));
+      RouteTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : class, IMessage
     {
       Logging.Send(destination, messages);
-      SendTransportMessage(new[] { destination }, CreateTransportMessage(null, false, messages));
+      SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(null, false, messages));
     }
 
     public void Send(EndpointAddress destination, MessagePayload payload)
     {
       Logging.SendMessagePayload(destination, payload);
-      SendTransportMessage(new[] { destination }, CreateTransportMessage(null, payload, false));
+      SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(null, payload, false));
     }
 
     public void SendLocal<T>(params T[] messages) where T : class, IMessage
@@ -85,14 +86,15 @@ namespace Machine.Mta
       Send(this.Address, messages);
     }
 
-    public TransportMessage SendTransportMessage<T>(TransportMessage transportMessage)
+    public TransportMessage RouteTransportMessage<T>(TransportMessage transportMessage, params EndpointAddress[] destinations)
     {
-      return SendTransportMessage(_messageDestinations.LookupEndpointsFor(typeof(T)), transportMessage);
+      IEnumerable<EndpointAddress> allDestinations = _messageDestinations.LookupEndpointsFor(typeof(T)).Union(destinations);
+      return SendTransportMessageOnlyTo(allDestinations, transportMessage);
     }
 
-    public TransportMessage SendTransportMessage(IEnumerable<EndpointAddress> destinations, TransportMessage transportMessage)
+    public TransportMessage SendTransportMessageOnlyTo(IEnumerable<EndpointAddress> destinations, TransportMessage transportMessage)
     {
-      foreach (EndpointAddress destination in destinations)
+      foreach (EndpointAddress destination in destinations.Distinct())
       {
         Send(destination, transportMessage);
       }
@@ -112,12 +114,12 @@ namespace Machine.Mta
 
     public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
     {
-      return new RequestReplyBuilder(CreateTransportMessage(null, false, messages), (x) => SendTransportMessage<T>(x), _asyncCallbackMap);
+      return new RequestReplyBuilder(CreateTransportMessage(null, false, messages), (x) => RouteTransportMessage<T>(x), _asyncCallbackMap);
     }
 
     public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : class, IMessage
     {
-      return new RequestReplyBuilder(CreateTransportMessage(correlationId, false, messages), (x) => SendTransportMessage<T>(x), _asyncCallbackMap);
+      return new RequestReplyBuilder(CreateTransportMessage(correlationId, false, messages), (x) => RouteTransportMessage<T>(x), _asyncCallbackMap);
     }
 
     public void Reply<T>(params T[] messages) where T : class, IMessage
@@ -128,19 +130,36 @@ namespace Machine.Mta
     public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : class, IMessage
     {
       Logging.Reply(messages);
-      SendTransportMessage(new[] { destination }, CreateTransportMessage(correlationId, true, messages));
+      SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(correlationId, true, messages));
     }
 
     public void Reply<T>(string correlationId, params T[] messages) where T : class, IMessage
     {
-      Logging.Reply(messages);
-      SendTransportMessage<T>(CreateTransportMessage(correlationId, true, messages));
+      Reply(CurrentMessageContext.Current.ReturnAddress, correlationId, messages);
     }
 
     public void Publish<T>(params T[] messages) where T : class, IMessage
     {
       Logging.Publish(messages);
-      SendTransportMessage<T>(CreateTransportMessage(null, false, messages));
+      RouteTransportMessage<T>(CreateTransportMessage(null, false, messages));
+    }
+
+    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : class, IMessage
+    {
+      Logging.Reply(messages);
+      RouteTransportMessage<T>(CreateTransportMessage(correlationId, true, messages), destination);
+    }
+
+    public void PublishAndReply<T>(params T[] messages) where T : class, IMessage
+    {
+      Logging.Publish(messages);
+      RouteTransportMessage<T>(CreateTransportMessage(null, false, messages), CurrentMessageContext.Current.ReturnAddress);
+    }
+
+    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : class, IMessage
+    {
+      Logging.Publish(messages);
+      RouteTransportMessage<T>(CreateTransportMessage(correlationId, false, messages), CurrentMessageContext.Current.ReturnAddress);
     }
 
     private void Send(EndpointAddress destination, TransportMessage transportMessage)
