@@ -39,7 +39,17 @@ namespace Machine.Mta
 
     public bool IsLocal
     {
-      get { return _host.Equals("localhost", StringComparison.InvariantCultureIgnoreCase); }
+      get
+      {
+        foreach (var hostValue in new[] { "localhost", Environment.MachineName })
+        {
+          if (hostValue.Equals(_host, StringComparison.InvariantCultureIgnoreCase))
+          {
+            return true;
+          }
+        }
+        return false;
+      }
     }
 
     protected EndpointAddress()
