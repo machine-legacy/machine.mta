@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Messaging;
 
@@ -43,21 +44,13 @@ namespace Machine.Mta.Transports.Msmq
       transportMessage.Id = systemMessage.Id;
     }
 
+    [DebuggerNonUserCode]
     public bool HasAnyPendingMessages(TimeSpan timeout)
     {
       CheckForWriteOnly(timeout);
       try
       {
-        Message message;
-        // This exception interferes with debugging apparently. This should mitigate that.
-        if (System.Diagnostics.Debugger.IsAttached)
-        {
-          message = _queue.Peek();
-        }
-        else
-        {
-          message = _queue.Peek(timeout);
-        }
+        Message message = _queue.Peek(timeout);
         if (message != null)
         {
           message.Dispose();
