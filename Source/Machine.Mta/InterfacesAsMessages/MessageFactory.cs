@@ -25,16 +25,23 @@ namespace Machine.Mta.InterfacesAsMessages
       return (IMessage)Activator.CreateInstance(implementation, parameters);
     }
 
-    public T Create<T>() where T : class, IMessage
+    public T Create<T>() where T : IMessage
     {
       return (T)Create(typeof(T));
     }
 
-    public T Create<T>(object value) where T : class, IMessage
+    public T Create<T>(object value) where T : IMessage
     {
       IDictionary<string, object> dictionary = value as IDictionary<string, object> ?? value.ToDictionary();
       CheckForErrors(typeof(T), dictionary);
       return (T)Create(typeof(T), dictionary);
+    }
+
+    public T Create<T>(Action<T> factory) where T : IMessage
+    {
+      T message = Create<T>();
+      factory(message);
+      return message;
     }
 
     private void CheckForErrors(Type messageType, IDictionary<string, object> dictionary)
