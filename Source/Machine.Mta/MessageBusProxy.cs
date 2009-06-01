@@ -28,6 +28,11 @@ namespace Machine.Mta
       CurrentBus().Send(messages);
     }
 
+    public void Send<T>(string correlationId, params T[] messages) where T : IMessage
+    {
+      CurrentBus().Send(correlationId, messages);
+    }
+
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage
     {
       CurrentBus().Send(destination, messages);

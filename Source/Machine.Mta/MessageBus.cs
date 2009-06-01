@@ -69,6 +69,12 @@ namespace Machine.Mta
       RouteTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
+    public void Send<T>(string correlationId, params T[] messages) where T : IMessage
+    {
+      Logging.Send(messages);
+      RouteTransportMessage<T>(CreateTransportMessage(correlationId, false, messages));
+    }
+
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage
     {
       Logging.Send(destination, messages);
