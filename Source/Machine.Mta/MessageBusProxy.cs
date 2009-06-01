@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Remoting.Messaging;
 
 namespace Machine.Mta
 {
@@ -22,12 +23,12 @@ namespace Machine.Mta
       All(x => x.Start());
     }
 
-    public void Send<T>(params T[] messages) where T : class, IMessage
+    public void Send<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().Send(messages);
     }
 
-    public void Send<T>(EndpointAddress destination, params T[] messages) where T : class, IMessage
+    public void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage
     {
       CurrentBus().Send(destination, messages);
     }
@@ -37,7 +38,7 @@ namespace Machine.Mta
       CurrentBus().Send(destination, payload);
     }
 
-    public void SendLocal<T>(params T[] messages) where T : class, IMessage
+    public void SendLocal<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().SendLocal(messages);
     }
@@ -47,47 +48,47 @@ namespace Machine.Mta
       All(x => x.Stop());
     }
 
-    public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
+    public IRequestReplyBuilder Request<T>(params T[] messages) where T : IMessage
     {
       return CurrentBus().Request(messages);
     }
 
-    public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : class, IMessage
+    public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : IMessage
     {
       return CurrentBus().Request(correlationId, messages);
     }
 
-    public void Reply<T>(params T[] messages) where T : class, IMessage
+    public void Reply<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().Reply(messages);
     }
 
-    public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : class, IMessage
+    public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
     {
       CurrentBus().Reply(destination, correlationId, messages);
     }
 
-    public void Reply<T>(string correlationId, params T[] messages) where T : class, IMessage
+    public void Reply<T>(string correlationId, params T[] messages) where T : IMessage
     {
       CurrentBus().Reply(correlationId, messages);
     }
 
-    public void Publish<T>(params T[] messages) where T : class, IMessage
+    public void Publish<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().Publish(messages);
     }
 
-    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : class, IMessage
+    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
     {
       CurrentBus().PublishAndReplyTo(destination, correlationId, messages);
     }
 
-    public void PublishAndReply<T>(params T[] messages) where T : class, IMessage
+    public void PublishAndReply<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().PublishAndReply(messages);
     }
 
-    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : class, IMessage
+    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : IMessage
     {
       CurrentBus().PublishAndReply(correlationId, messages);
     }

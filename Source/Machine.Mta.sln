@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machine.Mta.Transports.Msmq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machine.Mta.NServiceBus", "Machine.Mta.NServiceBus\Machine.Mta.NServiceBus.csproj", "{3F2E6DF5-6EE7-4E06-9A7D-EEE90172F253}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machine.Mta.Core", "Machine.Mta.Core\Machine.Mta.Core.csproj", "{9C7A8E98-28A6-4C32-B704-B3644925A08E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{3F2E6DF5-6EE7-4E06-9A7D-EEE90172F253}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F2E6DF5-6EE7-4E06-9A7D-EEE90172F253}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F2E6DF5-6EE7-4E06-9A7D-EEE90172F253}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C7A8E98-28A6-4C32-B704-B3644925A08E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C7A8E98-28A6-4C32-B704-B3644925A08E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C7A8E98-28A6-4C32-B704-B3644925A08E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C7A8E98-28A6-4C32-B704-B3644925A08E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,7 +12,7 @@ namespace Machine.Mta
     static readonly ILog _dispatcherLog = LogManager.GetLogger(_loggerPrefix + ".Dispatching");
     static readonly ILog _errorLog = LogManager.GetLogger("Machine.Mta.Errors");
 
-    public static void Publish(IMessage[] messages)
+    public static void Publish<T>(T[] messages) where T : IMessage
     {
       if (messages.Length == 0) return;
       string message = "Publishing " + messages[0].GetType() + " x " + messages.Length;
@@ -25,7 +25,7 @@ namespace Machine.Mta
       _sendingLog.Info("Sending Payload " + message + " to " + destination);
     }
 
-    public static void Reply(IMessage[] messages)
+    public static void Reply<T>(T[] messages) where T : IMessage
     {
       if (messages.Length == 0) return;
       string message = "Replying " + messages[0].GetType() + " x " + messages.Length;
@@ -33,7 +33,7 @@ namespace Machine.Mta
       ForMessage(messages[0]).Info(message);
     }
 
-    public static void Send(EndpointAddress destination, IMessage[] messages)
+    public static void Send<T>(EndpointAddress destination, T[] messages) where T : IMessage
     {
       if (messages.Length == 0) return;
       string message = "Sending " + messages[0].GetType() + " to " + destination + " x " + messages.Length;
@@ -41,7 +41,7 @@ namespace Machine.Mta
       ForMessage(messages[0]).Info(message);
     }
 
-    public static void Send(IMessage[] messages)
+    public static void Send<T>(T[] messages) where T : IMessage
     {
       if (messages.Length == 0) return;
       string message = "Sending " + messages[0].GetType() + " x " + messages.Length;

@@ -73,6 +73,10 @@
     <Compile Include="WithSaga.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">
+      <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
+      <Name>Machine.Mta.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Machine.Mta.Transports.Msmq\Machine.Mta.Transports.Msmq.csproj">
       <Project>{283092A1-0A52-497E-A063-130B9FBE95FF}</Project>
       <Name>Machine.Mta.Transports.Msmq</Name>

@@ -59,6 +59,12 @@
     <Compile Include="IMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">
+      <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
+      <Name>Machine.Mta.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

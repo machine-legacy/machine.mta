@@ -63,13 +63,13 @@ namespace Machine.Mta
       _threads.Start();
     }
 
-    public void Send<T>(params T[] messages) where T : class, IMessage
+    public void Send<T>(params T[] messages) where T : IMessage
     {
       Logging.Send(messages);
       RouteTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
-    public void Send<T>(EndpointAddress destination, params T[] messages) where T : class, IMessage
+    public void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage
     {
       Logging.Send(destination, messages);
       SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(null, false, messages));
@@ -81,7 +81,7 @@ namespace Machine.Mta
       SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(null, payload, false));
     }
 
-    public void SendLocal<T>(params T[] messages) where T : class, IMessage
+    public void SendLocal<T>(params T[] messages) where T : IMessage
     {
       Send(this.Address, messages);
     }
@@ -112,51 +112,51 @@ namespace Machine.Mta
       Stop();
     }
 
-    public IRequestReplyBuilder Request<T>(params T[] messages) where T : class, IMessage
+    public IRequestReplyBuilder Request<T>(params T[] messages) where T : IMessage
     {
       return new RequestReplyBuilder(CreateTransportMessage(null, false, messages), (x) => RouteTransportMessage<T>(x), _asyncCallbackMap);
     }
 
-    public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : class, IMessage
+    public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : IMessage
     {
       return new RequestReplyBuilder(CreateTransportMessage(correlationId, false, messages), (x) => RouteTransportMessage<T>(x), _asyncCallbackMap);
     }
 
-    public void Reply<T>(params T[] messages) where T : class, IMessage
+    public void Reply<T>(params T[] messages) where T : IMessage
     {
       Reply(CurrentMessageContext.Current.ReturnAddress, CurrentMessageContext.Current.CorrelationId, messages);
     }
 
-    public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : class, IMessage
+    public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
     {
       Logging.Reply(messages);
       SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(correlationId, true, messages));
     }
 
-    public void Reply<T>(string correlationId, params T[] messages) where T : class, IMessage
+    public void Reply<T>(string correlationId, params T[] messages) where T : IMessage
     {
       Reply(CurrentMessageContext.Current.ReturnAddress, correlationId, messages);
     }
 
-    public void Publish<T>(params T[] messages) where T : class, IMessage
+    public void Publish<T>(params T[] messages) where T : IMessage
     {
       Logging.Publish(messages);
       RouteTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
-    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : class, IMessage
+    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
     {
       Logging.Reply(messages);
       RouteTransportMessage<T>(CreateTransportMessage(correlationId, true, messages), destination);
     }
 
-    public void PublishAndReply<T>(params T[] messages) where T : class, IMessage
+    public void PublishAndReply<T>(params T[] messages) where T : IMessage
     {
       Logging.Publish(messages);
       RouteTransportMessage<T>(CreateTransportMessage(null, false, messages), CurrentMessageContext.Current.ReturnAddress);
     }
 
-    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : class, IMessage
+    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : IMessage
     {
       Logging.Publish(messages);
       RouteTransportMessage<T>(CreateTransportMessage(correlationId, false, messages), CurrentMessageContext.Current.ReturnAddress);
@@ -168,7 +168,7 @@ namespace Machine.Mta
       endpoint.Send(transportMessage);
     }
 
-    private TransportMessage CreateTransportMessage<T>(string correlationId, bool forReply, params T[] messages) where T : class, IMessage
+    private TransportMessage CreateTransportMessage<T>(string correlationId, bool forReply, params T[] messages) where T : IMessage
     {
       MessagePayload payload = _transportMessageBodySerializer.Serialize(messages);
       return CreateTransportMessage(correlationId, payload, forReply);
