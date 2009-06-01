@@ -33,7 +33,7 @@ namespace Machine.Mta.Timing
 
     public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage
     {
-      EndpointAddress[] destinations = _messageDestinations.LookupEndpointsFor(typeof(T)).ToArray();
+      EndpointAddress[] destinations = _messageDestinations.LookupEndpointsFor(typeof(T), true).ToArray();
       PublishAt(publishAt, destinations, messages);
     }
 

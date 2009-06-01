@@ -13,7 +13,7 @@ namespace Machine.Mta
     private readonly List<EndpointAddress> _catchAlls = new List<EndpointAddress>();
     private readonly ReaderWriterLock _lock = new ReaderWriterLock();
 
-    public ICollection<EndpointAddress> LookupEndpointsFor(Type messageType)
+    public ICollection<EndpointAddress> LookupEndpointsFor(Type messageType, bool throwOnNone)
     {
       using (RWLock.AsReader(_lock))
       {
@@ -31,7 +31,7 @@ namespace Machine.Mta
             }
           }
         }
-        if (destinations.Count == 0)
+        if (destinations.Count == 0 && throwOnNone)
         {
           throw new InvalidOperationException("No endpoints for: " + messageType);
         }

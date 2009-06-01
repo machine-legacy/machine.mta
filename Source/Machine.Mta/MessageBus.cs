@@ -88,7 +88,7 @@ namespace Machine.Mta
 
     public TransportMessage RouteTransportMessage<T>(TransportMessage transportMessage, params EndpointAddress[] destinations)
     {
-      IEnumerable<EndpointAddress> allDestinations = _messageDestinations.LookupEndpointsFor(typeof(T)).Union(destinations);
+      IEnumerable<EndpointAddress> allDestinations = _messageDestinations.LookupEndpointsFor(typeof(T), true).Union(destinations);
       return SendTransportMessageOnlyTo(allDestinations, transportMessage);
     }
 
