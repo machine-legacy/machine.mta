@@ -69,7 +69,6 @@
     <Compile Include="AdoNet\IGroupNameProvider.cs" />
     <Compile Include="Batching.cs" />
     <Compile Include="Configuration\MessageBusConfigurationSection.cs" />
-    <Compile Include="Dispatching\AllHandlersInContainer.cs" />
     <Compile Include="Dispatching\DefaultMessageAspectsProvider.cs" />
     <Compile Include="Dispatching\EndpointHandlerRules.cs" />
     <Compile Include="Dispatching\HandlerDiscoverer.cs" />
@@ -77,8 +76,6 @@
     <Compile Include="Dispatching\IEndpointHandlerRules.cs" />
     <Compile Include="Dispatching\IMessageAspect.cs" />
     <Compile Include="Dispatching\IMessageAspectsProvider.cs" />
-    <Compile Include="Dispatching\IProvideHandlerTypes.cs" />
-    <Compile Include="Dispatching\MessageHandlerType.cs" />
     <Compile Include="Dispatching\StaticHandlerTypes.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinarySagaStateRepository.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinaryScheduledPublishRepository.cs" />
@@ -102,7 +99,6 @@
     <Compile Include="InterfacesAsMessages\ExceptionJsonConverter.cs" />
     <Compile Include="Helpers\MessageHandlerServices.cs" />
     <Compile Include="Helpers\MessageSetupHelpers.cs" />
-    <Compile Include="IConsume.cs" />
     <Compile Include="Dispatching\IMessageDispatcher.cs" />
     <Compile Include="Dispatching\BusWorker.cs" />
     <Compile Include="ITransactionManager.cs" />
@@ -115,7 +111,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TimeToBeReceivedAttribute.cs" />
-    <Compile Include="TypeHelpers.cs" />
     <Compile Include="MessageBusFactory.cs" />
     <Compile Include="RequestReply.cs" />
     <Compile Include="MtaServices.cs" />
