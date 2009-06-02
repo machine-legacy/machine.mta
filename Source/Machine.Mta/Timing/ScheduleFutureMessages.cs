@@ -39,6 +39,21 @@ namespace Machine.Mta.Timing
     }
   }
 
+  public class NullScheduleFutureMessages : IScheduleFutureMessages
+  {
+    public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage
+    {
+    }
+
+    public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
+    {
+    }
+
+    public void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : IMessage
+    {
+    }
+  }
+
   public interface IScheduleFutureMessages
   {
     void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage;
