@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using NServiceBus;
 
 namespace Machine.Mta
@@ -116,7 +116,7 @@ namespace Machine.Mta
   {
     public static NServiceBus.IMessage[] ToNsbMessages<T>(this T[] messages) where T : IMessage
     {
-      return new NServiceBus.IMessage[0];
+      return messages.Cast<NServiceBus.IMessage>().ToArray();
     }
 
     public static string ToNsbAddress(this EndpointAddress address)
