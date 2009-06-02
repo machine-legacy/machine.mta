@@ -60,6 +60,7 @@
     <Compile Include="Config\MachineObjectBuilderConfig.cs" />
     <Compile Include="MessageHandlerProxies.cs" />
     <Compile Include="MtaNsbServices.cs" />
+    <Compile Include="NsbMessageRegisterer.cs" />
     <Compile Include="NServiceBusMessageBus.cs" />
     <Compile Include="NsbMessageBusFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
