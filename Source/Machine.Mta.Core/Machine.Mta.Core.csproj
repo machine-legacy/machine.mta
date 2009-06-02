@@ -39,6 +39,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Container\Machine.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Machine.Utility.ThreadPool, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Machine\Machine.Utility.ThreadPool.dll</HintPath>
+    </Reference>
     <Reference Include="NServiceBus, Version=2.7.6.2, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\NServiceBus\NServiceBus.dll</HintPath>
@@ -58,9 +62,11 @@
     <Compile Include="IConsume.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
+    <Compile Include="IMessageBusManager.cs" />
     <Compile Include="IMessageDestinations.cs" />
     <Compile Include="IMessageFactory.cs" />
     <Compile Include="ITransportMessageBodyFormatter.cs" />
+    <Compile Include="MessageDestinations.cs" />
     <Compile Include="MessagePayload.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Timing\IOnceASecondTask.cs" />

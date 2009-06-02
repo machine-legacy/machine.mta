@@ -63,10 +63,7 @@ namespace Machine.Mta
 
     public void Dispose()
     {
-      foreach (IMessageBus bus in _buses)
-      {
-        bus.Dispose();
-      }
+      EachBus(b => b.Dispose());
     }
   }
 }

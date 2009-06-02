@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq;
 
 using Machine.Container.Services;
+using Machine.Core;
 using Machine.Mta.Config;
-using Machine.Mta.Dispatching;
 
 using NServiceBus;
 using NServiceBus.ObjectBuilder;
@@ -16,24 +15,19 @@ using NServiceBus.Unicast.Transport.Msmq;
 
 namespace Machine.Mta
 {
-  public interface INsbMessageBusFactory
-  {
-    IBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
-    IBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
-  }
-
-  public class NsbMessageBusFactory : INsbMessageBusFactory
+  public class NsbMessageBusFactory : INsbMessageBusFactory, IDisposable
   {
     readonly IMachineContainer _container;
+    readonly List<NsbBus> _all = new List<NsbBus>();
 
     public NsbMessageBusFactory(IMachineContainer container)
     {
       _container = container;
     }
 
-    public IBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
+    public IStartableBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
-      return Configure
+      return Add(listenAddress, poisonAddress, Configure
         .With(_container.Handlers().Union(additionalTypes))
         .MachineBuilder(_container)
         .XmlSerializer()
@@ -41,13 +35,12 @@ namespace Machine.Mta
           .On(listenAddress, poisonAddress)
         .UnicastBus()
           .LoadMessageHandlers()
-        .CreateBus()
-        .Start();
+        .CreateBus());
     }
 
-    public IBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
+    public IStartableBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
-      return Configure
+      return Add(listenAddress, poisonAddress, Configure
         .With(_container.Handlers().Union(additionalTypes))
         .MachineBuilder(_container)
         .MsmqSubscriptionStorage()
@@ -57,9 +50,71 @@ namespace Machine.Mta
           .On(listenAddress, poisonAddress)
         .UnicastBus()
           .LoadMessageHandlers()
-        .CreateBus()
-        .Start();
+        .CreateBus());
     }
+
+    public void EachBus(Action<IStartableBus> action)
+    {
+      _all.Each(b => action(b.StartableBus));
+    }
+
+    public NsbBus CurrentBus()
+    {
+      return _all.First();
+    }
+
+    IStartableBus Add(EndpointAddress listenAddress, EndpointAddress poisonAddress, IStartableBus bus)
+    {
+      _all.Add(new NsbBus(listenAddress, poisonAddress, bus));
+      return bus;
+    }
+
+    public void Dispose()
+    {
+      EachBus(b => b.Dispose());
+    }
+  }
+
+  public class NsbBus
+  {
+    readonly EndpointAddress _listenAddress;
+    readonly EndpointAddress _poisonAddress;
+    readonly IStartableBus _startableBus;
+
+    public EndpointAddress ListenAddress
+    {
+      get { return _listenAddress; }
+    }
+
+    public EndpointAddress PoisonAddress
+    {
+      get { return _poisonAddress; }
+    }
+
+    public IStartableBus StartableBus
+    {
+      get { return _startableBus; }
+    }
+
+    public IBus Bus
+    {
+      get { return _startableBus.Start(); }
+    }
+
+    public NsbBus(EndpointAddress listenAddress, EndpointAddress poisonAddress, IStartableBus startableBus)
+    {
+      _listenAddress = listenAddress;
+      _poisonAddress = poisonAddress;
+      _startableBus = startableBus;
+    }
+  }
+
+  public interface INsbMessageBusFactory
+  {
+    IStartableBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
+    IStartableBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
+    void EachBus(Action<IStartableBus> action);
+    NsbBus CurrentBus();
   }
 
   public static class MyConfigure
@@ -163,51 +218,6 @@ namespace Machine.Mta
     {
       _config.ConfigureProperty(t => t.Queue, address.ToNsbAddress());
       return this;
-    }
-  }
-
-  public static class TypesScanner
-  {
-    public static IEnumerable<Type> MessagesFrom(params Assembly[] messageAssemblies)
-    {
-      return PossiblyDuplicateMessagesFrom(messageAssemblies).Distinct();
-    }
-
-    static IEnumerable<Type> PossiblyDuplicateMessagesFrom(params Assembly[] messageAssemblies)
-    {
-      foreach (var assembly in messageAssemblies)
-      {
-        foreach (var type in assembly.GetTypes())
-        {
-          if (typeof(IMessage).IsAssignableFrom(type))
-          {
-            yield return type;
-          }
-        }
-      }
-    }
-
-    public static IEnumerable<Type> Handlers(this IMachineContainer container)
-    {
-      foreach (var handlerType in AllMessageHandlerTypes(container))
-      {
-        if (typeof(NServiceBus.IMessage).IsAssignableFrom(handlerType.TargetExpectsMessageOfType))
-        {
-          yield return MessageHandlerProxies.For(handlerType.TargetExpectsMessageOfType, handlerType.TargetType);
-        }
-      }
-    }
-
-    static IEnumerable<MessageHandlerType> AllMessageHandlerTypes(IMachineContainer container)
-    {
-      foreach (var handlerType in new AllHandlersInContainer(container).HandlerTypes())
-      {
-        var handlerConsumes = handlerType.AllGenericVariations(typeof(IConsume<>));
-        foreach (var type in handlerConsumes)
-        {
-          yield return new MessageHandlerType(handlerType, type);
-        }
-      }
     }
   }
 }

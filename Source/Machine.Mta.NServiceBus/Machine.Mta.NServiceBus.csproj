@@ -59,9 +59,11 @@
     <Compile Include="MachineObjectBuilder.cs" />
     <Compile Include="Config\MachineObjectBuilderConfig.cs" />
     <Compile Include="MessageHandlerProxies.cs" />
+    <Compile Include="MtaNsbServices.cs" />
     <Compile Include="NServiceBusMessageBus.cs" />
     <Compile Include="NsbMessageBusFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypesScanner.cs" />
     <Compile Include="UnicastBusProxy.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,9 +6,16 @@ namespace Machine.Mta
 {
   public class BusProxy : IBus
   {
+    private readonly INsbMessageBusFactory _messageBusFactory;
+
+    public BusProxy(INsbMessageBusFactory messageBusFactory)
+    {
+      _messageBusFactory = messageBusFactory;
+    }
+
     public IBus CurrentBus()
     {
-      return null;
+      return _messageBusFactory.CurrentBus().Bus;
     }
 
     public T CreateInstance<T>() where T : NServiceBus.IMessage
