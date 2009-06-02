@@ -18,18 +18,18 @@ namespace Machine.Mta.Timing
       _bus = bus;
     }
 
-    public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage
+    public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage
     {
       EndpointAddress[] destinations = _messageDestinations.LookupEndpointsFor(typeof(T), true).ToArray();
       PublishAt(publishAt, destinations, messages);
     }
 
-    public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : class, IMessage
+    public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
     {
       PublishAt(publishAt, new[] { destination }, messages);
     }
 
-    public void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : class, IMessage
+    public void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : IMessage
     {
       ISchedulePublishMessage message = _messageFactory.Create<ISchedulePublishMessage>();
       message.PublishAddresses = destinations;
@@ -41,8 +41,8 @@ namespace Machine.Mta.Timing
 
   public interface IScheduleFutureMessages
   {
-    void PublishAt<T>(DateTime publishAt, params T[] messages) where T : class, IMessage;
-    void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : class, IMessage;
-    void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : class, IMessage;
+    void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage;
+    void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage;
+    void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : IMessage;
   }
 }
