@@ -6,12 +6,7 @@ namespace Machine.Mta
 {
   public class NsbMessageRegisterer : IMessageRegisterer
   {
-    readonly List<Type> _messageTypes;
-
-    public NsbMessageRegisterer(List<Type> messageTypes)
-    {
-      _messageTypes = messageTypes;
-    }
+    readonly List<Type> _messageTypes = new List<Type>();
 
     public void AddMessageTypes(params Type[] types)
     {

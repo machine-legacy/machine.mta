@@ -44,7 +44,7 @@ namespace Machine.Mta.InterfacesAsMessages
       return message;
     }
 
-    private void CheckForErrors(Type messageType, IDictionary<string, object> dictionary)
+    void CheckForErrors(Type messageType, IDictionary<string, object> dictionary)
     {
       StringBuilder sb = new StringBuilder();
       MessageDefinition definition = _messageDefinitionFactory.CreateDefinition(messageType);
