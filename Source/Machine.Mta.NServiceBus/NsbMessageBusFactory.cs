@@ -32,6 +32,7 @@ namespace Machine.Mta
       return Add(listenAddress, poisonAddress, Configure
         .With(_container.Handlers().Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
         .MachineBuilder(_container)
+        .StaticSubscriptionStorage()
         .XmlSerializer()
         .MsmqTransport()
           .On(listenAddress, poisonAddress)
@@ -148,6 +149,13 @@ namespace Machine.Mta
       cfg.Configure(config);
       return cfg;
     }
+
+    public static Configure StaticSubscriptionStorage(this Configure config)
+    {
+      var cfg = new MyConfigStaticSubscriptionStorage();
+      cfg.Configure(config);
+      return cfg;
+    }
   }
 
   public class MyConfigMsmqTransport : Configure
@@ -176,18 +184,28 @@ namespace Machine.Mta
 
   public class MyConfigUnicastBus : Configure
   {
+    private readonly Dictionary<string, string> _messageOwners = new Dictionary<string, string>();
     private IComponentConfig<UnicastBus> _config;
-
+ 
     public void Configure(Configure config)
     {
       this.Builder = config.Builder;
       this.Configurer = config.Configurer;
 
+      foreach (Type type in NServiceBus.Configure.TypesToScan)
+      {
+        if (typeof(IMessage).IsAssignableFrom(type))
+        {
+          _messageOwners[type.Assembly.GetName().Name] = String.Empty;
+        }
+      }
+
       _config = Configurer.ConfigureComponent<UnicastBus>(ComponentCallModelEnum.Singleton);
-      _config.ConfigureProperty(b => b.ForwardReceivedMessagesTo, "");
-      _config.ConfigureProperty(b => b.DistributorControlAddress, "");
-      _config.ConfigureProperty(b => b.DistributorDataAddress, "");
+      _config.ConfigureProperty(b => b.ForwardReceivedMessagesTo, null);
+      _config.ConfigureProperty(b => b.DistributorControlAddress, null);
+      _config.ConfigureProperty(b => b.DistributorDataAddress, null);
       _config.ConfigureProperty(b => b.ImpersonateSender, false);
+      _config.ConfigureProperty(b => b.MessageOwners, _messageOwners);
     }
 
     public MyConfigUnicastBus LoadMessageHandlers()
@@ -227,6 +245,19 @@ namespace Machine.Mta
     {
       _config.ConfigureProperty(t => t.Queue, address.ToNsbAddress());
       return this;
+    }
+  }
+
+  public class MyConfigStaticSubscriptionStorage : Configure
+  {
+    private IComponentConfig<StaticSubscriptionStorage> _config;
+
+    public void Configure(Configure config)
+    {
+      this.Builder = config.Builder;
+      this.Configurer = config.Configurer;
+
+      _config = Configurer.ConfigureComponent<StaticSubscriptionStorage>(ComponentCallModelEnum.Singleton);
     }
   }
 }
