@@ -1,21 +1,22 @@
 using System;
 using System.Collections.Generic;
+
 using NServiceBus;
 
 namespace Machine.Mta
 {
   public class NServiceBusMessageBus : IMessageBus
   {
-    readonly INsbMessageBusFactory _messageBusFactory;
+    readonly NsbBus _bus;
 
     IBus CurrentBus()
     {
-      return _messageBusFactory.CurrentBus().Bus;
+      return _bus.Bus;
     }
 
-    public NServiceBusMessageBus(INsbMessageBusFactory messageBusFactory)
+    public NServiceBusMessageBus(NsbBus bus)
     {
-      _messageBusFactory = messageBusFactory;
+      _bus = bus;
     }
 
     public void Dispose()
@@ -24,12 +25,12 @@ namespace Machine.Mta
 
     public EndpointAddress PoisonAddress
     {
-      get { return _messageBusFactory.CurrentBus().PoisonAddress; }
+      get { return _bus.PoisonAddress; }
     }
 
     public EndpointAddress Address
     {
-      get { return _messageBusFactory.CurrentBus().ListenAddress; }
+      get { return _bus.ListenAddress; }
     }
 
     public void Start()

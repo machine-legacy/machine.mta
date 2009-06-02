@@ -18,17 +18,19 @@ namespace Machine.Mta
   public class NsbMessageBusFactory : INsbMessageBusFactory, IDisposable
   {
     readonly IMachineContainer _container;
+    readonly NsbMessageRegisterer _messageRegisterer;
     readonly List<NsbBus> _all = new List<NsbBus>();
 
-    public NsbMessageBusFactory(IMachineContainer container)
+    public NsbMessageBusFactory(IMachineContainer container, NsbMessageRegisterer messageRegisterer)
     {
       _container = container;
+      _messageRegisterer = messageRegisterer;
     }
 
-    public IStartableBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
+    public NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
       return Add(listenAddress, poisonAddress, Configure
-        .With(_container.Handlers().Union(additionalTypes))
+        .With(_container.Handlers().Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
         .MachineBuilder(_container)
         .XmlSerializer()
         .MsmqTransport()
@@ -38,10 +40,10 @@ namespace Machine.Mta
         .CreateBus());
     }
 
-    public IStartableBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
+    public NsbBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
       return Add(listenAddress, poisonAddress, Configure
-        .With(_container.Handlers().Union(additionalTypes))
+        .With(_container.Handlers().Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
         .MachineBuilder(_container)
         .MsmqSubscriptionStorage()
           .In(subscriptionStorageAddress)
@@ -58,15 +60,21 @@ namespace Machine.Mta
       _all.Each(b => action(b.StartableBus));
     }
 
+    public void EachBus(Action<NsbBus> action)
+    {
+      _all.Each(action);
+    }
+
     public NsbBus CurrentBus()
     {
       return _all.First();
     }
 
-    IStartableBus Add(EndpointAddress listenAddress, EndpointAddress poisonAddress, IStartableBus bus)
+    NsbBus Add(EndpointAddress listenAddress, EndpointAddress poisonAddress, IStartableBus bus)
     {
-      _all.Add(new NsbBus(listenAddress, poisonAddress, bus));
-      return bus;
+      var nsbBus = new NsbBus(listenAddress, poisonAddress, bus);
+      _all.Add(nsbBus);
+      return nsbBus;
     }
 
     public void Dispose()
@@ -111,9 +119,10 @@ namespace Machine.Mta
 
   public interface INsbMessageBusFactory
   {
-    IStartableBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
-    IStartableBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
+    NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
+    NsbBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
     void EachBus(Action<IStartableBus> action);
+    void EachBus(Action<NsbBus> action);
     NsbBus CurrentBus();
   }
 

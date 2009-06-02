@@ -43,6 +43,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Container\Machine.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Machine.Utility.ThreadPool, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Machine\Machine.Utility.ThreadPool.dll</HintPath>
+    </Reference>
     <Reference Include="NServiceBus, Version=2.7.6.2, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\NServiceBus\NServiceBus.dll</HintPath>
@@ -60,6 +64,7 @@
     <Compile Include="Config\MachineObjectBuilderConfig.cs" />
     <Compile Include="MessageHandlerProxies.cs" />
     <Compile Include="MtaNsbServices.cs" />
+    <Compile Include="NsbMessageBusManager.cs" />
     <Compile Include="NsbMessageRegisterer.cs" />
     <Compile Include="NServiceBusMessageBus.cs" />
     <Compile Include="NsbMessageBusFactory.cs" />
