@@ -56,7 +56,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IMessage.cs" />
     <Compile Include="MachineObjectBuilder.cs" />
     <Compile Include="Config\MachineObjectBuilderConfig.cs" />
     <Compile Include="MessageHandlerProxies.cs" />

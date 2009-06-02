@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Machine.Mta
 {
-  public interface IMessage
+  public interface IMessage : NServiceBus.IMessage
   {
   }
 }
