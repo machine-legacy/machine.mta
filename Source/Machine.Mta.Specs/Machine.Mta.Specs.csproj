@@ -81,6 +81,10 @@
       <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
       <Name>Machine.Mta.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Machine.Mta.Timing\Machine.Mta.Timing.csproj">
+      <Project>{88204FFC-4823-4381-BCB2-E371F4F11470}</Project>
+      <Name>Machine.Mta.Timing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Machine.Mta.Transports.Msmq\Machine.Mta.Transports.Msmq.csproj">
       <Project>{283092A1-0A52-497E-A063-130B9FBE95FF}</Project>
       <Name>Machine.Mta.Transports.Msmq</Name>

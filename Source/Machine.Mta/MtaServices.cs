@@ -37,11 +37,11 @@ namespace Machine.Mta
       register.Type<MessageDispatcher>();
       register.Type<MessageBusFactory>();
       register.Type<MessageBusManager>();
-      register.Type<TimingManager>();
-      register.Type<TimingTaskFactory>();
-      register.Type<PublishScheduledMessagesTask>();
-      register.Type<ScheduleFutureMessages>();
-      register.Type<SchedulePublishHandler>();
+      // register.Type<TimingManager>();
+      // register.Type<TimingTaskFactory>();
+      // register.Type<PublishScheduledMessagesTask>();
+      // register.Type<ScheduleFutureMessages>();
+      // register.Type<SchedulePublishHandler>();
       register.Type<SagaAspect>();
       register.Type<EndpointHandlerRules>();
       register.Type(_transactionManagerType);

@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</ProjectGuid>
+    <ProjectGuid>{88204FFC-4823-4381-BCB2-E371F4F11470}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Machine.Mta</RootNamespace>
-    <AssemblyName>Machine.Mta.Core</AssemblyName>
+    <RootNamespace>Machine.Mta.Timing</RootNamespace>
+    <AssemblyName>Machine.Mta.Timing</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\Machine\Container\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Machine.Container, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5c474de7a495cff1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Container\Machine.Container.dll</HintPath>
@@ -51,22 +55,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dispatching\AllHandlersInContainer.cs" />
-    <Compile Include="Dispatching\IProvideHandlerTypes.cs" />
-    <Compile Include="Dispatching\MessageHandlerType.cs" />
-    <Compile Include="EndpointAddress.cs" />
-    <Compile Include="IConsume.cs" />
-    <Compile Include="IMessage.cs" />
-    <Compile Include="IMessageBus.cs" />
-    <Compile Include="IMessageDestinations.cs" />
-    <Compile Include="IMessageFactory.cs" />
-    <Compile Include="ITransportMessageBodyFormatter.cs" />
-    <Compile Include="MessagePayload.cs" />
+    <Compile Include="CronTrigger.cs" />
+    <Compile Include="ITrigger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Timing\IOnceASecondTask.cs" />
-    <Compile Include="Timing\ServerClock.cs" />
-    <Compile Include="TransportMessageBodySerializer.cs" />
-    <Compile Include="TypeHelpers.cs" />
+    <Compile Include="PublishMessageTask.cs" />
+    <Compile Include="SimpleCronEntry.cs" />
+    <Compile Include="TimingManager.cs" />
+    <Compile Include="TimingTaskFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">
+      <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
+      <Name>Machine.Mta.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

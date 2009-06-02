@@ -5,7 +5,7 @@ namespace Machine.Mta.Timing
 {
   public class ServerClock
   {
-    public static Func<DateTime> Now = () => { throw new NotImplementedException(); };
+    public static Func<DateTime> Now = () => DateTime.UtcNow;
 
     public static DateTime Later(TimeSpan time)
     {
