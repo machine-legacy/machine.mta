@@ -19,11 +19,13 @@ namespace Machine.Mta
   {
     readonly IMachineContainer _container;
     readonly NsbMessageRegisterer _messageRegisterer;
+    readonly IMessageDestinations _messageDestinations;
     readonly List<NsbBus> _all = new List<NsbBus>();
 
-    public NsbMessageBusFactory(IMachineContainer container, NsbMessageRegisterer messageRegisterer)
+    public NsbMessageBusFactory(IMachineContainer container, NsbMessageRegisterer messageRegisterer, IMessageDestinations messageDestinations)
     {
       _container = container;
+      _messageDestinations = messageDestinations;
       _messageRegisterer = messageRegisterer;
     }
 
@@ -38,6 +40,7 @@ namespace Machine.Mta
           .On(listenAddress, poisonAddress)
         .UnicastBus()
           .LoadMessageHandlers()
+          .WithMessageRoutes(_messageDestinations)
         .CreateBus());
     }
 
@@ -53,6 +56,7 @@ namespace Machine.Mta
           .On(listenAddress, poisonAddress)
         .UnicastBus()
           .LoadMessageHandlers()
+          .WithMessageRoutes(_messageDestinations)
         .CreateBus());
     }
 
@@ -184,6 +188,7 @@ namespace Machine.Mta
 
   public class MyConfigUnicastBus : Configure
   {
+    private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MyConfigUnicastBus));
     private readonly Dictionary<string, string> _messageOwners = new Dictionary<string, string>();
     private IComponentConfig<UnicastBus> _config;
  
@@ -192,20 +197,38 @@ namespace Machine.Mta
       this.Builder = config.Builder;
       this.Configurer = config.Configurer;
 
-      foreach (Type type in NServiceBus.Configure.TypesToScan)
-      {
-        if (typeof(IMessage).IsAssignableFrom(type))
-        {
-          _messageOwners[type.Assembly.GetName().Name] = String.Empty;
-        }
-      }
-
       _config = Configurer.ConfigureComponent<UnicastBus>(ComponentCallModelEnum.Singleton);
       _config.ConfigureProperty(b => b.ForwardReceivedMessagesTo, null);
       _config.ConfigureProperty(b => b.DistributorControlAddress, null);
       _config.ConfigureProperty(b => b.DistributorDataAddress, null);
       _config.ConfigureProperty(b => b.ImpersonateSender, false);
+    }
+
+    public MyConfigUnicastBus WithMessageRoutes(IMessageRouting routing)
+    {
+      foreach (Type type in NServiceBus.Configure.TypesToScan)
+      {
+        if (typeof(IMessage).IsAssignableFrom(type))
+        {
+          var key = type.FullName + ", " + type.Assembly.GetName().Name;
+          var owner = routing.Owner(type);
+          if (owner != null)
+          {
+            _messageOwners[key] = owner.ToNsbAddress();
+          }
+          else
+          {
+            _messageOwners[key] = String.Empty;
+          }
+        }
+      }
+      foreach (var entry in _messageOwners)
+      {
+        _log.Info("Configured: " + entry.Key + " to " + entry.Value);
+      }
       _config.ConfigureProperty(b => b.MessageOwners, _messageOwners);
+
+      return this;
     }
 
     public MyConfigUnicastBus LoadMessageHandlers()

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 
 using Machine.Core.Utility;
@@ -9,9 +8,11 @@ namespace Machine.Mta
 {
   public class MessageDestinations : IMessageDestinations 
   {
-    private readonly Dictionary<Type, List<EndpointAddress>> _map = new Dictionary<Type, List<EndpointAddress>>();
-    private readonly List<EndpointAddress> _catchAlls = new List<EndpointAddress>();
-    private readonly ReaderWriterLock _lock = new ReaderWriterLock();
+    readonly Dictionary<Type, List<EndpointAddress>> _map = new Dictionary<Type, List<EndpointAddress>>();
+    readonly Dictionary<Type, List<EndpointAddress>> _subscriptions = new Dictionary<Type, List<EndpointAddress>>();
+    readonly Dictionary<Type, EndpointAddress> _owners = new Dictionary<Type, EndpointAddress>();
+    readonly List<EndpointAddress> _catchAlls = new List<EndpointAddress>();
+    readonly ReaderWriterLock _lock = new ReaderWriterLock();
 
     public ICollection<EndpointAddress> LookupEndpointsFor(Type messageType, bool throwOnNone)
     {
@@ -61,17 +62,6 @@ namespace Machine.Mta
     {
       SendMessageTypeTo(typeof(T), destinations);
     }
-
-    public void SendAllFromAssemblyTo<T>(Assembly assembly, EndpointAddress destination)
-    {
-      foreach (Type type in assembly.GetTypes())
-      {
-        if (typeof(T).IsAssignableFrom(type))
-        {
-          SendMessageTypeTo(type, destination);
-        }
-      }
-    }
     
     public void SendAllTo(params EndpointAddress[] destinations)
     {
@@ -84,6 +74,60 @@ namespace Machine.Mta
             _catchAlls.Add(destination);
           }
         }
+      }
+    }
+
+    public void SubscribeTo<T>(params EndpointAddress[] addresses)
+    {
+      using (RWLock.AsWriter(_lock))
+      {
+        if (!_subscriptions.ContainsKey(typeof(T)))
+        {
+          _subscriptions[typeof(T)] = new List<EndpointAddress>();
+        }
+        foreach (var address in addresses)
+        {
+          if (!_subscriptions[typeof(T)].Contains(address))
+          {
+            _subscriptions[typeof(T)].Add(address);
+          }
+        }
+      }
+    }
+
+    public void AssignOwner<T>(EndpointAddress address)
+    {
+      using (RWLock.AsWriter(_lock))
+      {
+        if (_owners.ContainsKey(typeof(T)))
+        {
+          throw new ArgumentException(address + " already owns " + typeof(T));
+        }
+        _owners[typeof(T)] = address;
+      }
+    }
+
+    public ICollection<EndpointAddress> Subscribers(Type messageType)
+    {
+      using (RWLock.AsReader(_lock))
+      {
+        if (_subscriptions.ContainsKey(messageType))
+        {
+          return _subscriptions[messageType].ToArray();
+        }
+        return new EndpointAddress[0];
+      }
+    }
+
+    public EndpointAddress Owner(Type messageType)
+    {
+      using (RWLock.AsReader(_lock))
+      {
+        if (_owners.ContainsKey(messageType))
+        {
+          return _owners[messageType];
+        }
+        return null;
       }
     }
   }

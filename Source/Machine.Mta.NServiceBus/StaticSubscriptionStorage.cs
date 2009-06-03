@@ -8,11 +8,11 @@ namespace Machine.Mta
 {
   public class StaticSubscriptionStorage : ISubscriptionStorage
   {
-    readonly IMessageDestinations _destinations;
+    readonly IMessageRouting _routing;
 
-    public StaticSubscriptionStorage(IMessageDestinations destinations)
+    public StaticSubscriptionStorage(IMessageRouting routing)
     {
-      _destinations = destinations;
+      _routing = routing;
     }
 
     public void HandleSubscriptionMessage(TransportMessage msg)
@@ -23,7 +23,7 @@ namespace Machine.Mta
     public IList<string> GetSubscribersForMessage(Type messageType)
     {
       var found = new List<string>();
-      foreach (var destiny in _destinations.LookupEndpointsFor(messageType, false))
+      foreach (var destiny in _routing.Subscribers(messageType))
       {
         found.Add(destiny.ToNsbAddress());
       }
