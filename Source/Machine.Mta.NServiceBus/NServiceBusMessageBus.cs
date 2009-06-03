@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using NServiceBus;
 
 namespace Machine.Mta
@@ -8,14 +9,16 @@ namespace Machine.Mta
   public class NServiceBusMessageBus : IMessageBus
   {
     readonly NsbBus _bus;
+    readonly IMessageRouting _routing;
 
     IBus CurrentBus()
     {
       return _bus.Bus;
     }
 
-    public NServiceBusMessageBus(NsbBus bus)
+    public NServiceBusMessageBus(IMessageRouting routing, NsbBus bus)
     {
+      _routing = routing;
       _bus = bus;
     }
 
@@ -68,12 +71,12 @@ namespace Machine.Mta
 
     public IRequestReplyBuilder Request<T>(params T[] messages) where T : IMessage
     {
-      return new NServiceBusRequestReplyBuilder(CurrentBus(), null, messages.ToNsbMessages());
+      return new NServiceBusRequestReplyBuilder<T>(_routing, CurrentBus(), null, messages.ToNsbMessages());
     }
 
     public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : IMessage
     {
-      return new NServiceBusRequestReplyBuilder(CurrentBus(), correlationId, messages.ToNsbMessages());
+      return new NServiceBusRequestReplyBuilder<T>(_routing, CurrentBus(), correlationId, messages.ToNsbMessages());
     }
 
     public void Reply<T>(params T[] messages) where T : IMessage
@@ -125,14 +128,16 @@ namespace Machine.Mta
     }
   }
 
-  public class NServiceBusRequestReplyBuilder : IRequestReplyBuilder
+  public class NServiceBusRequestReplyBuilder<T> : IRequestReplyBuilder where T : IMessage
   {
+    readonly IMessageRouting _routing;
+    readonly IBus _bus;
     readonly string _correlationId;
     readonly NServiceBus.IMessage[] _messages;
-    readonly IBus _bus;
 
-    public NServiceBusRequestReplyBuilder(IBus bus, string correlationId, NServiceBus.IMessage[] messages)
+    public NServiceBusRequestReplyBuilder(IMessageRouting routing, IBus bus, string correlationId, NServiceBus.IMessage[] messages)
     {
+      _routing = routing;
       _bus = bus;
       _correlationId = correlationId;
       _messages = messages;
