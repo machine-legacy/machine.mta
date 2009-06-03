@@ -24,6 +24,11 @@ namespace Machine.Mta
         _target.Consume(message);
       }
     }
+
+    public override string ToString()
+    {
+      return _target.ToString();
+    }
   }
 
   public static class MessageHandlerProxies
