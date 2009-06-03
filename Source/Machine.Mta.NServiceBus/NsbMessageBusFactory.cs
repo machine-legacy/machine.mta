@@ -7,11 +7,14 @@ using Machine.Core;
 using Machine.Mta.Config;
 
 using NServiceBus;
+using NServiceBus.Grid.MessageHandlers;
 using NServiceBus.ObjectBuilder;
+using NServiceBus.Saga;
 using NServiceBus.Unicast;
 using NServiceBus.Unicast.Config;
 using NServiceBus.Unicast.Subscriptions.Msmq;
 using NServiceBus.Unicast.Transport.Msmq;
+using Configure = NServiceBus.Configure;
 
 namespace Machine.Mta
 {
@@ -32,14 +35,15 @@ namespace Machine.Mta
     public NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
       return Add(listenAddress, poisonAddress, Configure
-        .With(_container.Handlers().Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
+        .With(_container.Handlers().Union(_container.Sagas()).Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
         .MachineBuilder(_container)
         .StaticSubscriptionStorage()
         .XmlSerializer()
         .MsmqTransport()
           .On(listenAddress, poisonAddress)
+        .Sagas()
         .UnicastBus()
-          .LoadMessageHandlers()
+          .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageDestinations)
         .CreateBus());
     }
@@ -47,15 +51,16 @@ namespace Machine.Mta
     public NsbBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
       return Add(listenAddress, poisonAddress, Configure
-        .With(_container.Handlers().Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
+        .With(_container.Handlers().Union(_container.Sagas()).Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
         .MachineBuilder(_container)
         .MsmqSubscriptionStorage()
           .In(subscriptionStorageAddress)
         .XmlSerializer()
         .MsmqTransport()
           .On(listenAddress, poisonAddress)
+        .Sagas()
         .UnicastBus()
-          .LoadMessageHandlers()
+          .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageDestinations)
         .CreateBus());
     }
@@ -233,18 +238,29 @@ namespace Machine.Mta
 
     public MyConfigUnicastBus LoadMessageHandlers()
     {
-      return this.ConfigureMessageHandlersIn(NServiceBus.Configure.TypesToScan);
+      return ConfigureMessageHandlersIn(NServiceBus.Configure.TypesToScan);
+    }
+
+    public MyConfigUnicastBus LoadMessageHandlers<T>(First<T> order)
+    {
+      var types = new List<Type>(NServiceBus.Configure.TypesToScan);
+      foreach (var type in order.Types)
+      {
+        types.Remove(type);
+      }
+      types.InsertRange(0, order.Types);
+      return ConfigureMessageHandlersIn(types);
     }
 
     MyConfigUnicastBus ConfigureMessageHandlersIn(IEnumerable<Type> types)
     {
       var handlers = new List<Type>();
-      foreach (Type t in types)
+      foreach (var type in types)
       {
-        if (ConfigUnicastBus.IsMessageHandler(t))
+        if (ConfigUnicastBus.IsMessageHandler(type))
         {
-          this.Configurer.ConfigureComponent(t, ComponentCallModelEnum.Singlecall);
-          handlers.Add(t);
+          Configurer.ConfigureComponent(type, ComponentCallModelEnum.Singlecall);
+          handlers.Add(type);
         }
       }
       _config.ConfigureProperty(b => b.MessageHandlerTypes, handlers);

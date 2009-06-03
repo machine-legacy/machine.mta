@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+using Machine.Container.Model;
 using Machine.Container.Services;
 using Machine.Mta.Dispatching;
+
+using NServiceBus.Saga;
 
 namespace Machine.Mta
 {
@@ -25,6 +28,17 @@ namespace Machine.Mta
           {
             yield return type;
           }
+        }
+      }
+    }
+
+    public static IEnumerable<Type> Sagas(this IMachineContainer container)
+    {
+      foreach (ServiceRegistration registration in container.RegisteredServices)
+      {
+        if (typeof(ISaga).IsAssignableFrom(registration.ServiceType))
+        {
+          yield return registration.ServiceType;
         }
       }
     }
