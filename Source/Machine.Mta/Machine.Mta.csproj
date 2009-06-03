@@ -147,7 +147,6 @@
     <Compile Include="Timing\ScheduledPublish.cs" />
     <Compile Include="Timing\ScheduleFutureMessages.cs" />
     <Compile Include="Timing\SchedulePublishHandler.cs" />
-    <Compile Include="TransportMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AdoNet\Tables.sql" />

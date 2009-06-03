@@ -16,7 +16,7 @@ namespace Machine.Mta
       _routing = routing;
     }
 
-    public void HandleSubscriptionMessage(TransportMessage msg)
+    public void HandleSubscriptionMessage(NServiceBus.Unicast.Transport.TransportMessage msg)
     {
       NServiceBus.IMessage[] messages = msg.Body;
       if ((messages != null) && (messages.Length == 1))
