@@ -6,7 +6,7 @@ using System.Reflection;
 using Machine.Container.Model;
 using Machine.Container.Services;
 using Machine.Mta.Dispatching;
-
+using NServiceBus;
 using NServiceBus.Saga;
 
 namespace Machine.Mta
@@ -43,14 +43,35 @@ namespace Machine.Mta
       }
     }
 
+    public static IEnumerable<Type> Finders(this IMachineContainer container)
+    {
+      foreach (ServiceRegistration registration in container.RegisteredServices)
+      {
+        if (IsAllowableImplementationOf(registration.ServiceType, typeof(IFinder)))
+        {
+          yield return registration.ServiceType;
+        }
+      }
+    }
+
+    private static bool IsAllowableImplementationOf(Type type, Type source)
+    {
+      return (((source.IsAssignableFrom(type) && (type != source)) && (!type.IsAbstract && !type.IsInterface)) && !type.IsGenericType);
+    }
+
     public static IEnumerable<Type> Handlers(this IMachineContainer container)
     {
-      foreach (var handlerType in AllMessageHandlerTypes(container))
+      foreach (var handlerType in AllConsumerTypes(container))
       {
         if (typeof(NServiceBus.IMessage).IsAssignableFrom(handlerType.TargetExpectsMessageOfType))
         {
           yield return MessageHandlerProxies.For(handlerType.TargetExpectsMessageOfType, handlerType.TargetType);
         }
+      }
+
+      foreach (var handlerType in AllMessageHandlerTypes(container))
+      {
+        yield return handlerType.TargetType;
       }
     }
 
@@ -58,8 +79,20 @@ namespace Machine.Mta
     {
       foreach (var handlerType in new AllHandlersInContainer(container).HandlerTypes())
       {
-        var handlerConsumes = handlerType.AllGenericVariations(typeof(IConsume<>));
-        foreach (var type in handlerConsumes)
+        var messageHandlers = handlerType.AllGenericVariations(typeof(IMessageHandler<>));
+        foreach (var type in messageHandlers)
+        {
+          yield return new MessageHandlerType(handlerType, type);
+        }
+      }
+    }
+
+    static IEnumerable<MessageHandlerType> AllConsumerTypes(IMachineContainer container)
+    {
+      foreach (var handlerType in new AllHandlersInContainer(container).HandlerTypes())
+      {
+        var consumers = handlerType.AllGenericVariations(typeof(IConsume<>));
+        foreach (var type in consumers)
         {
           yield return new MessageHandlerType(handlerType, type);
         }

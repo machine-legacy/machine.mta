@@ -1,6 +1,8 @@
 using System;
 using System.Reflection;
 
+using NServiceBus;
+
 using Machine.Container;
 using Machine.Container.Plugins;
 using Machine.Mta.Sagas;
@@ -22,9 +24,9 @@ namespace Machine.Mta.Helpers
       {
         foreach (Type type in assembly.GetTypes())
         {
-          if (type.IsImplementationOfGenericType(typeof(IConsume<>)))
+          if (IsHandlerOrConsumer(type))
           {
-            if (typeof(ISagaHandler).IsAssignableFrom(type))
+            if (IsSagaHandler(type))
             {
               register.Type(type).AsTransient();
             }
@@ -35,6 +37,16 @@ namespace Machine.Mta.Helpers
           }
         }
       }
+    }
+
+    static bool IsHandlerOrConsumer(Type type)
+    {
+      return type.IsImplementationOfGenericType(typeof(IConsume<>)) || type.IsImplementationOfGenericType(typeof(IMessageHandler<>));
+    }
+
+    static bool IsSagaHandler(Type type)
+    {
+      return typeof(ISagaHandler).IsAssignableFrom(type) || typeof(NServiceBus.Saga.ISaga).IsAssignableFrom(type);
     }
   }
 }

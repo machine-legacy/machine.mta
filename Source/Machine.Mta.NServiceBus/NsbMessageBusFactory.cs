@@ -34,8 +34,13 @@ namespace Machine.Mta
 
     public NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
+      var types =       _container.Handlers().
+                  Union(_container.Finders()).
+                  Union(_container.Sagas()).
+                  Union(_messageRegisterer.MessageTypes).
+                  Union(additionalTypes).ToList();
       return Add(listenAddress, poisonAddress, Configure
-        .With(_container.Handlers().Union(_container.Sagas()).Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
+        .With(types)
         .MachineBuilder(_container)
         .StaticSubscriptionStorage()
         .XmlSerializer()
@@ -50,8 +55,13 @@ namespace Machine.Mta
 
     public NsbBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
+      var types =       _container.Handlers().
+                  Union(_container.Finders()).
+                  Union(_container.Sagas()).
+                  Union(_messageRegisterer.MessageTypes).
+                  Union(additionalTypes).ToList();
       return Add(listenAddress, poisonAddress, Configure
-        .With(_container.Handlers().Union(_container.Sagas()).Union(_messageRegisterer.MessageTypes).Union(additionalTypes).ToList())
+        .With(types)
         .MachineBuilder(_container)
         .MsmqSubscriptionStorage()
           .In(subscriptionStorageAddress)
