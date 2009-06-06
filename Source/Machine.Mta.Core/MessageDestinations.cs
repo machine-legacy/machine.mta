@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 using Machine.Core.Utility;
+using System.Linq;
 
 namespace Machine.Mta
 {
@@ -128,6 +129,14 @@ namespace Machine.Mta
           return _owners[messageType];
         }
         return null;
+      }
+    }
+
+    public IEnumerable<Type> MessageTypes()
+    {
+      using (RWLock.AsReader(_lock))
+      {
+        return _owners.Keys.Union(_subscriptions.Keys).ToArray();
       }
     }
   }

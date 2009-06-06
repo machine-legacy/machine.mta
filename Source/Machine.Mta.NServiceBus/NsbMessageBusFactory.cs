@@ -221,9 +221,9 @@ namespace Machine.Mta
 
     public MyConfigUnicastBus WithMessageRoutes(IMessageRouting routing)
     {
-      foreach (Type type in NServiceBus.Configure.TypesToScan)
+      foreach (Type type in NServiceBus.Configure.TypesToScan.Union(routing.MessageTypes()))
       {
-        if (typeof(IMessage).IsAssignableFrom(type))
+        if (typeof(NServiceBus.IMessage).IsAssignableFrom(type))
         {
           var key = type.FullName + ", " + type.Assembly.GetName().Name;
           var owner = routing.Owner(type);

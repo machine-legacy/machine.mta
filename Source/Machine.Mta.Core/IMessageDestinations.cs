@@ -17,5 +17,6 @@ namespace Machine.Mta
     void AssignOwner<T>(EndpointAddress address);
     ICollection<EndpointAddress> Subscribers(Type messageType);
     EndpointAddress Owner(Type messageType);
+    IEnumerable<Type> MessageTypes();
   }
 }
