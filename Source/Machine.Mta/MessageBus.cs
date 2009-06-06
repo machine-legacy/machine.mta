@@ -150,24 +150,6 @@ namespace Machine.Mta
       RouteTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
-    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
-    {
-      Logging.Reply(messages);
-      RouteTransportMessage<T>(CreateTransportMessage(correlationId, true, messages), destination);
-    }
-
-    public void PublishAndReply<T>(params T[] messages) where T : IMessage
-    {
-      Logging.Publish(messages);
-      RouteTransportMessage<T>(CreateTransportMessage(null, false, messages), CurrentMessageContext.Current.ReturnAddress);
-    }
-
-    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      Logging.Publish(messages);
-      RouteTransportMessage<T>(CreateTransportMessage(correlationId, false, messages), CurrentMessageContext.Current.ReturnAddress);
-    }
-
     private void Send(EndpointAddress destination, TransportMessage transportMessage)
     {
       IEndpoint endpoint = _endpointResolver.Resolve(destination);

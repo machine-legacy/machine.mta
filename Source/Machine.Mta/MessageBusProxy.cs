@@ -83,21 +83,6 @@ namespace Machine.Mta
       CurrentBus().Publish(messages);
     }
 
-    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
-    {
-      CurrentBus().PublishAndReplyTo(destination, correlationId, messages);
-    }
-
-    public void PublishAndReply<T>(params T[] messages) where T : IMessage
-    {
-      CurrentBus().PublishAndReply(messages);
-    }
-
-    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      CurrentBus().PublishAndReply(correlationId, messages);
-    }
-
     public EndpointAddress PoisonAddress
     {
       get { return CurrentBus().PoisonAddress; }

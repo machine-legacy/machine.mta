@@ -24,12 +24,6 @@ namespace Machine.Mta
     //[Obsolete]
     void Reply<T>(string correlationId, params T[] messages) where T : IMessage;
     void Publish<T>(params T[] messages) where T : IMessage;
-    //[Obsolete]
-    void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage;
-    //[Obsolete]
-    void PublishAndReply<T>(params T[] messages) where T : IMessage;
-    //[Obsolete]
-    void PublishAndReply<T>(string correlationId, params T[] messages) where T : IMessage;
   }
 
   public interface IRequestReplyBuilder

@@ -98,21 +98,6 @@ namespace Machine.Mta
     {
       CurrentBus().Publish(messages.ToNsbMessages());
     }
-
-    public void PublishAndReplyTo<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
-    {
-      throw new NotImplementedException();
-    }
-
-    public void PublishAndReply<T>(params T[] messages) where T : IMessage
-    {
-      throw new NotImplementedException();
-    }
-
-    public void PublishAndReply<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      throw new NotImplementedException();
-    }
   }
 
   public static class NsbMessageHelpers
