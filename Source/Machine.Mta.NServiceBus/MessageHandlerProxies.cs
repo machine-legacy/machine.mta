@@ -6,6 +6,7 @@ namespace Machine.Mta
 {
   public class MessageHandlerProxy<T, K> : IMessageHandler<T> where T : class, NServiceBus.IMessage, Machine.Mta.IMessage where K: Machine.Mta.IConsume<T>
   {
+    readonly log4net.ILog _log;
     readonly INsbMessageBusFactory _messageBusFactory;
     readonly K _target;
 
@@ -13,6 +14,7 @@ namespace Machine.Mta
     {
       _target = target;
       _messageBusFactory = messageBusFactory;
+      _log = log4net.LogManager.GetLogger(typeof(K));
     }
 
     public void Handle(T message)
@@ -21,7 +23,9 @@ namespace Machine.Mta
       var nsbContext = bus.CurrentMessageContext;
       using (var cmc =  CurrentMessageContext.Open(nsbContext.ReturnAddress.ToEndpointAddress(), nsbContext.Id, new Guid[0]))
       {
+        _log.Info("Consuming: " + message);
         _target.Consume(message);
+        _log.Info("Done consuming: " + message);
       }
     }
 
