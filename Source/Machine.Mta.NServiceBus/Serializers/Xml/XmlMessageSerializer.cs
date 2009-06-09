@@ -19,15 +19,21 @@ namespace Machine.Mta.Serializers.Xml
   {
     public IMessageMapper MessageMapper { get; set; }
 
-    private string nameSpace = "http://tempuri.net";
+    private string _nameSpace = "http://tempuri.net";
 
     public string Namespace
     {
-      get { return nameSpace; }
-      set { nameSpace = value; }
+      get { return _nameSpace; }
+      set { _nameSpace = value; }
     }
 
-    public List<Type> AdditionalTypes { get; set; }
+    // private List<Type> _additionalTypes;
+
+    public List<Type> AdditionalTypes
+    {
+      get;
+      set;
+    }
 
     public void Initialize(params Type[] types)
     {
@@ -49,7 +55,7 @@ namespace Machine.Mta.Serializers.Xml
       if (typeof(IEnumerable).IsAssignableFrom(t))
       {
         if (t.IsArray)
-          typesToCreateForArrays[t] = typeof(List<>).MakeGenericType(t.GetElementType());
+          _typesToCreateForArrays[t] = typeof(List<>).MakeGenericType(t.GetElementType());
 
         foreach (Type g in t.GetGenericArguments())
           InitType(g);
@@ -67,15 +73,15 @@ namespace Machine.Mta.Serializers.Xml
       }
 
       //already in the process of initializing this type (prevents infinite recursion).
-      if (typesBeingInitialized.Contains(t))
+      if (_typesBeingInitialized.Contains(t))
         return;
 
-      typesBeingInitialized.Add(t);
+      _typesBeingInitialized.Add(t);
 
       var props = GetAllPropertiesForType(t);
-      typeToProperties[t] = props;
+      _typeToProperties[t] = props;
       var fields = GetAllFieldsForType(t);
-      typeToFields[t] = fields;
+      _typeToFields[t] = fields;
 
       foreach (PropertyInfo prop in props)
         InitType(prop.PropertyType);
@@ -102,8 +108,8 @@ namespace Machine.Mta.Serializers.Xml
 
     public NServiceBus.IMessage[] Deserialize(Stream stream)
     {
-      prefixesToNamespaces = new Dictionary<string, string>();
-      messageBaseTypes = new List<Type>();
+      _prefixesToNamespaces = new Dictionary<string, string>();
+      _messageBaseTypes = new List<Type>();
       List<IMessage> result = new List<IMessage>();
 
       XmlDocument doc = new XmlDocument();
@@ -112,7 +118,7 @@ namespace Machine.Mta.Serializers.Xml
       foreach (XmlAttribute attr in doc.DocumentElement.Attributes)
       {
         if (attr.Name == "xmlns")
-          defaultNameSpace = attr.Value.Substring(attr.Value.LastIndexOf("/") + 1);
+          _defaultNameSpace = attr.Value.Substring(attr.Value.LastIndexOf("/") + 1);
         else
         {
           if (attr.Name.Contains("xmlns:"))
@@ -124,10 +130,10 @@ namespace Machine.Mta.Serializers.Xml
             {
               Type baseType = MessageMapper.GetMappedTypeFor(attr.Value);
               if (baseType != null)
-                messageBaseTypes.Add(baseType);
+                _messageBaseTypes.Add(baseType);
             }
             else
-              prefixesToNamespaces[prefix] = attr.Value;
+              _prefixesToNamespaces[prefix] = attr.Value;
           }
         }
       }
@@ -151,7 +157,7 @@ namespace Machine.Mta.Serializers.Xml
         }
       }
 
-      defaultNameSpace = null;
+      _defaultNameSpace = null;
 
       return result.ToArray();
     }
@@ -159,14 +165,14 @@ namespace Machine.Mta.Serializers.Xml
     private object Process(XmlNode node, object parent)
     {
       string name = node.Name;
-      string typeName = defaultNameSpace + "." + name;
+      string typeName = _defaultNameSpace + "." + name;
 
       if (name.Contains(":"))
       {
         int colonIndex = node.Name.IndexOf(":");
         name = name.Substring(colonIndex + 1);
         string prefix = node.Name.Substring(0, colonIndex);
-        string nameSpace = prefixesToNamespaces[prefix];
+        string nameSpace = _prefixesToNamespaces[prefix];
 
         typeName = nameSpace.Substring(nameSpace.LastIndexOf("/") + 1) + "." + name;
       }
@@ -191,11 +197,11 @@ namespace Machine.Mta.Serializers.Xml
       Type t = MessageMapper.GetMappedTypeFor(typeName);
       if (t == null)
       {
-        logger.Debug("Could not load " + typeName + ". Trying base types...");
-        foreach (Type baseType in messageBaseTypes)
+        _logger.Debug("Could not load " + typeName + ". Trying base types...");
+        foreach (Type baseType in _messageBaseTypes)
           try
           {
-            logger.Debug("Trying to deserialize message to " + baseType.FullName);
+            _logger.Debug("Trying to deserialize message to " + baseType.FullName);
             return GetObjectOfTypeFromNode(baseType, node);
           }
           catch { } // intentionally swallow exception
@@ -269,7 +275,7 @@ namespace Machine.Mta.Serializers.Xml
     private PropertyInfo GetProperty(Type t, string name)
     {
       IEnumerable<PropertyInfo> props;
-      typeToProperties.TryGetValue(t, out props);
+      _typeToProperties.TryGetValue(t, out props);
 
       if (props == null)
         return null;
@@ -284,7 +290,7 @@ namespace Machine.Mta.Serializers.Xml
     private FieldInfo GetField(Type t, string name)
     {
       IEnumerable<FieldInfo> fields;
-      typeToFields.TryGetValue(t, out fields);
+      _typeToFields.TryGetValue(t, out fields);
 
       if (fields == null)
         return null;
@@ -359,7 +365,7 @@ namespace Machine.Mta.Serializers.Xml
 
         Type typeToCreate = type;
         if (isArray)
-          typeToCreate = typesToCreateForArrays[type];
+          typeToCreate = _typesToCreateForArrays[type];
 
         IList list = Activator.CreateInstance(typeToCreate) as IList;
 
@@ -389,7 +395,7 @@ namespace Machine.Mta.Serializers.Xml
 
     public void Serialize(NServiceBus.IMessage[] messages, Stream stream)
     {
-      namespacesToPrefix = new Dictionary<string, string>();
+      _namespacesToPrefix = new Dictionary<string, string>();
 
       StringBuilder builder = new StringBuilder();
 
@@ -400,17 +406,17 @@ namespace Machine.Mta.Serializers.Xml
 
       builder.Append("<Messages xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"");
 
-      for (int i = 0; i < namespaces.Count; i++)
+      for (var i = 0; i < namespaces.Count; i++)
       {
         string prefix = "q" + i;
         if (i == 0)
           prefix = "";
 
-        builder.AppendFormat(" xmlns{0}=\"{1}/{2}\"", (prefix != "" ? ":" + prefix : prefix), nameSpace, namespaces[i]);
-        namespacesToPrefix[namespaces[i]] = prefix;
+        builder.AppendFormat(" xmlns{0}=\"{1}/{2}\"", (prefix != "" ? ":" + prefix : prefix), _nameSpace, namespaces[i]);
+        _namespacesToPrefix[namespaces[i]] = prefix;
       }
 
-      for (int i = 0; i < baseTypes.Count; i++)
+      for (var i = 0; i < baseTypes.Count; i++)
       {
         string prefix = BASETYPE;
         if (i != 0)
@@ -421,7 +427,7 @@ namespace Machine.Mta.Serializers.Xml
 
       builder.Append(">\n");
 
-      foreach (IMessage m in messages)
+      foreach (var m in messages)
       {
         Type t = MessageMapper.GetMappedTypeFor(m.GetType());
 
@@ -439,10 +445,10 @@ namespace Machine.Mta.Serializers.Xml
       if (obj == null)
         return;
 
-      foreach (PropertyInfo prop in typeToProperties[t])
+      foreach (var prop in _typeToProperties[t])
         WriteEntry(prop.Name, prop.PropertyType, prop.GetValue(obj, null), builder);
 
-      foreach (FieldInfo field in typeToFields[t])
+      foreach (var field in _typeToFields[t])
         WriteEntry(field.Name, field.FieldType, field.GetValue(obj), builder);
     }
 
@@ -450,7 +456,7 @@ namespace Machine.Mta.Serializers.Xml
     {
       string element = name;
       string prefix;
-      namespacesToPrefix.TryGetValue(type.Namespace, out prefix);
+      _namespacesToPrefix.TryGetValue(type.Namespace, out prefix);
 
       if (!string.IsNullOrEmpty(prefix))
         element = prefix + ":" + name;
@@ -480,7 +486,7 @@ namespace Machine.Mta.Serializers.Xml
         Type baseType = typeof(object);
 
         //Get generic type from list: T for List<T>, KeyValuePair<T,K> for IDictionary<T,K>
-        foreach (Type interfaceType in type.GetInterfaces())
+        foreach (var interfaceType in type.GetInterfaces())
         {
           Type[] arr = interfaceType.GetGenericArguments();
           if (arr.Length == 1)
@@ -491,7 +497,7 @@ namespace Machine.Mta.Serializers.Xml
             }
         }
 
-        foreach (object obj in ((IEnumerable)value))
+        foreach (var obj in ((IEnumerable)value))
           if (obj.GetType().IsSimpleType())
             WriteEntry(obj.GetType().Name, obj.GetType(), obj, builder);
           else
@@ -579,20 +585,20 @@ namespace Machine.Mta.Serializers.Xml
     private static readonly string XMLTYPE = XMLPREFIX + ":type";
     private static readonly string BASETYPE = "baseType";
 
-    private static readonly Dictionary<Type, IEnumerable<PropertyInfo>> typeToProperties = new Dictionary<Type, IEnumerable<PropertyInfo>>();
-    private static readonly Dictionary<Type, IEnumerable<FieldInfo>> typeToFields = new Dictionary<Type, IEnumerable<FieldInfo>>();
-    private static readonly Dictionary<Type, Type> typesToCreateForArrays = new Dictionary<Type, Type>();
-    private static readonly List<Type> typesBeingInitialized = new List<Type>();
+    private static readonly Dictionary<Type, IEnumerable<PropertyInfo>> _typeToProperties = new Dictionary<Type, IEnumerable<PropertyInfo>>();
+    private static readonly Dictionary<Type, IEnumerable<FieldInfo>> _typeToFields = new Dictionary<Type, IEnumerable<FieldInfo>>();
+    private static readonly Dictionary<Type, Type> _typesToCreateForArrays = new Dictionary<Type, Type>();
+    private static readonly List<Type> _typesBeingInitialized = new List<Type>();
 
     [ThreadStatic]
-    private static string defaultNameSpace;
+    private static string _defaultNameSpace;
     [ThreadStatic]
-    private static IDictionary<string, string> namespacesToPrefix;
+    private static IDictionary<string, string> _namespacesToPrefix;
     [ThreadStatic]
-    private static IDictionary<string, string> prefixesToNamespaces;
+    private static IDictionary<string, string> _prefixesToNamespaces;
     [ThreadStatic]
-    private static List<Type> messageBaseTypes;
-    private static readonly ILog logger = LogManager.GetLogger("NServiceBus.Serializers.XML");
+    private static List<Type> _messageBaseTypes;
+    private static readonly ILog _logger = LogManager.GetLogger("NServiceBus.Serializers.XML");
   }
 
   public static class ExtensionMethods
