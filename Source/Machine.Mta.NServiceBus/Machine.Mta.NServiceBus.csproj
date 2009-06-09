@@ -70,6 +70,7 @@
     <Compile Include="NServiceBusMessageBus.cs" />
     <Compile Include="NsbMessageBusFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serializers\Xml\XmlMessageSerializer.cs" />
     <Compile Include="StaticSubscriptionStorage.cs" />
     <Compile Include="TypesScanner.cs" />
     <Compile Include="UnicastBusProxy.cs" />
@@ -79,9 +80,6 @@
       <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
       <Name>Machine.Mta.Core</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Timing\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

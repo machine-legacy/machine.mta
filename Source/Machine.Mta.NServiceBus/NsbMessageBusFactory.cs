@@ -5,9 +5,10 @@ using System.Linq;
 using Machine.Container.Services;
 using Machine.Core;
 using Machine.Mta.Config;
-
+using Machine.Mta.Serializers.Xml;
 using NServiceBus;
 using NServiceBus.Grid.MessageHandlers;
+using NServiceBus.MessageInterfaces.MessageMapper.Reflection;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Saga;
 using NServiceBus.Unicast;
@@ -53,26 +54,11 @@ namespace Machine.Mta
         .CreateBus());
     }
 
-    public NsbBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
+    public IStartableBus AddBus(IStartableBus bus)
     {
-      var types =       _container.Handlers().
-                  Union(_container.Finders()).
-                  Union(_container.Sagas()).
-                  Union(_messageRegisterer.MessageTypes).
-                  Union(additionalTypes).ToList();
-      return Add(listenAddress, poisonAddress, Configure
-        .With(types)
-        .MachineBuilder(_container)
-        .MsmqSubscriptionStorage()
-          .In(subscriptionStorageAddress)
-        .XmlSerializer()
-        .MsmqTransport()
-          .On(listenAddress, poisonAddress)
-        .Sagas()
-        .UnicastBus()
-          .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
-          .WithMessageRoutes(_messageDestinations)
-        .CreateBus());
+      // var nsbBus = new NsbBus();
+      // _all.Add(nsbBus);
+      return bus;
     }
 
     public void EachBus(Action<IStartableBus> action)
@@ -140,7 +126,7 @@ namespace Machine.Mta
   public interface INsbMessageBusFactory
   {
     NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
-    NsbBus Create(EndpointAddress subscriptionStorageAddress, EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
+    IStartableBus AddBus(IStartableBus bus);
     void EachBus(Action<IStartableBus> action);
     void EachBus(Action<NsbBus> action);
     NsbBus CurrentBus();
@@ -160,6 +146,13 @@ namespace Machine.Mta
       var cfg = new MyConfigUnicastBus();
       cfg.Configure(config);
       return cfg;
+    }
+
+    public static Configure XmlSerializer(this Configure config)
+    {
+      config.Configurer.ConfigureComponent<MessageMapper>(ComponentCallModelEnum.Singleton);
+      config.Configurer.ConfigureComponent<MessageSerializer>(ComponentCallModelEnum.Singleton);
+      return config;
     }
 
     public static MyConfigMsmqSubscriptionStorage MsmqSubscriptionStorage(this Configure config)
