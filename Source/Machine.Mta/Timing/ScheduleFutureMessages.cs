@@ -32,9 +32,9 @@ namespace Machine.Mta.Timing
     public void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : IMessage
     {
       ISchedulePublishMessage message = _messageFactory.Create<ISchedulePublishMessage>();
-      message.PublishAddresses = destinations;
+      message.PublishAddresses = destinations.Select(d => d.ToString()).ToArray();
       message.PublishAt = publishAt;
-      message.MessagePayload = _transportMessageBodySerializer.Serialize(messages);
+      message.MessagePayload = _transportMessageBodySerializer.Serialize(messages).ToByteArray();
       _bus.Send(message);
     }
   }

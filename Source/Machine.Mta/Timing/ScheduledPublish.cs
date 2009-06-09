@@ -7,8 +7,8 @@ namespace Machine.Mta.Timing
   {
     readonly Guid _id;
     readonly DateTime _publishAt;
-    readonly MessagePayload _messagePayload;
-    readonly EndpointAddress[] _addresses;
+    readonly byte[] _messagePayload;
+    readonly string[] _addresses;
     readonly Guid[] _sagaIds;
 
     public Guid Id
@@ -21,12 +21,12 @@ namespace Machine.Mta.Timing
       get { return _publishAt; }
     }
 
-    public MessagePayload MessagePayload
+    public byte[] MessagePayload
     {
       get { return _messagePayload; }
     }
 
-    public EndpointAddress[] Addresses
+    public string[] Addresses
     {
       get { return _addresses; }
     }
@@ -36,7 +36,7 @@ namespace Machine.Mta.Timing
       get { return _sagaIds; }
     }
 
-    public ScheduledPublish(DateTime publishAt, MessagePayload messagePayload, EndpointAddress[] addresses, Guid[] sagaIds)
+    public ScheduledPublish(DateTime publishAt, byte[] messagePayload, string[] addresses, Guid[] sagaIds)
     {
       _id = Guid.NewGuid();
       _publishAt = publishAt;

@@ -43,13 +43,13 @@ namespace Machine.Mta.AdoNet
     {
       using (IDbConnection connection = OpenConnection())
       {
-        foreach (EndpointAddress destination in scheduled.Addresses)
+        foreach (var destination in scheduled.Addresses)
         {
           IDbCommand command = CreateInsertCommand(connection);
           command.Parameter("GroupName").Value = _groupNameProvider.GroupName;
           command.Parameter("PublishId").Value = scheduled.Id;
           command.Parameter("PublishAt").Value = scheduled.PublishAt;
-          command.Parameter("ReturnAddress").Value = destination.ToString();
+          command.Parameter("ReturnAddress").Value = destination;
           command.Parameter("MessagePayload").Value = scheduled.MessagePayload.MakeString();
           command.Parameter("SagaIds").Value = scheduled.SagaIds.MakeString();
           if (command.ExecuteNonQuery() != 1)
@@ -77,7 +77,7 @@ namespace Machine.Mta.AdoNet
             string returnAddress = reader.GetString(3);
             string messagePayload = reader.GetString(4);
             string sagaIds = reader.GetString(5);
-            scheduled.Add(new ScheduledPublish(publishAt, MessagePayload.FromString(messagePayload), new[] { EndpointAddress.FromString(returnAddress) }, sagaIds.ToGuidArray()));
+            scheduled.Add(new ScheduledPublish(publishAt, Convert.FromBase64String(messagePayload), new[] { returnAddress }, sagaIds.ToGuidArray()));
           }
           reader.Close();
         }

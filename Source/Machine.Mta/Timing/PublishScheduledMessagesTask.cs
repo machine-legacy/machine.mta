@@ -1,13 +1,17 @@
+using System.Linq;
+
 namespace Machine.Mta.Timing
 {
   public class PublishScheduledMessagesTask : IOnceASecondTask
   {
     readonly IScheduledPublishRepository _scheduledPublishRepository;
+    readonly TransportMessageBodySerializer _transportMessageBodySerializer;
     readonly IMessageBus _bus;
 
-    public PublishScheduledMessagesTask(IMessageBus bus, IScheduledPublishRepository scheduledPublishRepository)
+    public PublishScheduledMessagesTask(IMessageBus bus, IScheduledPublishRepository scheduledPublishRepository, TransportMessageBodySerializer transportMessageBodySerializer)
     {
       _bus = bus;
+      _transportMessageBodySerializer = transportMessageBodySerializer;
       _scheduledPublishRepository = scheduledPublishRepository;
     }
 
@@ -17,9 +21,10 @@ namespace Machine.Mta.Timing
       {
         using (CurrentSagaContext.Open(scheduled.SagaIds))
         {
-          foreach (EndpointAddress destination in scheduled.Addresses)
+          var messages = _transportMessageBodySerializer.Deserialize(scheduled.MessagePayload);
+          foreach (EndpointAddress destination in scheduled.Addresses.Select(a => EndpointAddress.FromString(a)))
           {
-            _bus.Send(destination, scheduled.MessagePayload);
+            _bus.Send(destination, messages);
           }
         }
       }
