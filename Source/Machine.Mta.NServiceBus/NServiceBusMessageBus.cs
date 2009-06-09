@@ -55,6 +55,11 @@ namespace Machine.Mta
       CurrentBus().Send(destination.ToNsbAddress(), messages.ToNsbMessages());
     }
 
+    public void Send<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
+    {
+      CurrentBus().Send(destination.ToNsbAddress(), correlationId, messages.ToNsbMessages());
+    }
+
     public void Send(EndpointAddress destination, MessagePayload payload)
     {
       throw new NotImplementedException();
@@ -82,11 +87,6 @@ namespace Machine.Mta
     public void Reply<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().Reply(messages.ToNsbMessages());
-    }
-
-    public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
-    {
-      CurrentBus().Send(destination.ToNsbAddress(), correlationId, messages.ToNsbMessages());
     }
 
     public void Reply<T>(string correlationId, params T[] messages) where T : IMessage

@@ -38,6 +38,11 @@ namespace Machine.Mta
       CurrentBus().Send(destination, messages);
     }
 
+    public void Send<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
+    {
+      CurrentBus().Send(destination, correlationId, messages);
+    }
+
     public void Send(EndpointAddress destination, MessagePayload payload)
     {
       CurrentBus().Send(destination, payload);
@@ -66,11 +71,6 @@ namespace Machine.Mta
     public void Reply<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().Reply(messages);
-    }
-
-    public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
-    {
-      CurrentBus().Reply(destination, correlationId, messages);
     }
 
     public void Reply<T>(string correlationId, params T[] messages) where T : IMessage

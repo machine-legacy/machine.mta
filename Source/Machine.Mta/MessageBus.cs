@@ -87,6 +87,12 @@ namespace Machine.Mta
       SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(null, payload, false));
     }
 
+    public void Send<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
+    {
+      Logging.Send(messages);
+      SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(correlationId, false, messages));
+    }
+
     public void SendLocal<T>(params T[] messages) where T : IMessage
     {
       Send(this.Address, messages);
