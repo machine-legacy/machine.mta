@@ -15,7 +15,7 @@ using NServiceBus.Serialization;
 
 namespace Machine.Mta.Serializers.Xml
 {
-  public class MessageSerializer : IMessageSerializer
+  public class MessageSerializer : IMessageSerializer, ITransportMessageBodyFormatter
   {
     public IMessageMapper MessageMapper { get; set; }
 
@@ -106,11 +106,21 @@ namespace Machine.Mta.Serializers.Xml
       return t.GetFields(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public);
     }
 
+    public void Serialize(Machine.Mta.IMessage[] messages, Stream stream)
+    {
+      Serialize(messages.Cast<NServiceBus.IMessage>().ToArray(), stream);
+    }
+
+    Machine.Mta.IMessage[] ITransportMessageBodyFormatter.Deserialize(Stream stream)
+    {
+      return Deserialize(stream).Cast<Machine.Mta.IMessage>().ToArray();
+    }
+
     public NServiceBus.IMessage[] Deserialize(Stream stream)
     {
       _prefixesToNamespaces = new Dictionary<string, string>();
       _messageBaseTypes = new List<Type>();
-      List<IMessage> result = new List<IMessage>();
+      List<NServiceBus.IMessage> result = new List<NServiceBus.IMessage>();
 
       XmlDocument doc = new XmlDocument();
       doc.Load(stream);
@@ -145,7 +155,7 @@ namespace Machine.Mta.Serializers.Xml
         if (m == null)
           throw new SerializationException("Could not deserialize message.");
 
-        result.Add(m as IMessage);
+        result.Add(m as NServiceBus.IMessage);
       }
       else
       {
@@ -153,7 +163,7 @@ namespace Machine.Mta.Serializers.Xml
         {
           object m = Process(node, null);
 
-          result.Add(m as IMessage);
+          result.Add(m as NServiceBus.IMessage);
         }
       }
 
@@ -544,7 +554,7 @@ namespace Machine.Mta.Serializers.Xml
     {
       List<string> result = new List<string>();
 
-      foreach (IMessage m in messages)
+      foreach (var m in messages)
       {
         string ns = mapper.GetMappedTypeFor(m.GetType()).Namespace;
         if (!result.Contains(ns))
@@ -558,14 +568,14 @@ namespace Machine.Mta.Serializers.Xml
     {
       List<string> result = new List<string>();
 
-      foreach (IMessage m in messages)
+      foreach (var m in messages)
       {
         Type t = mapper.GetMappedTypeFor(m.GetType());
 
         Type baseType = t.BaseType;
         while (baseType != typeof(object) && baseType != null)
         {
-          if (typeof(IMessage).IsAssignableFrom(baseType))
+          if (typeof(NServiceBus.IMessage).IsAssignableFrom(baseType))
             if (!result.Contains(baseType.FullName))
               result.Add(baseType.FullName);
 
@@ -573,7 +583,7 @@ namespace Machine.Mta.Serializers.Xml
         }
 
         foreach (Type i in t.GetInterfaces())
-          if (i != typeof(IMessage) && typeof(IMessage).IsAssignableFrom(i))
+          if (i != typeof(NServiceBus.IMessage) && typeof(NServiceBus.IMessage).IsAssignableFrom(i))
             if (!result.Contains(i.FullName))
               result.Add(i.FullName);
       }
@@ -620,18 +630,18 @@ namespace Machine.Mta.Serializers.Xml
               type.IsEnum);
     }
 
-    public static string SerializationFriendlyName(this Type t)
+    public static string SerializationFriendlyName(this Type type)
     {
-      if (typeToNameLookup.ContainsKey(t))
-        return typeToNameLookup[t];
+      if (_typeToNameLookup.ContainsKey(type))
+        return _typeToNameLookup[type];
 
-      var args = t.GetGenericArguments();
+      var args = type.GetGenericArguments();
       if (args != null)
       {
-        int index = t.Name.IndexOf('`');
+        int index = type.Name.IndexOf('`');
         if (index >= 0)
         {
-          string result = t.Name.Substring(0, index) + "Of";
+          string result = type.Name.Substring(0, index) + "Of";
           for (int i = 0; i < args.Length; i++)
           {
             result += args[i].Name;
@@ -639,13 +649,13 @@ namespace Machine.Mta.Serializers.Xml
               result += "And";
           }
 
-          typeToNameLookup[t] = result;
+          _typeToNameLookup[type] = result;
           return result;
         }
       }
 
-      typeToNameLookup[t] = t.Name;
-      return t.Name;
+      _typeToNameLookup[type] = type.Name;
+      return type.Name;
     }
 
     public static TSource ForgivingCaseSensitiveFind<TSource>(this IEnumerable<TSource> source, Func<TSource, string> valueSelector, string testValue)
@@ -666,6 +676,6 @@ namespace Machine.Mta.Serializers.Xml
       }
     }
 
-    private static IDictionary<Type, string> typeToNameLookup = new Dictionary<Type, string>();
+    private static IDictionary<Type, string> _typeToNameLookup = new Dictionary<Type, string>();
   }
 }

@@ -5,7 +5,6 @@ using System.Linq;
 using Machine.Mta.Serializers.Xml;
 
 using NServiceBus;
-using NServiceBus.MessageInterfaces.MessageMapper.Reflection;
 using NServiceBus.ObjectBuilder;
 using NServiceBus.Unicast;
 using NServiceBus.Unicast.Config;

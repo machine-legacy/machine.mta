@@ -71,6 +71,7 @@
     <Compile Include="NServiceBusMessageBus.cs" />
     <Compile Include="NsbMessageBusFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serializers\Xml\MessageMapper.cs" />
     <Compile Include="Serializers\Xml\XmlMessageSerializer.cs" />
     <Compile Include="StaticSubscriptionStorage.cs" />
     <Compile Include="TypesScanner.cs" />
