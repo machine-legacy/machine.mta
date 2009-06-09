@@ -67,7 +67,6 @@
     <Compile Include="MyConfigure.cs" />
     <Compile Include="NsbMessageBusManager.cs" />
     <Compile Include="NsbMessageFactory.cs" />
-    <Compile Include="NsbMessageRegisterer.cs" />
     <Compile Include="NServiceBusMessageBus.cs" />
     <Compile Include="NsbMessageBusFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

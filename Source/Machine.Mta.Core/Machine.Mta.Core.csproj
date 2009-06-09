@@ -70,6 +70,7 @@
     <Compile Include="ITransportMessageBodyFormatter.cs" />
     <Compile Include="MessageDestinations.cs" />
     <Compile Include="MessagePayload.cs" />
+    <Compile Include="MessageRegisterer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Timing\IOnceASecondTask.cs" />
     <Compile Include="Timing\ServerClock.cs" />

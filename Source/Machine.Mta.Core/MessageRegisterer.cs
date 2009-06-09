@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Machine.Mta
 {
-  public class NsbMessageRegisterer : IMessageRegisterer
+  public class MessageRegisterer : IMessageRegisterer
   {
     readonly List<Type> _messageTypes = new List<Type>();
 

@@ -154,8 +154,9 @@ namespace Machine.Mta.Specs
       container.Start();
       IEndpointResolver endpointResolver = new EndpointResolver(container);
       messageDestinations = new MessageDestinations();
-      MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
-      messageInterfaceImplementations.AddMessageTypes(typeof(IMessage), typeof(ISampleMessage), typeof(ISampleSagaMessage));
+      MessageRegisterer registerer = new MessageRegisterer();
+      registerer.AddMessageTypes(typeof(IMessage), typeof(ISampleMessage), typeof(ISampleSagaMessage));
+      MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory(), registerer);
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
       dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container), new AllHandlersInContainer(container));
       messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());

@@ -275,9 +275,10 @@ namespace Machine.Mta.Specs
     Establish context = () =>
     {
       factory = new DefaultMessageInterfaceImplementationFactory();
-      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(factory);
+      MessageRegisterer registerer = new MessageRegisterer();
+      registerer.AddMessageTypes(typeof(IAmAMessage), typeof(IHaveAChildMessage), typeof(ISampleMessage), typeof(IComplexMessage), typeof(IAnotherMessage));
+      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(factory, registerer);
       messageFactory = new MessageFactory(implementations, new MessageDefinitionFactory());
-      implementations.AddMessageTypes(typeof(IAmAMessage), typeof(IHaveAChildMessage), typeof(ISampleMessage), typeof(IComplexMessage), typeof(IAnotherMessage));
     };
   }
 

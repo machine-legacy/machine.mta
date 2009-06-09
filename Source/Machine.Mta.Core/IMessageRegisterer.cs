@@ -5,7 +5,7 @@ namespace Machine.Mta
 {
   public interface IMessageRegisterer
   {
-    void AddMessageTypes(params Type[] types);
     void AddMessageTypes(IEnumerable<Type> types);
+    IEnumerable<Type> MessageTypes { get; }
   }
 }

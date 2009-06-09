@@ -16,15 +16,15 @@ namespace Machine.Mta
   public class NsbMessageBusFactory : INsbMessageBusFactory, IDisposable
   {
     readonly IMachineContainer _container;
-    readonly NsbMessageRegisterer _messageRegisterer;
+    readonly IMessageRegisterer _registerer;
     readonly IMessageDestinations _messageDestinations;
     readonly List<NsbBus> _all = new List<NsbBus>();
 
-    public NsbMessageBusFactory(IMachineContainer container, NsbMessageRegisterer messageRegisterer, IMessageDestinations messageDestinations)
+    public NsbMessageBusFactory(IMachineContainer container, IMessageRegisterer registerer, IMessageDestinations messageDestinations)
     {
       _container = container;
       _messageDestinations = messageDestinations;
-      _messageRegisterer = messageRegisterer;
+      _registerer = registerer;
     }
 
     public NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
@@ -32,7 +32,7 @@ namespace Machine.Mta
       var types =       _container.Handlers().
                   Union(_container.Finders()).
                   Union(_container.Sagas()).
-                  Union(_messageRegisterer.MessageTypes).
+                  Union(_registerer.MessageTypes).
                   Union(additionalTypes).ToList();
       return Add(listenAddress, poisonAddress, Configure
         .With(types)
