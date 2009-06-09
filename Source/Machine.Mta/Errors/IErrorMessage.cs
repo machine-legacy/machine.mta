@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace Machine.Mta.Errors
 {
+  /*
   public interface IErrorMessage : IMessage
   {
     DateTime OccuredAt { get; set; }
@@ -202,4 +203,5 @@ namespace Machine.Mta.Errors
       };
     }
   }
+  */
 }

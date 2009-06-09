@@ -80,7 +80,7 @@ namespace Machine.Mta
     void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error);
     bool IsPoison(TransportMessage transportMessage);
   }
-
+  /*
   public class PublishErrorMessages : IStartable
   {
     readonly IMessageBus _bus;
@@ -102,4 +102,5 @@ namespace Machine.Mta
       MessageFailureManager.Failure = RecordFailure;
     }
   }
+  */
 }
