@@ -13,11 +13,15 @@ using Common.Logging;
 using NServiceBus.MessageInterfaces;
 using NServiceBus.Serialization;
 
-namespace Machine.Mta.Serializers.Xml
+namespace Machine.Mta.Serializing.Xml
 {
-  public class MessageSerializer : IMessageSerializer, ITransportMessageBodyFormatter
+  public class MessageSerializer : IMessageSerializer
   {
-    public IMessageMapper MessageMapper { get; set; }
+    public IMessageMapper MessageMapper
+    {
+      get;
+      set;
+    }
 
     private string _nameSpace = "http://tempuri.net";
 
@@ -27,45 +31,45 @@ namespace Machine.Mta.Serializers.Xml
       set { _nameSpace = value; }
     }
 
-    // private List<Type> _additionalTypes;
+    private List<Type> _additionalTypes;
 
     public List<Type> AdditionalTypes
     {
-      get;
-      set;
+      get { return _additionalTypes; }
+      set { _additionalTypes = value; }
     }
 
     public void Initialize(params Type[] types)
     {
-      if (AdditionalTypes == null)
-        AdditionalTypes = new List<Type>();
+      if (_additionalTypes == null)
+        _additionalTypes = new List<Type>();
 
-      AdditionalTypes.AddRange(types);
-      this.MessageMapper.Initialize(AdditionalTypes.ToArray());
+      _additionalTypes.AddRange(types);
+      this.MessageMapper.Initialize(_additionalTypes.ToArray());
 
-      foreach (Type t in AdditionalTypes)
-        InitType(t);
+      foreach (Type type in _additionalTypes)
+        InitType(type);
     }
 
-    public void InitType(Type t)
+    public void InitType(Type type)
     {
-      if (t.IsPrimitive || t == typeof(string) || t == typeof(Guid) || t == typeof(DateTime))
+      if (type.IsPrimitive || type == typeof(string) || type == typeof(Guid) || type == typeof(DateTime))
         return;
 
-      if (typeof(IEnumerable).IsAssignableFrom(t))
+      if (typeof(IEnumerable).IsAssignableFrom(type))
       {
-        if (t.IsArray)
-          _typesToCreateForArrays[t] = typeof(List<>).MakeGenericType(t.GetElementType());
+        if (type.IsArray)
+          _typesToCreateForArrays[type] = typeof(List<>).MakeGenericType(type.GetElementType());
 
-        foreach (Type g in t.GetGenericArguments())
+        foreach (Type g in type.GetGenericArguments())
           InitType(g);
 
         //Handle dictionaries - initalize relevant KeyValuePair<T,K> types.
-        foreach (Type interfaceType in t.GetInterfaces())
+        foreach (Type interfaceType in type.GetInterfaces())
         {
           Type[] arr = interfaceType.GetGenericArguments();
           if (arr.Length == 1)
-            if (typeof(IEnumerable<>).MakeGenericType(arr[0]).IsAssignableFrom(t))
+            if (typeof(IEnumerable<>).MakeGenericType(arr[0]).IsAssignableFrom(type))
               InitType(arr[0]);
         }
 
@@ -73,15 +77,15 @@ namespace Machine.Mta.Serializers.Xml
       }
 
       //already in the process of initializing this type (prevents infinite recursion).
-      if (_typesBeingInitialized.Contains(t))
+      if (_typesBeingInitialized.Contains(type))
         return;
 
-      _typesBeingInitialized.Add(t);
+      _typesBeingInitialized.Add(type);
 
-      var props = GetAllPropertiesForType(t);
-      _typeToProperties[t] = props;
-      var fields = GetAllFieldsForType(t);
-      _typeToFields[t] = fields;
+      var props = GetAllPropertiesForType(type);
+      _typeToProperties[type] = props;
+      var fields = GetAllFieldsForType(type);
+      _typeToFields[type] = fields;
 
       foreach (PropertyInfo prop in props)
         InitType(prop.PropertyType);
@@ -90,30 +94,20 @@ namespace Machine.Mta.Serializers.Xml
         InitType(field.FieldType);
     }
 
-    IEnumerable<PropertyInfo> GetAllPropertiesForType(Type t)
+    static IEnumerable<PropertyInfo> GetAllPropertiesForType(Type type)
     {
-      List<PropertyInfo> result = new List<PropertyInfo>(t.GetProperties());
+      List<PropertyInfo> result = new List<PropertyInfo>(type.GetProperties());
 
-      if (t.IsInterface)
-        foreach (Type interfaceType in t.GetInterfaces())
+      if (type.IsInterface)
+        foreach (Type interfaceType in type.GetInterfaces())
           result.AddRange(GetAllPropertiesForType(interfaceType));
 
       return result;
     }
 
-    IEnumerable<FieldInfo> GetAllFieldsForType(Type t)
+    static IEnumerable<FieldInfo> GetAllFieldsForType(Type type)
     {
-      return t.GetFields(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public);
-    }
-
-    public void Serialize(Machine.Mta.IMessage[] messages, Stream stream)
-    {
-      Serialize(messages.Cast<NServiceBus.IMessage>().ToArray(), stream);
-    }
-
-    Machine.Mta.IMessage[] ITransportMessageBodyFormatter.Deserialize(Stream stream)
-    {
-      return Deserialize(stream).Cast<Machine.Mta.IMessage>().ToArray();
+      return type.GetFields(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public);
     }
 
     public NServiceBus.IMessage[] Deserialize(Stream stream)
@@ -172,7 +166,7 @@ namespace Machine.Mta.Serializers.Xml
       return result.ToArray();
     }
 
-    private object Process(XmlNode node, object parent)
+    object Process(XmlNode node, object parent)
     {
       string name = node.Name;
       string typeName = _defaultNameSpace + "." + name;
@@ -228,16 +222,16 @@ namespace Machine.Mta.Serializers.Xml
       public Action<object> Set;
     }
 
-    private object GetObjectOfTypeFromNode(Type t, XmlNode node)
+    object GetObjectOfTypeFromNode(Type type, XmlNode node)
     {
-      if (t.IsSimpleType())
-        return GetPropertyValue(t, node);
+      if (type.IsSimpleType())
+        return GetPropertyValue(type, node);
 
       Dictionary<MemberInfo, DeserializedProperty> properties = new Dictionary<MemberInfo, DeserializedProperty>();
 
       foreach (XmlNode n in node.ChildNodes)
       {
-        PropertyInfo prop = GetProperty(t, n.Name);
+        PropertyInfo prop = GetProperty(type, n.Name);
         if (prop != null)
         {
           object val = GetPropertyValue(prop.PropertyType, n);
@@ -245,7 +239,7 @@ namespace Machine.Mta.Serializers.Xml
             properties[prop] = new DeserializedProperty() { Value = val, Set = (o) => prop.SetValue(o, val, null) };
         }
 
-        FieldInfo field = GetField(t, n.Name);
+        FieldInfo field = GetField(type, n.Name);
         if (field != null)
         {
           object val = GetPropertyValue(field.FieldType, n);
@@ -254,19 +248,19 @@ namespace Machine.Mta.Serializers.Xml
         }
       }
 
-      if (t.IsInterface || t.IsAbstract || ExtensionMethods.HasDefaultConstructor(t))
+      if (type.IsInterface || type.IsAbstract || ExtensionMethods.HasDefaultConstructor(type))
       {
-        object result = MessageMapper.CreateInstance(t);
+        object result = MessageMapper.CreateInstance(type);
         foreach (var entry in properties)
         {
           entry.Value.Set(result);
         }
         return result;
       }
-      return CreateUsingNonDefaultConstructor(t, properties);
+      return CreateUsingNonDefaultConstructor(type, properties);
     }
 
-    private object CreateUsingNonDefaultConstructor(Type type, IDictionary<MemberInfo, DeserializedProperty> properties)
+    static object CreateUsingNonDefaultConstructor(Type type, IDictionary<MemberInfo, DeserializedProperty> properties)
     {
       var ctor = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance).SingleOrDefault();
       if (ctor == null) throw new ArgumentException("No valid constructor on: " + type);
@@ -282,7 +276,7 @@ namespace Machine.Mta.Serializers.Xml
       return Activator.CreateInstance(type, source.Values.ToArray());
     }
 
-    private PropertyInfo GetProperty(Type t, string name)
+    static PropertyInfo GetProperty(Type t, string name)
     {
       IEnumerable<PropertyInfo> props;
       _typeToProperties.TryGetValue(t, out props);
@@ -297,7 +291,7 @@ namespace Machine.Mta.Serializers.Xml
       return null;
     }
 
-    private FieldInfo GetField(Type t, string name)
+    static FieldInfo GetField(Type t, string name)
     {
       IEnumerable<FieldInfo> fields;
       _typeToFields.TryGetValue(t, out fields);
@@ -312,7 +306,7 @@ namespace Machine.Mta.Serializers.Xml
       return null;
     }
 
-    private object GetPropertyValue(Type type, XmlNode n)
+    object GetPropertyValue(Type type, XmlNode n)
     {
       if (n.ChildNodes.Count == 1 && n.ChildNodes[0] is XmlText)
       {
@@ -450,19 +444,30 @@ namespace Machine.Mta.Serializers.Xml
       stream.Write(buffer, 0, buffer.Length);
     }
 
-    private void Write(StringBuilder builder, Type t, object obj)
+    void Write(StringBuilder builder, Type t, object obj)
     {
       if (obj == null)
         return;
 
       foreach (var prop in _typeToProperties[t])
-        WriteEntry(prop.Name, prop.PropertyType, prop.GetValue(obj, null), builder);
+      {
+        try
+        {
+          WriteEntry(prop.Name, prop.PropertyType, prop.GetValue(obj, null), builder);
+        }
+        catch (Exception error)
+        {
+          throw new InvalidOperationException("Error writing: " + prop, error);
+        }
+      }
 
       foreach (var field in _typeToFields[t])
+      {
         WriteEntry(field.Name, field.FieldType, field.GetValue(obj), builder);
+      }
     }
 
-    private void WriteObject(string name, Type type, object value, StringBuilder builder)
+    void WriteObject(string name, Type type, object value, StringBuilder builder)
     {
       string element = name;
       string prefix;
@@ -478,7 +483,7 @@ namespace Machine.Mta.Serializers.Xml
       builder.AppendFormat("</{0}>\n", element);
     }
 
-    private void WriteEntry(string name, Type type, object value, StringBuilder builder)
+    void WriteEntry(string name, Type type, object value, StringBuilder builder)
     {
       if (value == null)
         return;
@@ -520,7 +525,7 @@ namespace Machine.Mta.Serializers.Xml
       WriteObject(name, type, value, builder);
     }
 
-    private string FormatAsString(object value)
+    string FormatAsString(object value)
     {
       if (value == null)
         return string.Empty;
@@ -545,12 +550,12 @@ namespace Machine.Mta.Serializers.Xml
       return value.ToString();
     }
 
-    private static bool CanFormatAsString(Type type)
+    static bool CanFormatAsString(Type type)
     {
       return type.IsValueType || type == typeof(Uri) || type == typeof(string);
     }
 
-    private static List<string> GetNamespaces(IEnumerable<NServiceBus.IMessage> messages, IMessageMapper mapper)
+    static List<string> GetNamespaces(IEnumerable<NServiceBus.IMessage> messages, IMessageMapper mapper)
     {
       List<string> result = new List<string>();
 
@@ -564,7 +569,7 @@ namespace Machine.Mta.Serializers.Xml
       return result;
     }
 
-    private static List<string> GetBaseTypes(IEnumerable<NServiceBus.IMessage> messages, IMessageMapper mapper)
+    static List<string> GetBaseTypes(IEnumerable<NServiceBus.IMessage> messages, IMessageMapper mapper)
     {
       List<string> result = new List<string>();
 
@@ -591,24 +596,24 @@ namespace Machine.Mta.Serializers.Xml
       return result;
     }
 
-    private static readonly string XMLPREFIX = "d1p1";
-    private static readonly string XMLTYPE = XMLPREFIX + ":type";
-    private static readonly string BASETYPE = "baseType";
+    static readonly string XMLPREFIX = "d1p1";
+    static readonly string XMLTYPE = XMLPREFIX + ":type";
+    static readonly string BASETYPE = "baseType";
 
-    private static readonly Dictionary<Type, IEnumerable<PropertyInfo>> _typeToProperties = new Dictionary<Type, IEnumerable<PropertyInfo>>();
-    private static readonly Dictionary<Type, IEnumerable<FieldInfo>> _typeToFields = new Dictionary<Type, IEnumerable<FieldInfo>>();
-    private static readonly Dictionary<Type, Type> _typesToCreateForArrays = new Dictionary<Type, Type>();
-    private static readonly List<Type> _typesBeingInitialized = new List<Type>();
+    static readonly Dictionary<Type, IEnumerable<PropertyInfo>> _typeToProperties = new Dictionary<Type, IEnumerable<PropertyInfo>>();
+    static readonly Dictionary<Type, IEnumerable<FieldInfo>> _typeToFields = new Dictionary<Type, IEnumerable<FieldInfo>>();
+    static readonly Dictionary<Type, Type> _typesToCreateForArrays = new Dictionary<Type, Type>();
+    static readonly List<Type> _typesBeingInitialized = new List<Type>();
 
     [ThreadStatic]
-    private static string _defaultNameSpace;
+    static string _defaultNameSpace;
     [ThreadStatic]
-    private static IDictionary<string, string> _namespacesToPrefix;
+    static IDictionary<string, string> _namespacesToPrefix;
     [ThreadStatic]
-    private static IDictionary<string, string> _prefixesToNamespaces;
+    static IDictionary<string, string> _prefixesToNamespaces;
     [ThreadStatic]
-    private static List<Type> _messageBaseTypes;
-    private static readonly ILog _logger = LogManager.GetLogger("NServiceBus.Serializers.XML");
+    static List<Type> _messageBaseTypes;
+    static readonly ILog _logger = LogManager.GetLogger("NServiceBus.Serializers.XML");
   }
 
   public static class ExtensionMethods

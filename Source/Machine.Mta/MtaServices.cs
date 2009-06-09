@@ -5,7 +5,6 @@ using Machine.Container.Plugins;
 using Machine.Mta.Dispatching;
 using Machine.Mta.Endpoints;
 using Machine.Mta.InterfacesAsMessages;
-using Machine.Mta.Timing;
 using Machine.Mta.Sagas;
 
 namespace Machine.Mta
@@ -28,7 +27,6 @@ namespace Machine.Mta
     {
       register.Type<EndpointResolver>();
       register.Type<MessageDestinations>();
-      register.Type<MessageInterfaceTransportFormatter>();
       register.Type<TransportMessageBodySerializer>();
       register.Type<MessageInterfaceImplementations>();
       register.Type<MessageFactory>();

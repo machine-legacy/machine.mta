@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Machine.Mta.Serializers.Xml;
+using Machine.Mta.Serializing.Xml;
 
 using NServiceBus;
 using NServiceBus.ObjectBuilder;

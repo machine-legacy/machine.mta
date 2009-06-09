@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using NServiceBus.MessageInterfaces;
 
-namespace Machine.Mta.Serializers.Xml
+namespace Machine.Mta.Serializing.Xml
 {
   public class MessageMapper : IMessageMapper
   {
