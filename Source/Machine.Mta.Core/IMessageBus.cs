@@ -9,20 +9,13 @@ namespace Machine.Mta
     EndpointAddress Address { get; }
     void Start();
     void Send<T>(params T[] messages) where T : IMessage;
-    //[Obsolete]
-    void Send<T>(string correlationId, params T[] messages) where T : IMessage;
     void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage;
     void Send<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage;
-    //[Obsolete]
     void Send(EndpointAddress destination, MessagePayload payload);
     void SendLocal<T>(params T[] messages) where T : IMessage;
     void Stop();
     IRequestReplyBuilder Request<T>(params T[] messages) where T : IMessage;
-    //[Obsolete]
-    IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : IMessage;
     void Reply<T>(params T[] messages) where T : IMessage;
-    //[Obsolete]
-    void Reply<T>(string correlationId, params T[] messages) where T : IMessage;
     void Publish<T>(params T[] messages) where T : IMessage;
   }
 

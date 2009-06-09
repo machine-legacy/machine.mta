@@ -45,11 +45,6 @@ namespace Machine.Mta
       CurrentBus().Send(messages.ToNsbMessages());
     }
 
-    public void Send<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      throw new NotImplementedException();
-    }
-
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage
     {
       CurrentBus().Send(destination.ToNsbAddress(), messages.ToNsbMessages());
@@ -79,19 +74,9 @@ namespace Machine.Mta
       return new NServiceBusRequestReplyBuilder<T>(_routing, CurrentBus(), null, messages.ToNsbMessages());
     }
 
-    public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      return new NServiceBusRequestReplyBuilder<T>(_routing, CurrentBus(), correlationId, messages.ToNsbMessages());
-    }
-
     public void Reply<T>(params T[] messages) where T : IMessage
     {
       CurrentBus().Reply(messages.ToNsbMessages());
-    }
-
-    public void Reply<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      throw new NotImplementedException();
     }
 
     public void Publish<T>(params T[] messages) where T : IMessage

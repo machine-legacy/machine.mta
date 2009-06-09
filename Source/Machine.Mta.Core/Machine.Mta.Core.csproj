@@ -66,6 +66,7 @@
     <Compile Include="IMessageBusManager.cs" />
     <Compile Include="IMessageDestinations.cs" />
     <Compile Include="IMessageFactory.cs" />
+    <Compile Include="IMessageInterfaceImplementationsLookup.cs" />
     <Compile Include="IMessageRegisterer.cs" />
     <Compile Include="ITransportMessageBodyFormatter.cs" />
     <Compile Include="MessageDestinations.cs" />

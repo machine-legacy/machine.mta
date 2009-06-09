@@ -69,12 +69,6 @@ namespace Machine.Mta
       RouteTransportMessage<T>(CreateTransportMessage(null, false, messages));
     }
 
-    public void Send<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      Logging.Send(messages);
-      RouteTransportMessage<T>(CreateTransportMessage(correlationId, false, messages));
-    }
-
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage
     {
       Logging.Send(destination, messages);
@@ -129,11 +123,6 @@ namespace Machine.Mta
       return new RequestReplyBuilder(CreateTransportMessage(null, false, messages), (x) => RouteTransportMessage<T>(x), _asyncCallbackMap);
     }
 
-    public IRequestReplyBuilder Request<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      return new RequestReplyBuilder(CreateTransportMessage(correlationId, false, messages), (x) => RouteTransportMessage<T>(x), _asyncCallbackMap);
-    }
-
     public void Reply<T>(params T[] messages) where T : IMessage
     {
       Reply(CurrentMessageContext.Current.ReturnAddress, CurrentMessageContext.Current.CorrelationId, messages);
@@ -143,11 +132,6 @@ namespace Machine.Mta
     {
       Logging.Reply(messages);
       SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(correlationId, true, messages));
-    }
-
-    public void Reply<T>(string correlationId, params T[] messages) where T : IMessage
-    {
-      Reply(CurrentMessageContext.Current.ReturnAddress, correlationId, messages);
     }
 
     public void Publish<T>(params T[] messages) where T : IMessage

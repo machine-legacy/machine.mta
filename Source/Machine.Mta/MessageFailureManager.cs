@@ -62,7 +62,7 @@ namespace Machine.Mta
       {
         if (RWLock.UpgradeToWriterIf(_lock, () => _errors.ContainsKey(id)))
         {
-          if (_errors[id].Count == _configuration.MaximumRetries)
+          if (_errors[id].Count >= _configuration.MaximumRetries)
           {
             _errors.Remove(id);
             return true;
