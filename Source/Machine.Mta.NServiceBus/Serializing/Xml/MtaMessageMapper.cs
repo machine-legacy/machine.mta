@@ -42,12 +42,17 @@ namespace Machine.Mta.Serializing.Xml
     {
       if (type.IsClass)
       {
-        var mappedType = _lookup.GetInterfaceFor(type);
-        if (mappedType != null)
-          return mappedType;
+        if (_lookup.IsClassOrInterface(type))
+        {
+          return _lookup.GetClassOrInterfaceFor(type);
+        }
         return type;
       }
-      return _lookup.GetClassFor(type);
+      if (_lookup.IsClassOrInterface(type))
+      {
+        return _lookup.GetClassOrInterfaceFor(type);
+      }
+      return null;
     }
 
     public Type GetMappedTypeFor(string typeName)

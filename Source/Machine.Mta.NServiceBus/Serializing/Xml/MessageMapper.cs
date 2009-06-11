@@ -9,10 +9,6 @@ namespace Machine.Mta.Serializing.Xml
 {
   public class MessageMapper : IMessageMapper
   {
-    /// <summary>
-    /// Scans the given types generating concrete classes for interfaces.
-    /// </summary>
-    /// <param name="types"></param>
     public void Initialize(params Type[] types)
     {
       if (types == null || types.Length == 0)
@@ -31,11 +27,6 @@ namespace Machine.Mta.Serializing.Xml
         InitType(t, moduleBuilder);
     }
 
-    /// <summary>
-    /// Generates a concrete implementation of the given type if it is an interface.
-    /// </summary>
-    /// <param name="t"></param>
-    /// <param name="moduleBuilder"></param>
     public void InitType(Type t, ModuleBuilder moduleBuilder)
     {
       if (t == null)
@@ -84,23 +75,11 @@ namespace Machine.Mta.Serializing.Xml
       }
     }
 
-    /// <summary>
-    /// Generates a new full name for a type to be generated for the given type.
-    /// </summary>
-    /// <param name="t"></param>
-    /// <returns></returns>
     public string GetNewTypeName(Type t)
     {
       return t.Namespace + SUFFIX + "." + t.Name;
     }
 
-    /// <summary>
-    /// Generates the concrete implementation of the given type.
-    /// Only properties on the given type are generated in the concrete implementation.
-    /// </summary>
-    /// <param name="t"></param>
-    /// <param name="moduleBuilder"></param>
-    /// <returns></returns>
     public Type CreateTypeFrom(Type t, ModuleBuilder moduleBuilder)
     {
       TypeBuilder typeBuilder = moduleBuilder.DefineType(
@@ -167,12 +146,6 @@ namespace Machine.Mta.Serializing.Xml
       return typeBuilder.CreateType();
     }
 
-    /// <summary>
-    /// Returns all properties on the given type, going up the inheritance
-    /// hierarchy.
-    /// </summary>
-    /// <param name="t"></param>
-    /// <returns></returns>
     private IEnumerable<PropertyInfo> GetAllProperties(Type t)
     {
       List<PropertyInfo> result = new List<PropertyInfo>(t.GetProperties());
@@ -182,12 +155,6 @@ namespace Machine.Mta.Serializing.Xml
       return result;
     }
 
-    /// <summary>
-    /// If the given type is concrete, returns the interface it was generated to support.
-    /// If the given type is an interface, returns the concrete class generated to implement it.
-    /// </summary>
-    /// <param name="t"></param>
-    /// <returns></returns>
     public Type GetMappedTypeFor(Type t)
     {
       if (t.IsClass)
@@ -206,11 +173,6 @@ namespace Machine.Mta.Serializing.Xml
       return toReturn;
     }
 
-    /// <summary>
-    /// Returns the type mapped to the given name.
-    /// </summary>
-    /// <param name="typeName"></param>
-    /// <returns></returns>
     public Type GetMappedTypeFor(string typeName)
     {
       if (_nameToType.ContainsKey(typeName))
@@ -219,13 +181,6 @@ namespace Machine.Mta.Serializing.Xml
       return Type.GetType(typeName);
     }
 
-    /// <summary>
-    /// Calls the generic CreateInstance and performs the given
-    /// action on the result.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="action"></param>
-    /// <returns></returns>
     public T CreateInstance<T>(Action<T> action) where T : NServiceBus.IMessage
     {
       T result = CreateInstance<T>();
@@ -234,23 +189,11 @@ namespace Machine.Mta.Serializing.Xml
       return result;
     }
 
-    /// <summary>
-    /// Calls the non-generic CreateInstance and returns its result
-    /// cast to T.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
     public T CreateInstance<T>() where T : NServiceBus.IMessage
     {
       return (T)CreateInstance(typeof(T));
     }
 
-    /// <summary>
-    /// If the given type is an interface, finds its generated concrete
-    /// implementation, instantiates it, and returns the result.
-    /// </summary>
-    /// <param name="t"></param>
-    /// <returns></returns>
     public object CreateInstance(Type t)
     {
       Type mapped = t;

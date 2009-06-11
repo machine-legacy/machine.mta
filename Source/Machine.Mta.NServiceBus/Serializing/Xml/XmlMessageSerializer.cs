@@ -15,7 +15,7 @@ using NServiceBus.Serialization;
 
 namespace Machine.Mta.Serializing.Xml
 {
-  public class MessageSerializer : IMessageSerializer
+  public class XmlMessageSerializer : IMessageSerializer
   {
     public IMessageMapper MessageMapper
     {
@@ -308,8 +308,16 @@ namespace Machine.Mta.Serializing.Xml
 
     object GetPropertyValue(Type type, XmlNode n)
     {
+      var xsiType = n.Attributes["type", "http://www.w3.org/2001/XMLSchema-instance"];
+      if (xsiType != null)
+      {
+        type = this.MessageMapper.GetMappedTypeFor(xsiType.Value);
+      }
       if (n.ChildNodes.Count == 1 && n.ChildNodes[0] is XmlText)
       {
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+          type = type.GetGenericArguments().First();
+
         if (type == typeof(string))
           return n.ChildNodes[0].InnerText;
 
@@ -435,7 +443,7 @@ namespace Machine.Mta.Serializing.Xml
       {
         Type t = MessageMapper.GetMappedTypeFor(m.GetType());
 
-        WriteObject(t.Name, t, m, builder);
+        WriteObject(t.Name, t, t, m, builder);
       }
 
       builder.AppendLine("</Messages>");
@@ -451,14 +459,7 @@ namespace Machine.Mta.Serializing.Xml
 
       foreach (var prop in _typeToProperties[t])
       {
-        try
-        {
-          WriteEntry(prop.Name, prop.PropertyType, prop.GetValue(obj, null), builder);
-        }
-        catch (Exception error)
-        {
-          throw new InvalidOperationException("Error writing: " + prop, error);
-        }
+        WriteEntry(prop.Name, prop.PropertyType, prop.GetValue(obj, null), builder);
       }
 
       foreach (var field in _typeToFields[t])
@@ -467,7 +468,7 @@ namespace Machine.Mta.Serializing.Xml
       }
     }
 
-    void WriteObject(string name, Type type, object value, StringBuilder builder)
+    void WriteObject(string name, Type type, Type typeOnWire, object value, StringBuilder builder)
     {
       string element = name;
       string prefix;
@@ -476,9 +477,16 @@ namespace Machine.Mta.Serializing.Xml
       if (!string.IsNullOrEmpty(prefix))
         element = prefix + ":" + name;
 
-      builder.AppendFormat("<{0}>\n", element);
-
-      Write(builder, type, value);
+      if (type != typeOnWire)
+      {
+        builder.AppendFormat("<{0} xsi:type=\"{1}\">\n", element, typeOnWire.FullName);
+        Write(builder, typeOnWire, value);
+      }
+      else
+      {
+        builder.AppendFormat("<{0}>\n", element);
+        Write(builder, type, value);
+      }
 
       builder.AppendFormat("</{0}>\n", element);
     }
@@ -516,16 +524,17 @@ namespace Machine.Mta.Serializing.Xml
           if (obj.GetType().IsSimpleType())
             WriteEntry(obj.GetType().Name, obj.GetType(), obj, builder);
           else
-            WriteObject(baseType.SerializationFriendlyName(), baseType, obj, builder);
+            WriteObject(baseType.SerializationFriendlyName(), baseType, baseType, obj, builder);
 
         builder.AppendFormat("</{0}>\n", name);
         return;
       }
 
-      WriteObject(name, type, value, builder);
+      var mappedType = MessageMapper.GetMappedTypeFor(value.GetType());
+      WriteObject(name, type, mappedType, value, builder);
     }
 
-    string FormatAsString(object value)
+    static string FormatAsString(object value)
     {
       if (value == null)
         return string.Empty;
@@ -625,6 +634,8 @@ namespace Machine.Mta.Serializing.Xml
 
     public static bool IsSimpleType(this Type type)
     {
+      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        return true;
       return (type == typeof(string) ||
               type.IsPrimitive ||
               type == typeof(decimal) ||

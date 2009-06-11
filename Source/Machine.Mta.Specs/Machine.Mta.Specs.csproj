@@ -66,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Blah.cs" />
     <Compile Include="DefaultMessageInterfaceImplementationFactorySpecs.cs" />
     <Compile Include="Generics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,6 +81,10 @@
     <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">
       <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
       <Name>Machine.Mta.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Machine.Mta.NServiceBus\Machine.Mta.NServiceBus.csproj">
+      <Project>{3F2E6DF5-6EE7-4E06-9A7D-EEE90172F253}</Project>
+      <Name>Machine.Mta.NServiceBus</Name>
     </ProjectReference>
     <ProjectReference Include="..\Machine.Mta.Timing\Machine.Mta.Timing.csproj">
       <Project>{88204FFC-4823-4381-BCB2-E371F4F11470}</Project>

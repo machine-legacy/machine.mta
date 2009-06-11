@@ -8,14 +8,14 @@ namespace Machine.Mta.Serializing.Xml
   public class XmlTransportMessageBodyFormatter : ITransportMessageBodyFormatter
   {
     readonly IMessageRegisterer _registerer;
-    readonly MessageSerializer _serializer;
+    readonly XmlMessageSerializer _serializer;
     readonly MtaMessageMapper _messageMapper;
 
     public XmlTransportMessageBodyFormatter(IMessageRegisterer registerer, MtaMessageMapper messageMapper)
     {
       _registerer = registerer;
       _messageMapper = messageMapper;
-      _serializer = new MessageSerializer();
+      _serializer = new XmlMessageSerializer();
     }
 
     public void Initialize()
@@ -26,14 +26,7 @@ namespace Machine.Mta.Serializing.Xml
 
     public void Serialize(IMessage[] messages, Stream stream)
     {
-      try
-      {
-        _serializer.Serialize(messages, stream);
-      }
-      catch (Exception error)
-      {
-        throw new InvalidOperationException("Error serializing: " + messages[0].GetType(), error);
-      }
+      _serializer.Serialize(messages, stream);
     }
 
     public IMessage[] Deserialize(Stream stream)

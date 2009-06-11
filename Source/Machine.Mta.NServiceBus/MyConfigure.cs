@@ -32,7 +32,7 @@ namespace Machine.Mta
     public static Configure XmlSerializer(this Configure config)
     {
       config.Configurer.ConfigureComponent<MessageMapper>(ComponentCallModelEnum.Singleton);
-      config.Configurer.ConfigureComponent<MessageSerializer>(ComponentCallModelEnum.Singleton);
+      config.Configurer.ConfigureComponent<XmlMessageSerializer>(ComponentCallModelEnum.Singleton);
       return config;
     }
 

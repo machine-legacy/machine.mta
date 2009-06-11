@@ -27,6 +27,8 @@ namespace Machine.Mta.InterfacesAsMessages
       using (RWLock.AsReader(_lock))
       {
         GenerateIfNecessary();
+        if (!_interfaceToClass.ContainsKey(type))
+          throw new KeyNotFoundException(type.FullName);
         return _interfaceToClass[type];
       }
     }
@@ -36,7 +38,22 @@ namespace Machine.Mta.InterfacesAsMessages
       using (RWLock.AsReader(_lock))
       {
         GenerateIfNecessary();
+        if (!_classToInterface.ContainsKey(type))
+          throw new KeyNotFoundException(type.FullName);
         return _classToInterface[type];
+      }
+    }
+
+    public Type GetClassOrInterfaceFor(Type type)
+    {
+      using (RWLock.AsReader(_lock))
+      {
+        GenerateIfNecessary();
+        if (_interfaceToClass.ContainsKey(type))
+          return _interfaceToClass[type];
+        if (_classToInterface.ContainsKey(type))
+          return _classToInterface[type];
+        return null;
       }
     }
 
