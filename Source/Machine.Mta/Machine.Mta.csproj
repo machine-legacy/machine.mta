@@ -80,6 +80,7 @@
     <Compile Include="Dispatching\IEndpointHandlerRules.cs" />
     <Compile Include="Dispatching\IMessageAspect.cs" />
     <Compile Include="Dispatching\IMessageAspectsProvider.cs" />
+    <Compile Include="Dispatching\IMessageModule.cs" />
     <Compile Include="Dispatching\StaticHandlerTypes.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinarySagaStateRepository.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinaryScheduledPublishRepository.cs" />

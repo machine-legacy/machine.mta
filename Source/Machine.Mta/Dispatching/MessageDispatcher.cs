@@ -42,9 +42,25 @@ namespace Machine.Mta.Dispatching
 
     public void Dispatch(IMessage[] messages)
     {
-      foreach (IMessage message in messages)
+      ForAllScopes(mm => mm.Begin());
+      try
       {
-        Dispatch(message);
+        foreach (IMessage message in messages)
+        {
+          Dispatch(message);
+        }
+      }
+      finally
+      {
+        ForAllScopes(mm => mm.End());
+      }
+    }
+
+    void ForAllScopes(Action<IMessageModule> action)
+    {
+      foreach (var mm in _container.Resolve.All<IMessageModule>())
+      {
+        action(mm);
       }
     }
   }
