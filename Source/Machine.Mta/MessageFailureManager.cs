@@ -55,6 +55,18 @@ namespace Machine.Mta
       }
     }
 
+    public void RecordSuccess(TransportMessage transportMessage)
+    {
+      string id = transportMessage.Id;
+      using (RWLock.AsReader(_lock))
+      {
+        if (RWLock.UpgradeToWriterIf(_lock, () => _errors.ContainsKey(id)))
+        {
+          _errors.Remove(id);
+        }
+      }
+    }
+
     public virtual bool IsPoison(TransportMessage transportMessage)
     {
       string id = transportMessage.Id;
@@ -78,6 +90,7 @@ namespace Machine.Mta
   public interface IMessageFailureManager
   {
     void RecordFailure(EndpointAddress address, TransportMessage transportMessage, Exception error);
+    void RecordSuccess(TransportMessage transportMessage);
     bool IsPoison(TransportMessage transportMessage);
   }
   /*

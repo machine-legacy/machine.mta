@@ -82,6 +82,7 @@ namespace Machine.Mta.Dispatching
               }
             }
             scope.Complete();
+            _messageFailureManager.RecordSuccess(transportMessage);
           }
         }
         catch (Exception error)
