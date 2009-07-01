@@ -131,6 +131,8 @@ namespace Machine.Mta.Transports.Msmq
       get { return _sagaIds; }
     }
 
+    public static SerializedLabel Empty = new SerializedLabel(String.Empty, new Guid[0]);
+
     public SerializedLabel(TransportMessage transportMessage)
     {
       _label = transportMessage.Label;
@@ -145,10 +147,19 @@ namespace Machine.Mta.Transports.Msmq
 
     public static SerializedLabel Parse(string value)
     {
-      string[] parts = value.Split(':');
-      string label = parts[0];
-      string[] guidStrings = parts[1].Split(',');
-      return new SerializedLabel(label, guidStrings.Where(x => !String.IsNullOrEmpty(x)).Select(x => new Guid(x)).ToArray());
+      try
+      {
+        if (String.IsNullOrEmpty(value)) return Empty;
+        string[] parts = value.Split(':');
+        if (parts.Length != 2) return Empty;
+        string label = parts[0];
+        string[] guidStrings = parts[1].Split(',');
+        return new SerializedLabel(label, guidStrings.Where(x => !String.IsNullOrEmpty(x)).Select(x => new Guid(x)).ToArray());
+      }
+      catch (Exception error)
+      {
+        return Empty;
+      }
     }
 
     public string ToLabel()

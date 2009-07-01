@@ -34,11 +34,18 @@ namespace Machine.Mta.Transports.Msmq
 
     public static EndpointAddress ToAddress(this MessageQueue queue)
     {
-      if (queue == null) return null;
-      string[] tokens = queue.Path.Split('\\');
-      string queueName = tokens[tokens.Length - 1];
-      string[] firstHalfTokens = tokens[0].Split(':');
-      return EndpointAddress.ForRemoteQueue(firstHalfTokens[firstHalfTokens.Length - 1], queueName);
+      try
+      {
+        if (queue == null) return null;
+        string[] tokens = queue.Path.Split('\\');
+        string queueName = tokens[tokens.Length - 1];
+        string[] firstHalfTokens = tokens[0].Split(':');
+        return EndpointAddress.ForRemoteQueue(firstHalfTokens[firstHalfTokens.Length - 1], queueName);
+      }
+      catch (Exception error)
+      {
+        return EndpointAddress.Null;
+      }
     }
   }
 }
