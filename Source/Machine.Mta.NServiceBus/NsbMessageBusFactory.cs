@@ -115,6 +115,11 @@ namespace Machine.Mta
       _poisonAddress = poisonAddress;
       _startableBus = startableBus;
     }
+
+    public void Start()
+    {
+      _startableBus.Start();
+    }
   }
 
   public interface INsbMessageBusFactory

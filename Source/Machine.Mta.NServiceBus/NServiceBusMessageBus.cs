@@ -38,6 +38,7 @@ namespace Machine.Mta
 
     public void Start()
     {
+      _bus.Start();
     }
 
     public void Send<T>(params T[] messages) where T : IMessage
