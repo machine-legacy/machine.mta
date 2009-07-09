@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-using Machine.Container.Model;
 using Machine.Container.Services;
+
+using NServiceBus;
 
 namespace Machine.Mta.Dispatching
 {
@@ -17,9 +18,10 @@ namespace Machine.Mta.Dispatching
 
     public IEnumerable<Type> HandlerTypes()
     {
-      foreach (ServiceRegistration registration in _container.RegisteredServices)
+      foreach (var registration in _container.RegisteredServices)
       {
-        if (registration.ServiceType.IsImplementationOfGenericType(typeof(IConsume<>)))
+        var type = registration.ServiceType;
+        if (type.IsImplementationOfGenericType(typeof(IConsume<>)) || type.IsImplementationOfGenericType(typeof(IMessageHandler<>)))
         {
           yield return registration.ServiceType;
         }
