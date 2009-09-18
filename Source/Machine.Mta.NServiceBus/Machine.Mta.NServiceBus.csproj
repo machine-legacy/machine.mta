@@ -47,9 +47,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Machine.Utility.ThreadPool.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceBus, Version=2.7.6.2, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="NServiceBus, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\NServiceBus\NServiceBus.dll</HintPath>
+    </Reference>
+    <Reference Include="NServiceBus.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libraries\NServiceBus\NServiceBus.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

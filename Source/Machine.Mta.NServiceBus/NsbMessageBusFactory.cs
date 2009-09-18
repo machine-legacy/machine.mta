@@ -9,6 +9,7 @@ using Machine.Mta.Config;
 using NServiceBus;
 using NServiceBus.Grid.MessageHandlers;
 using NServiceBus.Saga;
+using NServiceBus.Sagas.Impl;
 using Configure = NServiceBus.Configure;
 
 namespace Machine.Mta
@@ -151,11 +152,11 @@ namespace Machine.Mta
       var container = new MachineContainer();
       container.Initialize();
       container.PrepareForServices();
-      // container.Register.Type<StaticSubscriptionStorage>();
+      container.Register.Type<MessageDestinations>();
+      container.Register.Type<MessageRegisterer>();
+      container.Register.Type<NsbMessageBusFactory>();
       container.Start();
-      var registerer = new MessageRegisterer();
-      var destinations = new MessageDestinations();
-      var factory = new NsbMessageBusFactory(container, registerer, destinations);
+      var factory = container.Resolve.Object<NsbMessageBusFactory>();
       var bus = factory.Create(new Type[0]);
       bus.Start();
       bus.Bus.Send("");
