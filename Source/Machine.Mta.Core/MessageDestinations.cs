@@ -110,6 +110,8 @@ namespace Machine.Mta
 
     public ICollection<EndpointAddress> Subscribers(Type messageType)
     {
+      if (messageType == null)
+        return new EndpointAddress[0];
       using (RWLock.AsReader(_lock))
       {
         if (_subscriptions.ContainsKey(messageType))
