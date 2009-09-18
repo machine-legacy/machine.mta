@@ -22,6 +22,12 @@ namespace Machine.Mta
       get { return new NServiceBusMessageBus(_routing, _messageBusFactory.CurrentBus()); }
     }
 
+    public IMessageBus AddSendOnlyMessageBus()
+    {
+      var bus = _messageBusFactory.Create(new Type[0]);
+      return new NServiceBusMessageBus(_routing, bus);
+    }
+
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress)
     {
       var bus = _messageBusFactory.Create(address, poisonAddress, new Type[0]);

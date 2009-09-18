@@ -13,6 +13,7 @@ namespace Machine.Mta
       get;
     }
 
+    IMessageBus AddSendOnlyMessageBus();
     IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress);
     IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes);
     IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes, ThreadPoolConfiguration threadPoolConfiguration);

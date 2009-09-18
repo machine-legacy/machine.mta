@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Machine.Container;
 using Machine.Container.Services;
 using Machine.Core;
 using Machine.Mta.Config;
@@ -27,6 +27,26 @@ namespace Machine.Mta
       _registerer = registerer;
     }
 
+    public NsbBus Create(IEnumerable<Type> additionalTypes)
+    {
+      var types =       _container.Handlers().
+                  Union(_container.Finders()).
+                  Union(_container.Sagas()).
+                  Union(_registerer.MessageTypes).
+                  Union(additionalTypes).ToList();
+      return Add(EndpointAddress.Null, EndpointAddress.Null, Configure
+        .With(types)
+        .MachineBuilder(_container)
+        .StaticSubscriptionStorage()
+        .XmlSerializer()
+        .MsmqTransport()
+        .Sagas()
+        .UnicastBus()
+          .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
+          .WithMessageRoutes(_messageDestinations)
+        .CreateBus());
+    }
+
     public NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
     {
       var types =       _container.Handlers().
@@ -46,13 +66,6 @@ namespace Machine.Mta
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageDestinations)
         .CreateBus());
-    }
-
-    public IStartableBus AddBus(IStartableBus bus)
-    {
-      // var nsbBus = new NsbBus();
-      // _all.Add(nsbBus);
-      return bus;
     }
 
     public void EachBus(Action<IStartableBus> action)
@@ -125,9 +138,27 @@ namespace Machine.Mta
   public interface INsbMessageBusFactory
   {
     NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
-    IStartableBus AddBus(IStartableBus bus);
+    NsbBus Create(IEnumerable<Type> additionalTypes);
     void EachBus(Action<IStartableBus> action);
     void EachBus(Action<NsbBus> action);
     NsbBus CurrentBus();
+  }
+
+  public class Fun
+  {
+    public void Run()
+    {
+      var container = new MachineContainer();
+      container.Initialize();
+      container.PrepareForServices();
+      // container.Register.Type<StaticSubscriptionStorage>();
+      container.Start();
+      var registerer = new MessageRegisterer();
+      var destinations = new MessageDestinations();
+      var factory = new NsbMessageBusFactory(container, registerer, destinations);
+      var bus = factory.Create(new Type[0]);
+      bus.Start();
+      bus.Bus.Send("");
+    }
   }
 }

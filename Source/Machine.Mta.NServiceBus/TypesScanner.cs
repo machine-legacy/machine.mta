@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 
 using Machine.Container.Model;
-using Machine.Container.Services;
+using Machine.Container;
 using Machine.Mta.Dispatching;
 using NServiceBus;
 using NServiceBus.Saga;

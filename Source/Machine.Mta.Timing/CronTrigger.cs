@@ -73,7 +73,8 @@ namespace Machine.Mta.Timing
     {
       foreach (SimpleCronEntry entry in _entries)
       {
-        if (entry.NextOccurenceAfter(_lastRanAt) < ServerClock.Now())
+        var nextOccurenceAfter = entry.NextOccurenceAfter(_lastRanAt);
+        if (nextOccurenceAfter < ServerClock.Now())
         {
           _lastRanAt = ServerClock.Now();
           return true;

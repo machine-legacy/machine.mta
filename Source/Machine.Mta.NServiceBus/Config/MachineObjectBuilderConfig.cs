@@ -1,5 +1,6 @@
 using System;
-using Machine.Container.Services;
+
+using Machine.Container;
 
 using NServiceBus;
 using NServiceBus.ObjectBuilder;

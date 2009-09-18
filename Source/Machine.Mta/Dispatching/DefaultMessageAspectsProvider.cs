@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-using Machine.Container.Services;
+using Machine.Container;
 using Machine.Mta.Sagas;
 
 namespace Machine.Mta.Dispatching

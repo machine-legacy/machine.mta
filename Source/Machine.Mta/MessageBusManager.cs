@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Machine.Container.Services;
 using Machine.Core;
+using Machine.Container;
 using Machine.Mta.Dispatching;
 using Machine.Utility.ThreadPool;
 
@@ -25,6 +25,11 @@ namespace Machine.Mta
     {
       _messageBusFactory = messageBusFactory;
       _container = container;
+    }
+
+    public IMessageBus AddSendOnlyMessageBus()
+    {
+      throw new NotImplementedException();
     }
 
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress)

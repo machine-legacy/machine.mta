@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Machine.Container.Services;
+
+using Machine.Container;
 using Machine.Core.Utility;
+
 using NServiceBus.ObjectBuilder;
 using NServiceBus.ObjectBuilder.Common;
 
