@@ -13,9 +13,11 @@ namespace Machine.Mta.Specs.Timing.CronTriggerSpecs
 
     Establish context = () =>
     {
-      ServerClock.Now = (() => new DateTime(2008, 1, 1, 10, 10, 10));
+      ServerClock.SetNowFunc(() => new DateTime(2008, 1, 1, 10, 10, 10));
       trigger = CronTriggerFactory.EveryHalfHour();
     };
+
+    Cleanup after = ServerClock.ResetNowFunc;
 
     Because of = () =>
       triggered = trigger.IsFired();
@@ -25,7 +27,9 @@ namespace Machine.Mta.Specs.Timing.CronTriggerSpecs
   public class with_cron_trigger_not_at_trigger_time : with_cron_trigger
   {
     Establish context = () =>
-      ServerClock.Now = (() => new DateTime(2008, 1, 1, 10, 15, 10));
+      ServerClock.SetNowFunc(() => new DateTime(2008, 1, 1, 10, 15, 10));
+
+    Cleanup after = ServerClock.ResetNowFunc;
 
     It should_not_trigger = () =>
       triggered.ShouldBeFalse();
@@ -35,7 +39,9 @@ namespace Machine.Mta.Specs.Timing.CronTriggerSpecs
   public class with_cron_trigger_at_trigger_time : with_cron_trigger
   {
     Establish context = () =>
-      ServerClock.Now = (() => new DateTime(2008, 1, 1, 10, 30, 1));
+      ServerClock.SetNowFunc(() => new DateTime(2008, 1, 1, 10, 30, 1));
+
+    Cleanup after = ServerClock.ResetNowFunc;
 
     It should_fire = () =>
       triggered.ShouldBeTrue();

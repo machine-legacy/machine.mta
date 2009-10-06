@@ -5,7 +5,24 @@ namespace Machine.Mta.Timing
 {
   public class ServerClock
   {
-    public static Func<DateTime> Now = () => DateTime.UtcNow;
+    static Func<DateTime> _nowFunc;
+
+    public static void SetNowFunc(Func<DateTime> nowFunc)
+    {
+      _nowFunc = nowFunc;
+    }
+
+    public static void ResetNowFunc()
+    {
+      _nowFunc = null;
+    }
+
+    public static DateTime Now()
+    {
+      if (_nowFunc == null)
+        throw new InvalidOperationException("No Now function has been assigned to the ServerClock. Please see ServerClock.SetNowFunc");
+      return _nowFunc();
+    }
 
     public static DateTime Later(TimeSpan time)
     {
