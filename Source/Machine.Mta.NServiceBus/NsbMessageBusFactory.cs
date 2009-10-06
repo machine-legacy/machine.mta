@@ -155,11 +155,22 @@ namespace Machine.Mta
       container.Register.Type<MessageDestinations>();
       container.Register.Type<MessageRegisterer>();
       container.Register.Type<NsbMessageBusFactory>();
+      container.Register.Type<NsbMessageFactory>();
       container.Start();
+      var registerer = container.Resolve.Object<IMessageRegisterer>();
+      registerer.AddMessageTypes(new[] { typeof(IHello) });
+      var messageFactory = container.Resolve.Object<IMessageFactory>();
       var factory = container.Resolve.Object<NsbMessageBusFactory>();
       var bus = factory.Create(new Type[0]);
+      var message = messageFactory.Create<IHello>(m => { m.Name = "Jacob"; });
+      var address = EndpointAddress.ForLocalQueue("test");
       bus.Start();
-      bus.Bus.Send("");
+      bus.Bus.Send("test@localhost", message);
     }
+  }
+
+  public interface IHello : IMessage
+  {
+    string Name { get; set; }
   }
 }
