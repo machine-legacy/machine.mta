@@ -12,17 +12,13 @@ namespace Machine.Mta
       get { return _address; }
     }
 
-    public static EndpointAddress Null1
-    {
-      get { return Null; }
-    }
-
     protected EndpointAddress()
     {
     }
 
     protected EndpointAddress(string address)
     {
+      if (String.IsNullOrEmpty(address)) throw new ArgumentException("address");
       _address = address;
     }
 

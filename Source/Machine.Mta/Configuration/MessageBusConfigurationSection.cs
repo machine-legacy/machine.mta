@@ -12,6 +12,7 @@ namespace Machine.Mta.Configuration
   public class MessageBusEndpoint
   {
     string _name;
+    string _address;
     string _host;
     string _queue;
 
@@ -36,8 +37,19 @@ namespace Machine.Mta.Configuration
       set { _queue = value; }
     }
 
+    [XmlAttribute]
+    public string Address
+    {
+      get { return _address; }
+      set { _address = value; }
+    }
+
     public EndpointAddress ToEndpointAddress()
     {
+      if (!String.IsNullOrEmpty(_address))
+      {
+        return EndpointAddress.FromString(_address);
+      }
       if (String.IsNullOrEmpty(_host))
       {
         return NameAndHostAddress.ForLocalQueue(_queue).ToAddress();
