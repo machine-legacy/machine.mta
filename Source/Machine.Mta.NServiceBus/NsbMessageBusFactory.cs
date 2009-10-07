@@ -11,6 +11,7 @@ using Machine.Mta.Config;
 using NServiceBus;
 using NServiceBus.Grid.MessageHandlers;
 using NServiceBus.Sagas.Impl;
+using NServiceBus.Unicast.Transport.RabbitMQ.Config;
 using Configure = NServiceBus.Configure;
 
 namespace Machine.Mta
@@ -63,7 +64,7 @@ namespace Machine.Mta
         .StaticSubscriptionStorage()
         .XmlSerializer()
         .AmqpTransport()
-          .On(properties.ListenAddress, properties.PoisonAddress)
+          .On(properties.ListenAddress.ToString(), properties.PoisonAddress.ToString())
         .Sagas()
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())

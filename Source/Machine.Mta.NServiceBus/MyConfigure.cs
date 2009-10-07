@@ -23,13 +23,6 @@ namespace Machine.Mta
       return cfg;
     }
 
-    public static MyConfigAmqpTransport AmqpTransport(this Configure config)
-    {
-      var cfg = new MyConfigAmqpTransport();
-      cfg.Configure(config);
-      return cfg;
-    }
-
     public static MyConfigUnicastBus UnicastBus(this Configure config)
     {
       var cfg = new MyConfigUnicastBus();
@@ -56,30 +49,6 @@ namespace Machine.Mta
       var cfg = new MyConfigStaticSubscriptionStorage();
       cfg.Configure(config);
       return cfg;
-    }
-  }
-
-  public class MyConfigAmqpTransport : Configure
-  {
-    private IComponentConfig<RabbitMqTransport> _config;
-
-    public void Configure(Configure config)
-    {
-      this.Builder = config.Builder;
-      this.Configurer = config.Configurer;
-
-      _config = Configurer.ConfigureComponent<RabbitMqTransport>(ComponentCallModelEnum.Singleton);
-      _config.ConfigureProperty(t => t.NumberOfWorkerThreads, 1);
-      _config.ConfigureProperty(t => t.MaximumNumberOfRetries, 3);
-    }
-
-    public MyConfigAmqpTransport On(EndpointAddress listenAddress, EndpointAddress poisonAddress)
-    {
-      if (listenAddress != EndpointAddress.Null)
-        _config.ConfigureProperty(t => t.ListenAddress, listenAddress.ToString());
-      if (poisonAddress != EndpointAddress.Null)
-        _config.ConfigureProperty(t => t.PoisonAddress, poisonAddress.ToString());
-      return this;
     }
   }
 

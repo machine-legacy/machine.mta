@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmqpAddress.cs" />
+    <Compile Include="Config\ConfigureAmqp.cs" />
     <Compile Include="RabbitMqTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

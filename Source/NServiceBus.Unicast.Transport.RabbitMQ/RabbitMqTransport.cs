@@ -27,6 +27,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     Int32 _numberOfWorkerThreads;
     Int32 _maximumNumberOfRetries;
     IsolationLevel _isolationLevel;
+    TimeSpan _transactionTimeout = TimeSpan.FromMinutes(5);
  
     class MessageReceiveProperties
     {
@@ -149,7 +150,12 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public string Address
     {
-      get { return _listenAddress.ToString(); }
+      get
+      {
+        if (_listenAddress == null)
+          return null;
+        return _listenAddress.ToString();
+      }
     }
 
     public void Dispose()
@@ -192,6 +198,12 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       set { _isolationLevel = value; }
     }
 
+    public TimeSpan TransactionTimeout
+    {
+      get { return _transactionTimeout; }
+      set { _transactionTimeout = value; }
+    }
+
     static Type[] GetExtraTypes(IEnumerable<Type> value)
     {
       var types = value.ToList();
@@ -227,7 +239,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       try
       {
         var wrapper = new TransactionWrapper();
-        wrapper.RunInTransaction(() => Receive(_messageContext), _isolationLevel, TimeSpan.FromMinutes(5));
+        wrapper.RunInTransaction(() => Receive(_messageContext), _isolationLevel, _transactionTimeout);
         ClearFailuresForMessage(_messageContext.MessageId);
       }
       catch (AbortHandlingCurrentMessageException)
