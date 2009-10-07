@@ -24,13 +24,13 @@ namespace Machine.Mta
 
     public IMessageBus AddSendOnlyMessageBus()
     {
-      var bus = _messageBusFactory.Create(new Type[0]);
+      var bus = _messageBusFactory.Create(new MsmqProperties());
       return new NServiceBusMessageBus(_routing, bus);
     }
 
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress)
     {
-      var bus = _messageBusFactory.Create(address, poisonAddress, new Type[0]);
+      var bus = _messageBusFactory.Create(new MsmqProperties() { ListenAddress = address, PoisonAddress = poisonAddress });
       return new NServiceBusMessageBus(_routing, bus);
     }
 
@@ -51,7 +51,7 @@ namespace Machine.Mta
 
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, ThreadPoolConfiguration threadPoolConfiguration)
     {
-      var bus = _messageBusFactory.Create(address, poisonAddress, new Type[0]);
+      var bus = _messageBusFactory.Create(new MsmqProperties() { ListenAddress = address, PoisonAddress = poisonAddress });
       return new NServiceBusMessageBus(_routing, bus);
     }
 

@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
+using log4net.Appender;
 using Machine.Container;
-using Machine.Container.Services;
+using Machine.Container.Plugins.Disposition;
 using Machine.Core;
 using Machine.Mta.Config;
 
 using NServiceBus;
 using NServiceBus.Grid.MessageHandlers;
-using NServiceBus.Saga;
 using NServiceBus.Sagas.Impl;
 using Configure = NServiceBus.Configure;
 
@@ -28,45 +29,46 @@ namespace Machine.Mta
       _registerer = registerer;
     }
 
-    public NsbBus Create(IEnumerable<Type> additionalTypes)
+    public NsbBus Create(MsmqProperties properties)
     {
       var types =       _container.Handlers().
                   Union(_container.Finders()).
                   Union(_container.Sagas()).
                   Union(_registerer.MessageTypes).
-                  Union(additionalTypes).ToList();
-      return Add(EndpointAddress.Null, EndpointAddress.Null, Configure
+                  Union(properties.AdditionalTypes).ToList();
+      var configure = Configure
         .With(types)
         .MachineBuilder(_container)
         .StaticSubscriptionStorage()
         .XmlSerializer()
         .MsmqTransport()
+          .On(properties.ListenAddress, properties.PoisonAddress)
         .Sagas()
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
-          .WithMessageRoutes(_messageDestinations)
-        .CreateBus());
+          .WithMessageRoutes(_messageDestinations);
+      return Add(properties.ListenAddress, properties.PoisonAddress, configure.CreateBus());
     }
 
-    public NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes)
+    public NsbBus Create(AmqpProperties properties)
     {
       var types =       _container.Handlers().
                   Union(_container.Finders()).
                   Union(_container.Sagas()).
                   Union(_registerer.MessageTypes).
-                  Union(additionalTypes).ToList();
-      return Add(listenAddress, poisonAddress, Configure
+                  Union(properties.AdditionalTypes).ToList();
+      var configure = Configure
         .With(types)
         .MachineBuilder(_container)
         .StaticSubscriptionStorage()
         .XmlSerializer()
-        .MsmqTransport()
-          .On(listenAddress, poisonAddress)
+        .AmqpTransport()
+          .On(properties.ListenAddress, EndpointAddress.Null)
         .Sagas()
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
-          .WithMessageRoutes(_messageDestinations)
-        .CreateBus());
+          .WithMessageRoutes(_messageDestinations);
+      return Add(properties.ListenAddress, EndpointAddress.Null, configure.CreateBus());
     }
 
     public void EachBus(Action<IStartableBus> action)
@@ -138,8 +140,8 @@ namespace Machine.Mta
 
   public interface INsbMessageBusFactory
   {
-    NsbBus Create(EndpointAddress listenAddress, EndpointAddress poisonAddress, IEnumerable<Type> additionalTypes);
-    NsbBus Create(IEnumerable<Type> additionalTypes);
+    NsbBus Create(MsmqProperties properties);
+    NsbBus Create(AmqpProperties properties);
     void EachBus(Action<IStartableBus> action);
     void EachBus(Action<NsbBus> action);
     NsbBus CurrentBus();
@@ -149,28 +151,81 @@ namespace Machine.Mta
   {
     public void Run()
     {
+      var loggingConfiguration = new NameValueCollection();
+      loggingConfiguration["configType"] = "EXTERNAL";
+      Common.Logging.LogManager.Adapter = new Common.Logging.Log4Net.Log4NetLoggerFactoryAdapter(loggingConfiguration);
+      log4net.Config.BasicConfigurator.Configure(new ConsoleAppender() { Layout = new log4net.Layout.PatternLayout("%-5p [%thread] (%30.30c) %m%n") });
+
       var container = new MachineContainer();
       container.Initialize();
+      container.AddPlugin(new DisposablePlugin());
       container.PrepareForServices();
       container.Register.Type<MessageDestinations>();
       container.Register.Type<MessageRegisterer>();
       container.Register.Type<NsbMessageBusFactory>();
       container.Register.Type<NsbMessageFactory>();
+      container.Register.Type<HelloHandler>();
       container.Start();
       var registerer = container.Resolve.Object<IMessageRegisterer>();
       registerer.AddMessageTypes(new[] { typeof(IHello) });
       var messageFactory = container.Resolve.Object<IMessageFactory>();
       var factory = container.Resolve.Object<NsbMessageBusFactory>();
-      var bus = factory.Create(new Type[0]);
+      var bus = factory.Create(new AmqpProperties() {
+        ListenAddress = EndpointAddress.FromString("test1@192.168.0.173"),
+        PoisonAddress = EndpointAddress.FromString("test1_poison@192.168.0.173")
+      });
       var message = messageFactory.Create<IHello>(m => { m.Name = "Jacob"; });
       var address = EndpointAddress.ForLocalQueue("test");
       bus.Start();
       bus.Bus.Send("test@localhost", message);
+      System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
+      container.Dispose();
+      System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));
+
+      Console.WriteLine("DONE");
     }
   }
 
   public interface IHello : IMessage
   {
     string Name { get; set; }
+  }
+
+  public class HelloHandler : IMessageHandler<IHello>
+  {
+    readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof (HelloHandler));
+
+    public void Handle(IHello message)
+    {
+      _log.Info("Hello " + message.Name + "!");
+    }
+  }
+
+  public class MsmqProperties
+  {
+    public EndpointAddress ListenAddress { get; set; }
+    public EndpointAddress PoisonAddress { get; set; }
+    public IEnumerable<Type> AdditionalTypes { get; set; }
+
+    public MsmqProperties()
+    {
+      this.ListenAddress = EndpointAddress.Null;
+      this.PoisonAddress = EndpointAddress.Null;
+      this.AdditionalTypes = new Type[0];
+    }
+  }
+
+  public class AmqpProperties
+  {
+    public EndpointAddress ListenAddress { get; set; }
+    public EndpointAddress PoisonAddress { get; set; }
+    public IEnumerable<Type> AdditionalTypes { get; set; }
+
+    public AmqpProperties()
+    {
+      this.ListenAddress = EndpointAddress.Null;
+      this.PoisonAddress = EndpointAddress.Null;
+      this.AdditionalTypes = new Type[0];
+    }
   }
 }

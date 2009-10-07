@@ -87,6 +87,10 @@
       <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
       <Name>Machine.Mta.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NServiceBus.Unicast.Transport.RabbitMQ\NServiceBus.Unicast.Transport.RabbitMQ.csproj">
+      <Project>{53178951-1270-4BAC-B52D-07BEE2197BC9}</Project>
+      <Name>NServiceBus.Unicast.Transport.RabbitMQ</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
