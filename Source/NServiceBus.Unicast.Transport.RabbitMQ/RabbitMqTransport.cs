@@ -93,6 +93,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
             }
             properties.Timestamp = DateTime.UtcNow.ToAmqpTimestamp();
             properties.ReplyTo = this.ListenAddress;
+            properties.SetPersistent(transportMessage.Recoverable);
             channel.BasicPublish(address.Exchange, address.RoutingKey, properties, stream.ToArray());
             transportMessage.Id = properties.MessageId;
             _log.Info("Sent message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
@@ -285,11 +286,11 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
                   }
                   m.Id = delivery.BasicProperties.MessageId;
                   m.CorrelationId = delivery.BasicProperties.CorrelationId;
-                  m.IdForCorrelation = delivery.BasicProperties.CorrelationId;
+                  m.IdForCorrelation = delivery.BasicProperties.MessageId;
                   m.ReturnAddress = delivery.BasicProperties.ReplyTo;
                   m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
                   m.Headers = new List<HeaderInfo>();
-                  m.Recoverable = false;
+                  m.Recoverable = delivery.BasicProperties.DeliveryMode == 2;
                   var receiveError = OnTransportMessageReceived(m);
                   var processingError = this.OnFinishedMessageProcessing();
                   if (messageContext.NeedToAbort)
