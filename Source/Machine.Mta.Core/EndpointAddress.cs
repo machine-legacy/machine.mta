@@ -51,6 +51,11 @@ namespace Machine.Mta
       return new EndpointAddress(value);
     }
 
+    public override string ToString()
+    {
+      return _address;
+    }
+
     public static readonly EndpointAddress Null = new EndpointAddress();
   }
 
