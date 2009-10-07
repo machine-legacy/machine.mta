@@ -165,9 +165,11 @@ namespace Machine.Mta
       container.Register.Type<NsbMessageBusFactory>();
       container.Register.Type<NsbMessageFactory>();
       container.Register.Type<HelloHandler>();
+      container.Register.Type<MessageBusProxy>();
+      container.Register.Type<NsbMessageBusManager>();
       container.Start();
       var registerer = container.Resolve.Object<IMessageRegisterer>();
-      registerer.AddMessageTypes(new[] { typeof(IHello) });
+      registerer.AddMessageTypes(new[] { typeof(IHelloMessage) });
       var messageFactory = container.Resolve.Object<IMessageFactory>();
       var factory = container.Resolve.Object<NsbMessageBusFactory>();
       var bus = factory.Create(new AmqpProperties() {
@@ -175,28 +177,41 @@ namespace Machine.Mta
         PoisonAddress = EndpointAddress.FromString("amqp://192.168.0.173//www/test1p")
       });
       bus.Start();
-      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHello>(m => { m.Name = "Jacob"; }));
-      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHello>(m => { m.Name = ""; }));
-      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHello>(m => { m.Name = "Jacob"; }));
+      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Andy"; m.Age = 1; }));
+      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = ""; m.Age = 0; }));
+      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Jacob"; m.Age = 0; }));
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(6));
       container.Dispose();
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));
     }
   }
 
-  public interface IHello : IMessage
+  public interface IHelloMessage : IMessage
   {
     string Name { get; set; }
+    Int32 Age { get; set; }
   }
 
-  public class HelloHandler : IMessageHandler<IHello>
+  public class HelloHandler : IMessageHandler<IHelloMessage>
   {
     readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof (HelloHandler));
+    readonly IMessageBus _bus;
+    readonly IMessageFactory _messageFactory;
 
-    public void Handle(IHello message)
+    public HelloHandler(IMessageBus bus, IMessageFactory messageFactory)
+    {
+      _bus = bus;
+      _messageFactory = messageFactory;
+    }
+
+    public void Handle(IHelloMessage message)
     {
       if (String.IsNullOrEmpty(message.Name)) throw new ArgumentException();
-      _log.Info("Hello " + message.Name + "!");
+      _log.Info("Hello " + message.Name + ": " + message.Age);
+      if (message.Age > 0)
+      {
+        _bus.Reply(_messageFactory.Create<IHelloMessage>(m => { m.Name = message.Name; m.Age = message.Age - 1; }));
+      }
     }
   }
 
