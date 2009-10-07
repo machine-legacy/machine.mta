@@ -59,6 +59,7 @@ namespace Machine.Mta
     public static readonly EndpointAddress Null = new EndpointAddress();
   }
 
+  [Serializable]
   public class NameAndHostAddress
   {
     private readonly string _host;

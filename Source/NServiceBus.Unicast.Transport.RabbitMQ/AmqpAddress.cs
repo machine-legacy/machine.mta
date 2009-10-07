@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace NServiceBus.Unicast.Transport.RabbitMQ
 {
+  [Serializable]
   public class AmqpAddress
   {
     readonly string _broker;

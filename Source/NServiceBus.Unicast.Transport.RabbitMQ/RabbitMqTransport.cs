@@ -85,8 +85,9 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         {
           using (var channel = connection.CreateModel())
           {
+            var messageId = Guid.NewGuid().ToString();
             var properties = channel.CreateBasicProperties();
-            properties.MessageId = Guid.NewGuid().ToString();
+            properties.MessageId = messageId;
             if (!String.IsNullOrEmpty(transportMessage.CorrelationId))
             {
               properties.CorrelationId = transportMessage.CorrelationId;
