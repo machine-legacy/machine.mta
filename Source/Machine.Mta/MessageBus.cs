@@ -39,9 +39,12 @@ namespace Machine.Mta
       _listeningOn = _endpointResolver.Resolve(listeningOnEndpointAddress);
       IEndpoint poison = _endpointResolver.Resolve(poisonEndpointAddress);
       _messageDispatchAttempter = new MessageDispatchAttempter(dispatcher, _transportMessageBodySerializer, _asyncCallbackMap);
-      _threads = new WorkerFactoryThreadPool(threadPoolConfiguration, new WorkerFactory(this, _transactionManager, messageFailureManager, _listeningOn, poison, _messageDispatchAttempter.AttemptDispatch));
+      _threads = new WorkerFactoryThreadPool(threadPoolConfiguration,
+        new WorkerFactory(this, _transactionManager, messageFailureManager, _listeningOn, listeningOnEndpointAddress, poison, _messageDispatchAttempter.AttemptDispatch)
+      );
     }
 
+    /*
     public EndpointAddress PoisonAddress
     {
       get { return _poisonEndpointAddress; }
@@ -51,6 +54,7 @@ namespace Machine.Mta
     {
       get { return _listeningOnAddress; }
     }
+    */
 
     public void ChangeThreadPoolConfiguration(ThreadPoolConfiguration configuration)
     {
@@ -89,7 +93,7 @@ namespace Machine.Mta
 
     public void SendLocal<T>(params T[] messages) where T : IMessage
     {
-      Send(this.Address, messages);
+      Send(_listeningOnAddress, messages);
     }
 
     public TransportMessage RouteTransportMessage<T>(TransportMessage transportMessage, params EndpointAddress[] destinations)
@@ -154,7 +158,7 @@ namespace Machine.Mta
 
     private TransportMessage CreateTransportMessage(string correlationId, MessagePayload payload, bool forReply)
     {
-      return TransportMessage.For(_returnAddressProvider.GetReturnAddress(this.Address), correlationId,
+      return TransportMessage.For(_returnAddressProvider.GetReturnAddress(_listeningOnAddress), correlationId,
         CurrentSagaContext.CurrentSagaIds(forReply), payload);
     }
   }

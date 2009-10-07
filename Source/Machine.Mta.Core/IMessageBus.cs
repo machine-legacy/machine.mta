@@ -5,8 +5,8 @@ namespace Machine.Mta
 {
   public interface IMessageBus : IDisposable
   {
-    EndpointAddress PoisonAddress { get; }
-    EndpointAddress Address { get; }
+    // EndpointAddress PoisonAddress { get; }
+    // EndpointAddress Address { get; }
     void Start();
     void Send<T>(params T[] messages) where T : IMessage;
     void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage;

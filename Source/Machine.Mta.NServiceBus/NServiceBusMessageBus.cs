@@ -26,16 +26,6 @@ namespace Machine.Mta
     {
     }
 
-    public EndpointAddress PoisonAddress
-    {
-      get { return _bus.PoisonAddress; }
-    }
-
-    public EndpointAddress Address
-    {
-      get { return _bus.ListenAddress; }
-    }
-
     public void Start()
     {
       _bus.Start();

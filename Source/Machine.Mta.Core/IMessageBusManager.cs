@@ -15,10 +15,10 @@ namespace Machine.Mta
 
     IMessageBus AddSendOnlyMessageBus();
     IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress);
-    IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes);
-    IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes, ThreadPoolConfiguration threadPoolConfiguration);
     IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, ThreadPoolConfiguration threadPoolConfiguration);
-    IMessageBus UseSingleBus(EndpointAddress address, EndpointAddress poisonAddress);
+    // IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes);
+    // IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes, ThreadPoolConfiguration threadPoolConfiguration);
+    // IMessageBus UseSingleBus(EndpointAddress address, EndpointAddress poisonAddress);
     void EachBus(Action<IMessageBus> action);
   }
 }

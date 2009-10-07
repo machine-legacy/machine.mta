@@ -68,6 +68,7 @@ namespace Machine.Mta
       CurrentBus().Publish(messages);
     }
 
+    /*
     public EndpointAddress PoisonAddress
     {
       get { return CurrentBus().PoisonAddress; }
@@ -77,6 +78,7 @@ namespace Machine.Mta
     {
       get { return CurrentBus().Address; }
     }
+    */
 
     private IMessageBus CurrentBus()
     {

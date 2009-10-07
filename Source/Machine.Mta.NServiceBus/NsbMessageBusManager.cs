@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using Machine.Mta.Dispatching;
 using Machine.Utility.ThreadPool;
 
 namespace Machine.Mta
@@ -34,30 +33,15 @@ namespace Machine.Mta
       return new NServiceBusMessageBus(_routing, bus);
     }
 
-    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes)
-    {
-      throw new NotImplementedException();
-    }
-
-    public IMessageBus UseSingleBus(EndpointAddress address, EndpointAddress poisonAddress)
-    {
-      throw new NotImplementedException();
-    }
-
-    public void EachBus(Action<IMessageBus> action)
-    {
-      _messageBusFactory.EachBus(b => action(new NServiceBusMessageBus(_routing, b)));
-    }
-
     public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, ThreadPoolConfiguration threadPoolConfiguration)
     {
       var bus = _messageBusFactory.Create(new MsmqProperties() { ListenAddress = address, PoisonAddress = poisonAddress });
       return new NServiceBusMessageBus(_routing, bus);
     }
 
-    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, IProvideHandlerTypes handlerTypes, ThreadPoolConfiguration threadPoolConfiguration)
+    public void EachBus(Action<IMessageBus> action)
     {
-      throw new NotImplementedException();
+      _messageBusFactory.EachBus(b => action(new NServiceBusMessageBus(_routing, b)));
     }
   }
 }

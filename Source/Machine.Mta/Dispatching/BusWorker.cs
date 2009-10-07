@@ -11,15 +11,17 @@ namespace Machine.Mta.Dispatching
   {
     readonly IMessageBus _bus;
     readonly IEndpoint _queue;
+    readonly EndpointAddress _queueAddress;
     readonly IEndpoint _poison;
     readonly ITransactionManager _transactionManager;
     readonly IMessageFailureManager _messageFailureManager;
     readonly Action<TransportMessage> _dispatcher;
 
-    public WorkerFactory(IMessageBus bus, ITransactionManager transactionManager, IMessageFailureManager messageFailureManager, IEndpoint queue, IEndpoint poison, Action<TransportMessage> dispatcher)
+    public WorkerFactory(IMessageBus bus, ITransactionManager transactionManager, IMessageFailureManager messageFailureManager, IEndpoint queue, EndpointAddress queueAddress, IEndpoint poison, Action<TransportMessage> dispatcher)
     {
       _bus = bus;
       _queue = queue;
+      _queueAddress = queueAddress;
       _poison= poison;
       _transactionManager = transactionManager;
       _messageFailureManager = messageFailureManager;
@@ -28,7 +30,7 @@ namespace Machine.Mta.Dispatching
 
     public Worker CreateWorker(BusyWatcher busyWatcher)
     {
-      return new BusWorker(busyWatcher, _bus, _queue, _poison, _transactionManager, _messageFailureManager, _dispatcher);
+      return new BusWorker(busyWatcher, _bus, _queue, _queueAddress, _poison, _transactionManager, _messageFailureManager, _dispatcher);
     }
   }
 
@@ -37,18 +39,20 @@ namespace Machine.Mta.Dispatching
     readonly static TimeSpan TimeForEachRead = TimeSpan.FromSeconds(3.0);
     readonly IMessageBus _bus;
     readonly IEndpoint _queue;
+    readonly EndpointAddress _queueAddress;
     readonly IEndpoint _poison;
     readonly ITransactionManager _transactionManager;
     readonly IMessageFailureManager _messageFailureManager;
     readonly Action<TransportMessage> _dispatcher;
     
-    public BusWorker(BusyWatcher busyWatcher, IMessageBus bus, IEndpoint queue, IEndpoint poison, ITransactionManager transactionManager, IMessageFailureManager messageFailureManager, Action<TransportMessage> dispatcher)
+    public BusWorker(BusyWatcher busyWatcher, IMessageBus bus, IEndpoint queue, EndpointAddress queueAddress, IEndpoint poison, ITransactionManager transactionManager, IMessageFailureManager messageFailureManager, Action<TransportMessage> dispatcher)
       : base(busyWatcher)
     {
       _transactionManager = transactionManager;
       _bus = bus;
       _messageFailureManager = messageFailureManager;
       _queue = queue;
+      _queueAddress = queueAddress;
       _poison = poison;
       _dispatcher = dispatcher;
     }
@@ -88,7 +92,7 @@ namespace Machine.Mta.Dispatching
         catch (Exception error)
         {
           Logging.Error(error);
-          _messageFailureManager.RecordFailure(_bus.Address, transportMessage, error);
+          _messageFailureManager.RecordFailure(_queueAddress, transportMessage, error);
           base.Error(error);
         }
       }

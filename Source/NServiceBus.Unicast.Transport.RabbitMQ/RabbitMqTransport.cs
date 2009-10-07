@@ -172,7 +172,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     public event EventHandler<TransportMessageReceivedEventArgs> TransportMessageReceived;
     public event EventHandler StartedMessageProcessing;
     public event EventHandler FinishedMessageProcessing;
-    public event EventHandler FailedMessageProcessing;
+    public event EventHandler<ThreadExceptionEventArgs> FailedMessageProcessing;
 
     public string ListenAddress
     {
@@ -258,7 +258,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     void Receive(MessageReceiveProperties messageContext)
     {
-      _log.Info("Receiving!");
+      _log.Info("Receiving from " + _listenAddress);
       using (var connection = _connectionFactory.CreateConnection(_listenAddress.Broker))
       {
         using (var channel = connection.CreateModel())

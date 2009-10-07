@@ -48,7 +48,7 @@ namespace Machine.Mta
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageDestinations);
-      return Add(properties.ListenAddress, properties.PoisonAddress, configure.CreateBus());
+      return Add(configure.CreateBus());
     }
 
     public NsbBus Create(AmqpProperties properties)
@@ -69,7 +69,7 @@ namespace Machine.Mta
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageDestinations);
-      return Add(properties.ListenAddress, EndpointAddress.Null, configure.CreateBus());
+      return Add(configure.CreateBus());
     }
 
     public void EachBus(Action<IStartableBus> action)
@@ -87,9 +87,9 @@ namespace Machine.Mta
       return _all.First();
     }
 
-    NsbBus Add(EndpointAddress listenAddress, EndpointAddress poisonAddress, IStartableBus bus)
+    NsbBus Add(IStartableBus bus)
     {
-      var nsbBus = new NsbBus(listenAddress, poisonAddress, bus);
+      var nsbBus = new NsbBus(bus);
       _all.Add(nsbBus);
       return nsbBus;
     }
@@ -102,19 +102,7 @@ namespace Machine.Mta
 
   public class NsbBus
   {
-    readonly EndpointAddress _listenAddress;
-    readonly EndpointAddress _poisonAddress;
     readonly IStartableBus _startableBus;
-
-    public EndpointAddress ListenAddress
-    {
-      get { return _listenAddress; }
-    }
-
-    public EndpointAddress PoisonAddress
-    {
-      get { return _poisonAddress; }
-    }
 
     public IStartableBus StartableBus
     {
@@ -126,10 +114,8 @@ namespace Machine.Mta
       get { return _startableBus.Start(); }
     }
 
-    public NsbBus(EndpointAddress listenAddress, EndpointAddress poisonAddress, IStartableBus startableBus)
+    public NsbBus(IStartableBus startableBus)
     {
-      _listenAddress = listenAddress;
-      _poisonAddress = poisonAddress;
       _startableBus = startableBus;
     }
 
@@ -180,6 +166,7 @@ namespace Machine.Mta
         PoisonAddress = EndpointAddress.FromString("amqp://192.168.0.173//www/test1p")
       });
       bus.Start();
+      System.Threading.Thread.Sleep(TimeSpan.FromSeconds(1));
       bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Andy"; m.Age = 1; }));
       bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = ""; m.Age = 0; }));
       bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Jacob"; m.Age = 0; }));
