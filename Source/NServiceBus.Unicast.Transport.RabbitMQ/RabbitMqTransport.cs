@@ -21,8 +21,8 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     readonly List<WorkerThread> _workers = new List<WorkerThread>();
     readonly ReaderWriterLockSlim _failuresPerMessageLocker = new ReaderWriterLockSlim();
     readonly IDictionary<string, Int32> _failuresPerMessage = new Dictionary<string, Int32>();
-    string _listenAddress;
-    string _poisonAddress;
+    AmqpAddress _listenAddress;
+    AmqpAddress _poisonAddress;
     IMessageSerializer _messageSerializer;
     Int32 _numberOfWorkerThreads;
     Int32 _maximumNumberOfRetries;
@@ -77,10 +77,11 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public void Send(TransportMessage transportMessage, string destination)
     {
+      var address = AmqpAddress.FromString(destination);
       using (var stream = new MemoryStream())
       {
         this.MessageSerializer.Serialize(transportMessage.Body, stream);
-        using (var connection = _connectionFactory.CreateConnection("192.168.0.173"))
+        using (var connection = _connectionFactory.CreateConnection(address.Broker))
         {
           using (var channel = connection.CreateModel())
           {
@@ -92,7 +93,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
             }
             properties.Timestamp = DateTime.UtcNow.ToAmqpTimestamp();
             properties.ReplyTo = this.ListenAddress;
-            channel.BasicPublish("www", "", properties, stream.ToArray());
+            channel.BasicPublish(address.Exchange, address.RoutingKey, properties, stream.ToArray());
             transportMessage.Id = properties.MessageId;
             _log.Info("Sent message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
           }
@@ -146,7 +147,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public string Address
     {
-      get { return _listenAddress; }
+      get { return _listenAddress.ToString(); }
     }
 
     public void Dispose()
@@ -167,14 +168,14 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public string ListenAddress
     {
-      get { return _listenAddress; }
-      set { _listenAddress = value; }
+      get { return _listenAddress.ToString(); }
+      set { _listenAddress = String.IsNullOrEmpty(value) ? null : AmqpAddress.FromString(value); }
     }
 
     public string PoisonAddress
     {
-      get { return _poisonAddress; }
-      set { _poisonAddress = value; }
+      get { return _poisonAddress.ToString(); }
+      set { _poisonAddress = String.IsNullOrEmpty(value) ? null : AmqpAddress.FromString(value); }
     }
 
     public IMessageSerializer MessageSerializer
@@ -244,12 +245,12 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     void Receive(MessageReceiveProperties messageContext)
     {
       _log.Info("Receiving!");
-      using (var connection = _connectionFactory.CreateConnection("192.168.0.173"))
+      using (var connection = _connectionFactory.CreateConnection(_listenAddress.Broker))
       {
         using (var channel = connection.CreateModel())
         {
           var consumer = new QueueingBasicConsumer(channel);
-          channel.BasicConsume("test1", false, null, consumer);
+          channel.BasicConsume(_listenAddress.RoutingKey, false, null, consumer);
           while (true)
           {
             var delivery = consumer.Receive(TimeSpan.FromSeconds(2));
@@ -263,6 +264,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
               if (this.HandledMaximumRetries(messageContext.MessageId))
               {
                 MoveToPoison(delivery);
+                channel.BasicAck(delivery.DeliveryTag, false);
               }
               else
               {
@@ -304,7 +306,6 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
               break;
             }
           }
-          channel.Close(200, "Done");
         }
       }
     }
@@ -365,12 +366,17 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     void MoveToPoison(BasicDeliverEventArgs delivery)
     {
-      if (String.IsNullOrEmpty(_poisonAddress)) return;
-      using (var connection = _connectionFactory.CreateConnection("192.168.0.173"))
+      if (_poisonAddress == null)
+      {
+        _log.Info("Discarding " + delivery.BasicProperties.MessageId);
+        return;
+      }
+      using (var connection = _connectionFactory.CreateConnection(_poisonAddress.Broker))
       {
         using (var channel = connection.CreateModel())
         {
-          channel.BasicPublish("www", "poison", delivery.BasicProperties, delivery.Body);
+          _log.Info("Moving " + delivery.BasicProperties.MessageId + " to " + _poisonAddress);
+          channel.BasicPublish(_poisonAddress.Exchange, _poisonAddress.RoutingKey, delivery.BasicProperties, delivery.Body);
         }
       }
     }

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmqpAddress.cs" />
     <Compile Include="RabbitMqTransport.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -63,7 +63,7 @@ namespace Machine.Mta
         .StaticSubscriptionStorage()
         .XmlSerializer()
         .AmqpTransport()
-          .On(properties.ListenAddress, EndpointAddress.Null)
+          .On(properties.ListenAddress, properties.PoisonAddress)
         .Sagas()
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
@@ -171,13 +171,14 @@ namespace Machine.Mta
       var messageFactory = container.Resolve.Object<IMessageFactory>();
       var factory = container.Resolve.Object<NsbMessageBusFactory>();
       var bus = factory.Create(new AmqpProperties() {
-        ListenAddress = EndpointAddress.FromString("test1@192.168.0.173"),
-        PoisonAddress = EndpointAddress.FromString("test1_poison@192.168.0.173")
+        ListenAddress = EndpointAddress.FromString("amqp://192.168.0.173//www/test1"),
+        PoisonAddress = EndpointAddress.FromString("amqp://192.168.0.173//www/test1p")
       });
-      var message = messageFactory.Create<IHello>(m => { m.Name = "Jacob"; });
       bus.Start();
-      bus.Bus.Send("", message);
-      System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
+      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHello>(m => { m.Name = "Jacob"; }));
+      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHello>(m => { m.Name = ""; }));
+      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHello>(m => { m.Name = "Jacob"; }));
+      System.Threading.Thread.Sleep(TimeSpan.FromSeconds(6));
       container.Dispose();
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));
     }
@@ -194,6 +195,7 @@ namespace Machine.Mta
 
     public void Handle(IHello message)
     {
+      if (String.IsNullOrEmpty(message.Name)) throw new ArgumentException();
       _log.Info("Hello " + message.Name + "!");
     }
   }
