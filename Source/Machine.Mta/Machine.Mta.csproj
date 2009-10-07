@@ -110,7 +110,6 @@
     <Compile Include="Dispatching\BusWorker.cs" />
     <Compile Include="ITransactionManager.cs" />
     <Compile Include="Logging.cs" />
-    <Compile Include="MessageBusProxy.cs" />
     <Compile Include="MessageFailureManager.cs" />
     <Compile Include="RetryAttemptsAttribute.cs" />
     <Compile Include="ReturnAddressProvider.cs" />

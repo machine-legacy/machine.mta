@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CurrentMessageBus.cs" />
     <Compile Include="CurrentMessageContext.cs" />
     <Compile Include="Dispatching\AllHandlersInContainer.cs" />
     <Compile Include="Dispatching\IProvideHandlerTypes.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="IMessageInterfaceImplementationsLookup.cs" />
     <Compile Include="IMessageRegisterer.cs" />
     <Compile Include="ITransportMessageBodyFormatter.cs" />
+    <Compile Include="MessageBusProxy.cs" />
     <Compile Include="MessageDestinations.cs" />
     <Compile Include="MessagePayload.cs" />
     <Compile Include="MessageRegisterer.cs" />
