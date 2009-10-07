@@ -154,7 +154,7 @@ namespace Machine.Mta
       var loggingConfiguration = new NameValueCollection();
       loggingConfiguration["configType"] = "EXTERNAL";
       Common.Logging.LogManager.Adapter = new Common.Logging.Log4Net.Log4NetLoggerFactoryAdapter(loggingConfiguration);
-      log4net.Config.BasicConfigurator.Configure(new ConsoleAppender() { Layout = new log4net.Layout.PatternLayout("%-5p [%thread] (%30.30c) %m%n") });
+      log4net.Config.BasicConfigurator.Configure(new OutputDebugStringAppender() { Layout = new log4net.Layout.PatternLayout("%-5p (%30.30c) %m%n") });
 
       var container = new MachineContainer();
       container.Initialize();
@@ -175,14 +175,13 @@ namespace Machine.Mta
         PoisonAddress = EndpointAddress.FromString("test1_poison@192.168.0.173")
       });
       var message = messageFactory.Create<IHello>(m => { m.Name = "Jacob"; });
-      var address = EndpointAddress.ForLocalQueue("test");
+      var address = EndpointAddress.ForRemoteQueue("test1", "192.168.0.173");
       bus.Start();
-      bus.Bus.Send("test@localhost", message);
+      //System.Threading.Thread.Sleep(TimeSpan.FromSeconds(1));
+      bus.Bus.Send(address.ToString(), message);
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
       container.Dispose();
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));
-
-      Console.WriteLine("DONE");
     }
   }
 
