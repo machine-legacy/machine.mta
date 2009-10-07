@@ -168,6 +168,8 @@ namespace Machine.Mta
       container.Register.Type<MessageBusProxy>();
       container.Register.Type<NsbMessageBusManager>();
       container.Start();
+      var routing = container.Resolve.Object<IMessageRouting>();
+      routing.AssignOwner<IHelloMessage>(EndpointAddress.FromString("amqp://192.168.0.173//www/test1"));
       var registerer = container.Resolve.Object<IMessageRegisterer>();
       registerer.AddMessageTypes(new[] { typeof(IHelloMessage) });
       var messageFactory = container.Resolve.Object<IMessageFactory>();
@@ -210,7 +212,13 @@ namespace Machine.Mta
       _log.Info("Hello " + message.Name + ": " + message.Age);
       if (message.Age > 0)
       {
-        _bus.Reply(_messageFactory.Create<IHelloMessage>(m => { m.Name = message.Name; m.Age = message.Age - 1; }));
+        _bus.Request(_messageFactory.Create<IHelloMessage>(m => { m.Name = message.Name; m.Age = -1; })).OnReply(ar => {
+          _log.Info("********* BACK");
+        });
+      }
+      else if (message.Age == -1)
+      {
+        _bus.Reply(_messageFactory.Create<IHelloMessage>(m => { m.Name = message.Name; m.Age = 0; }));
       }
     }
   }

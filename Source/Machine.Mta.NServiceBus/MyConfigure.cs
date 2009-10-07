@@ -137,7 +137,7 @@ namespace Machine.Mta
           var owner = routing.Owner(type);
           if (owner != null)
           {
-            _messageOwners[key] = owner.ToNsbAddress();
+            _messageOwners[key] = owner.ToString();
           }
           else
           {
