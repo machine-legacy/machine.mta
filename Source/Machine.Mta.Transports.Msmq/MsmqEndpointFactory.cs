@@ -47,7 +47,7 @@ namespace Machine.Mta.Transports.Msmq
         string[] firstHalfTokens = tokens[0].Split(':');
         return NameAndHostAddress.ForRemoteQueue(firstHalfTokens[firstHalfTokens.Length - 1], queueName);
       }
-      catch (Exception error)
+      catch (Exception)
       {
         return NameAndHostAddress.Null;
       }

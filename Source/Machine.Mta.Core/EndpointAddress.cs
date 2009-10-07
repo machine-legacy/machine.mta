@@ -134,7 +134,7 @@ namespace Machine.Mta
 
     public static NameAndHostAddress FromString(string value)
     {
-      string[] fields = value.Split('@');
+      var fields = value.Split('@');
       return ForRemoteQueue(fields[1], fields[0]);
     }
 

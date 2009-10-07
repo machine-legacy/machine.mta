@@ -156,7 +156,7 @@ namespace Machine.Mta.Transports.Msmq
         string[] guidStrings = parts[1].Split(',');
         return new SerializedLabel(label, guidStrings.Where(x => !String.IsNullOrEmpty(x)).Select(x => new Guid(x)).ToArray());
       }
-      catch (Exception error)
+      catch (Exception)
       {
         return Empty;
       }
