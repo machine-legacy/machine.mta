@@ -95,6 +95,11 @@ namespace Machine.Mta
 
     public static string ToNsbAddress(this EndpointAddress address)
     {
+      return address.ToNameAndHost().ToNsbAddress();
+    }
+
+    public static string ToNsbAddress(this NameAndHostAddress address)
+    {
       return address.Name + "@" + address.Host;
     }
   }

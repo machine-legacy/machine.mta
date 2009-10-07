@@ -6,9 +6,10 @@ namespace Machine.Mta
   {
     public virtual EndpointAddress GetReturnAddress(EndpointAddress listeningOn)
     {
-      if (listeningOn.IsLocal)
+      var nameAndHostAddress = NameAndHostAddress.FromAddress(listeningOn);
+      if (nameAndHostAddress.IsLocal)
       {
-        return EndpointAddress.ForRemoteQueue(Environment.MachineName, listeningOn.Name);
+        return NameAndHostAddress.ForRemoteQueue(Environment.MachineName, nameAndHostAddress.Name).ToAddress();
       }
       return listeningOn;
     }

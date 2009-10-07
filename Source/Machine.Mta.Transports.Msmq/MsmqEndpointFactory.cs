@@ -17,7 +17,7 @@ namespace Machine.Mta.Transports.Msmq
 
     public IEndpoint CreateEndpoint(EndpointAddress address)
     {
-      MessageQueue queue = new MessageQueue(address.ToPath(), QueueAccessMode.SendAndReceive);
+      MessageQueue queue = new MessageQueue(address.ToNameAndHost().ToMsmqPath(), QueueAccessMode.SendAndReceive);
       MessagePropertyFilter filter = new MessagePropertyFilter();
       filter.SetAll();
       queue.MessageReadPropertyFilter = filter;
@@ -27,12 +27,17 @@ namespace Machine.Mta.Transports.Msmq
   
   public static class EndpointAddressHelpers
   {
-    public static string ToPath(this EndpointAddress address)
+    public static string ToMsmqPath(this NameAndHostAddress address)
     {
       return String.Format(@"FormatName:DIRECT=OS:{0}\Private$\{1}", address.Host, address.Name);
     }
 
     public static EndpointAddress ToAddress(this MessageQueue queue)
+    {
+      return queue.ToNameAndHostAddress().ToAddress();
+    }
+
+    public static NameAndHostAddress ToNameAndHostAddress(this MessageQueue queue)
     {
       try
       {
@@ -40,11 +45,11 @@ namespace Machine.Mta.Transports.Msmq
         string[] tokens = queue.Path.Split('\\');
         string queueName = tokens[tokens.Length - 1];
         string[] firstHalfTokens = tokens[0].Split(':');
-        return EndpointAddress.ForRemoteQueue(firstHalfTokens[firstHalfTokens.Length - 1], queueName);
+        return NameAndHostAddress.ForRemoteQueue(firstHalfTokens[firstHalfTokens.Length - 1], queueName);
       }
       catch (Exception error)
       {
-        return EndpointAddress.Null;
+        return NameAndHostAddress.Null;
       }
     }
   }

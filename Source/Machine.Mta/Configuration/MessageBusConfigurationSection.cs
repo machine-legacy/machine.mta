@@ -40,9 +40,9 @@ namespace Machine.Mta.Configuration
     {
       if (String.IsNullOrEmpty(_host))
       {
-        return EndpointAddress.ForLocalQueue(_queue);
+        return NameAndHostAddress.ForLocalQueue(_queue).ToAddress();
       }
-      return EndpointAddress.ForRemoteQueue(_host, _queue);
+      return NameAndHostAddress.ForRemoteQueue(_host, _queue).ToAddress();
     }
   }
   

@@ -133,8 +133,8 @@ namespace Machine.Mta.Specs
   {
     protected static MessageBus bus;
     protected static MessageDispatcher dispatcher;
-    protected static EndpointAddress listeningOnAddress = EndpointAddress.ForLocalQueue("test");
-    protected static EndpointAddress poisonAddress = EndpointAddress.ForLocalQueue("error");
+    protected static EndpointAddress listeningOnAddress = NameAndHostAddress.ForLocalQueue("test").ToAddress();
+    protected static EndpointAddress poisonAddress = NameAndHostAddress.ForLocalQueue("error").ToAddress();
     protected static IMessageFactory messageFactory;
     protected static IMessage message1;
     protected static ISampleMessage message2;

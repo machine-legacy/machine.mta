@@ -25,7 +25,7 @@ namespace Machine.Mta.Specs
     Establish context = () =>
     {
       container.Register.Type<MessageHandler>();
-      messageDestinations.SendAllTo(EndpointAddress.ForLocalQueue("test"));
+      messageDestinations.SendAllTo(NameAndHostAddress.ForLocalQueue("test").ToAddress());
       bus.Start();
     };
 

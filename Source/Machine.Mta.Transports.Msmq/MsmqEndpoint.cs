@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -37,7 +37,7 @@ namespace Machine.Mta.Transports.Msmq
       {
         systemMessage.CorrelationId = transportMessage.CorrelationId;
       }
-      systemMessage.ResponseQueue = new MessageQueue(transportMessage.ReturnAddress.ToPath());
+      systemMessage.ResponseQueue = new MessageQueue(transportMessage.ReturnAddress.ToNameAndHost().ToMsmqPath());
       systemMessage.BodyStream.Write(transportMessage.Body, 0, transportMessage.Body.Length);
       _queue.Send(systemMessage, _transactionManager.SendTransactionType(_queue));
       systemMessage.Dispose();
