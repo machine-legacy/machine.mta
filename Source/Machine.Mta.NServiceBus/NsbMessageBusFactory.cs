@@ -175,9 +175,7 @@ namespace Machine.Mta
         PoisonAddress = EndpointAddress.FromString("test1_poison@192.168.0.173")
       });
       var message = messageFactory.Create<IHello>(m => { m.Name = "Jacob"; });
-      //var address = EndpointAddress.ForRemoteQueue("test1", "192.168.0.173");
       bus.Start();
-      //System.Threading.Thread.Sleep(TimeSpan.FromSeconds(1));
       bus.Bus.Send("", message);
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
       container.Dispose();

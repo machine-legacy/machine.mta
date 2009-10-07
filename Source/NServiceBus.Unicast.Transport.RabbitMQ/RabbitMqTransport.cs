@@ -4,10 +4,11 @@ using System.IO;
 using System.Threading;
 using System.Transactions;
 using System.Linq;
-using NServiceBus.Unicast.Transport.Msmq;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
+using NServiceBus.Unicast.Transport.Msmq;
 using NServiceBus.Serialization;
 using NServiceBus.Utils;
 
@@ -27,6 +28,15 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     Int32 _maximumNumberOfRetries;
     IsolationLevel _isolationLevel;
  
+    class MessageReceiveProperties
+    {
+      public string MessageId { get; set; }
+      public bool NeedToAbort { get; set; }
+    }
+
+    [ThreadStatic]
+    static MessageReceiveProperties _messageContext;
+
     public RabbitMqTransport()
     {
       _connectionFactory.Parameters.UserName = ConnectionParameters.DefaultUser;
@@ -105,6 +115,10 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public void AbortHandlingCurrentMessage()
     {
+      if (_messageContext != null)
+      {
+        _messageContext.NeedToAbort = true;
+      }
     }
 
     public IList<Type> MessageTypesToBeReceived
@@ -206,24 +220,28 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     void Process()
     {
-      var id = String.Empty;
+      _messageContext = new MessageReceiveProperties();
       try
       {
         var wrapper = new TransactionWrapper();
-        wrapper.RunInTransaction(Receive, _isolationLevel, TimeSpan.FromMinutes(5));
-        // ClearFailuresForMessage(id);
+        wrapper.RunInTransaction(() => Receive(_messageContext), _isolationLevel, TimeSpan.FromMinutes(5));
+        ClearFailuresForMessage(_messageContext.MessageId);
       }
       catch (AbortHandlingCurrentMessageException)
       {
       }
       catch (Exception error)
       {
-        // IncrementFailuresForMessage(id);
-        // OnFailedMessageProcessing(error);
+        IncrementFailuresForMessage(_messageContext.MessageId);
+        OnFailedMessageProcessing(error);
+      }
+      finally
+      {
+        _messageContext = null;
       }
     }
 
-    void Receive()
+    void Receive(MessageReceiveProperties messageContext)
     {
       _log.Info("Receiving!");
       using (var connection = _connectionFactory.CreateConnection("192.168.0.173"))
@@ -235,37 +253,54 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           while (true)
           {
             var delivery = consumer.Receive(TimeSpan.FromSeconds(2));
-            if (delivery != null)
+            if (delivery == null)
             {
-              using (var stream = new MemoryStream(delivery.Body))
-              {
-                OnStartedMessageProcessing();
-                var m = new TransportMessage();
-                try
-                {
-                  m.Body = this.MessageSerializer.Deserialize(stream);
-                }
-                catch (Exception deserializeError)
-                {
-                  _log.Error("Could not extract message data.", deserializeError);
-                  MoveToErrorQueue(delivery);
-                  OnFinishedMessageProcessing();
-                  return;
-                }
-                m.Id = delivery.BasicProperties.MessageId;
-                m.CorrelationId = delivery.BasicProperties.CorrelationId;
-                m.IdForCorrelation = delivery.BasicProperties.CorrelationId;
-                m.ReturnAddress = delivery.BasicProperties.ReplyTo;
-                m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
-                m.Headers = new List<HeaderInfo>();
-                m.Recoverable = false;
-                OnTransportMessageReceived(m);
-                channel.BasicAck(delivery.DeliveryTag, false);
-              }
               break;
             }
             else
             {
+              messageContext.MessageId = delivery.BasicProperties.MessageId;
+              if (this.HandledMaximumRetries(messageContext.MessageId))
+              {
+                MoveToPoison(delivery);
+              }
+              else
+              {
+                using (var stream = new MemoryStream(delivery.Body))
+                {
+                  OnStartedMessageProcessing();
+                  var m = new TransportMessage();
+                  try
+                  {
+                    m.Body = this.MessageSerializer.Deserialize(stream);
+                  }
+                  catch (Exception deserializeError)
+                  {
+                    _log.Error("Could not extract message data.", deserializeError);
+                    MoveToPoison(delivery);
+                    OnFinishedMessageProcessing();
+                    break;
+                  }
+                  m.Id = delivery.BasicProperties.MessageId;
+                  m.CorrelationId = delivery.BasicProperties.CorrelationId;
+                  m.IdForCorrelation = delivery.BasicProperties.CorrelationId;
+                  m.ReturnAddress = delivery.BasicProperties.ReplyTo;
+                  m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
+                  m.Headers = new List<HeaderInfo>();
+                  m.Recoverable = false;
+                  var receiveError = OnTransportMessageReceived(m);
+                  var processingError = this.OnFinishedMessageProcessing();
+                  if (messageContext.NeedToAbort)
+                  {
+                    throw new AbortHandlingCurrentMessageException();
+                  }
+                  if ((receiveError != null) || (processingError != null))
+                  {
+                    throw new ApplicationException("Exception occured while processing message.");
+                  }
+                  channel.BasicAck(delivery.DeliveryTag, false);
+                }
+              }
               break;
             }
           }
@@ -276,6 +311,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     void IncrementFailuresForMessage(string id)
     {
+      if (String.IsNullOrEmpty(id)) return;
       _failuresPerMessageLocker.EnterWriteLock();
       try
       {
@@ -296,6 +332,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     void ClearFailuresForMessage(string id)
     {
+      if (String.IsNullOrEmpty(id)) return;
       _failuresPerMessageLocker.EnterReadLock();
       if (_failuresPerMessage.ContainsKey(id))
       {
@@ -312,6 +349,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     
     bool HandledMaximumRetries(string id)
     {
+      if (String.IsNullOrEmpty(id)) return false;
       _failuresPerMessageLocker.EnterReadLock();
       if (_failuresPerMessage.ContainsKey(id) && (_failuresPerMessage[id] == _maximumNumberOfRetries))
       {
@@ -325,11 +363,15 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       return false;
     }
 
-    void MoveToErrorQueue(BasicDeliverEventArgs delivery)
+    void MoveToPoison(BasicDeliverEventArgs delivery)
     {
-      if (!String.IsNullOrEmpty(_poisonAddress))
+      if (String.IsNullOrEmpty(_poisonAddress)) return;
+      using (var connection = _connectionFactory.CreateConnection("192.168.0.173"))
       {
-        // this.errorQueue.Send(m, MessageQueueTransactionType.Single);
+        using (var channel = connection.CreateModel())
+        {
+          channel.BasicPublish("www", "poison", delivery.BasicProperties, delivery.Body);
+        }
       }
     }
 
