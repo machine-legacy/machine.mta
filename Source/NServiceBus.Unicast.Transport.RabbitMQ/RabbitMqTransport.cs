@@ -287,6 +287,10 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       }
 
       var startedProcessingError = OnStartedMessageProcessing();
+      if (startedProcessingError != null)
+      {
+        throw new MessageHandlingException("Exception occured while starting to process message.", startedProcessingError, null, null);
+      }
 
       var m = new TransportMessage();
       try
@@ -318,7 +322,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       }
       if (receivingError != null || finishedProcessingError != null)
       {
-        throw new MessageHandlingException("Exception occured while processing message.", receivingError, finishedProcessingError);
+        throw new MessageHandlingException("Exception occured while processing message.", null, receivingError, finishedProcessingError);
       }
       channel.BasicAck(delivery.DeliveryTag, false);
     }
