@@ -286,7 +286,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         return;
       }
 
-      OnStartedMessageProcessing();
+      var startedProcessingError = OnStartedMessageProcessing();
 
       var m = new TransportMessage();
       try
@@ -311,14 +311,14 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       m.Headers = new List<HeaderInfo>();
       m.Recoverable = delivery.BasicProperties.DeliveryMode == 2;
       var receivingError = OnTransportMessageReceived(m);
-      var processingError = OnFinishedMessageProcessing();
+      var finishedProcessingError = OnFinishedMessageProcessing();
       if (messageContext.NeedToAbort)
       {
         throw new AbortHandlingCurrentMessageException();
       }
-      if ((receivingError != null) || (processingError != null))
+      if (receivingError != null || finishedProcessingError != null)
       {
-        throw new ApplicationException("Exception occured while processing message.");
+        throw new MessageHandlingException("Exception occured while processing message.", receivingError, finishedProcessingError);
       }
       channel.BasicAck(delivery.DeliveryTag, false);
     }
@@ -420,10 +420,10 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           this.StartedMessageProcessing(this, null);
         }
       }
-      catch (Exception error)
+      catch (Exception processingError)
       {
-        _log.Error("Failed raising 'started message processing' event.", error);
-        return error;
+        _log.Error("Failed raising 'started message processing' event.", processingError);
+        return processingError;
       }
       return null;
     }
@@ -437,10 +437,10 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           this.FinishedMessageProcessing(this, null);
         }
       }
-      catch (Exception error)
+      catch (Exception processingError)
       {
-        _log.Error("Failed raising 'finished message processing' event.", error);
-        return error;
+        _log.Error("Failed raising 'finished message processing' event.", processingError);
+        return processingError;
       }
       return null;
     }
@@ -454,10 +454,10 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           this.TransportMessageReceived(this, new TransportMessageReceivedEventArgs(msg));
         }
       }
-      catch (Exception error)
+      catch (Exception processingError)
       {
-        _log.Error("Failed raising 'transport message received' event.", error);
-        return error;
+        _log.Error("Failed raising 'transport message received' event.", processingError);
+        return processingError;
       }
       return null;
     }
