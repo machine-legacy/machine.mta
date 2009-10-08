@@ -28,6 +28,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     Int32 _maximumNumberOfRetries;
     IsolationLevel _isolationLevel;
     TimeSpan _transactionTimeout = TimeSpan.FromMinutes(5);
+    TimeSpan _receiveTimeout = TimeSpan.FromSeconds(2);
  
     class MessageReceiveProperties
     {
@@ -204,6 +205,12 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       set { _transactionTimeout = value; }
     }
 
+    public TimeSpan ReceiveTimeout
+    {
+      get { return _receiveTimeout; }
+      set { _receiveTimeout = value; }
+    }
+
     static Type[] GetExtraTypes(IEnumerable<Type> value)
     {
       var types = value.ToList();
@@ -266,7 +273,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           var consumer = new QueueingBasicConsumer(channel);
           channel.BasicConsume(_listenAddress.RoutingKey, false, null, consumer);
           {
-            var delivery = consumer.Receive(TimeSpan.FromSeconds(2));
+            var delivery = consumer.Receive(_receiveTimeout);
             if (delivery != null)
             {
               DeliverMessage(channel, messageContext, delivery);
