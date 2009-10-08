@@ -265,63 +265,62 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         {
           var consumer = new QueueingBasicConsumer(channel);
           channel.BasicConsume(_listenAddress.RoutingKey, false, null, consumer);
-          while (true)
           {
             var delivery = consumer.Receive(TimeSpan.FromSeconds(2));
-            if (delivery == null)
+            if (delivery != null)
             {
-              break;
-            }
-            else
-            {
-              messageContext.MessageId = delivery.BasicProperties.MessageId;
-              if (this.HandledMaximumRetries(messageContext.MessageId))
-              {
-                MoveToPoison(delivery);
-                channel.BasicAck(delivery.DeliveryTag, false);
-              }
-              else
-              {
-                using (var stream = new MemoryStream(delivery.Body))
-                {
-                  OnStartedMessageProcessing();
-                  var m = new TransportMessage();
-                  try
-                  {
-                    m.Body = this.MessageSerializer.Deserialize(stream);
-                  }
-                  catch (Exception deserializeError)
-                  {
-                    _log.Error("Could not extract message data.", deserializeError);
-                    MoveToPoison(delivery);
-                    OnFinishedMessageProcessing();
-                    break;
-                  }
-                  m.Id = delivery.BasicProperties.MessageId;
-                  m.CorrelationId = delivery.BasicProperties.CorrelationId;
-                  m.IdForCorrelation = delivery.BasicProperties.MessageId;
-                  m.ReturnAddress = delivery.BasicProperties.ReplyTo;
-                  m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
-                  m.Headers = new List<HeaderInfo>();
-                  m.Recoverable = delivery.BasicProperties.DeliveryMode == 2;
-                  var receiveError = OnTransportMessageReceived(m);
-                  var processingError = this.OnFinishedMessageProcessing();
-                  if (messageContext.NeedToAbort)
-                  {
-                    throw new AbortHandlingCurrentMessageException();
-                  }
-                  if ((receiveError != null) || (processingError != null))
-                  {
-                    throw new ApplicationException("Exception occured while processing message.");
-                  }
-                  channel.BasicAck(delivery.DeliveryTag, false);
-                }
-              }
-              break;
+              DeliverMessage(channel, messageContext, delivery);
             }
           }
         }
       }
+    }
+
+    void DeliverMessage(IModel channel, MessageReceiveProperties messageContext, BasicDeliverEventArgs delivery)
+    {
+      messageContext.MessageId = delivery.BasicProperties.MessageId;
+      if (HandledMaximumRetries(messageContext.MessageId))
+      {
+        MoveToPoison(delivery);
+        channel.BasicAck(delivery.DeliveryTag, false);
+        return;
+      }
+
+      OnStartedMessageProcessing();
+
+      var m = new TransportMessage();
+      try
+      {
+        using (var stream = new MemoryStream(delivery.Body))
+        {
+          m.Body = this.MessageSerializer.Deserialize(stream);
+        }
+      }
+      catch (Exception deserializeError)
+      {
+        _log.Error("Could not extract message data.", deserializeError);
+        MoveToPoison(delivery);
+        OnFinishedMessageProcessing();
+        return;
+      }
+      m.Id = delivery.BasicProperties.MessageId;
+      m.CorrelationId = delivery.BasicProperties.CorrelationId;
+      m.IdForCorrelation = delivery.BasicProperties.MessageId;
+      m.ReturnAddress = delivery.BasicProperties.ReplyTo;
+      m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
+      m.Headers = new List<HeaderInfo>();
+      m.Recoverable = delivery.BasicProperties.DeliveryMode == 2;
+      var receivingError = OnTransportMessageReceived(m);
+      var processingError = OnFinishedMessageProcessing();
+      if (messageContext.NeedToAbort)
+      {
+        throw new AbortHandlingCurrentMessageException();
+      }
+      if ((receivingError != null) || (processingError != null))
+      {
+        throw new ApplicationException("Exception occured while processing message.");
+      }
+      channel.BasicAck(delivery.DeliveryTag, false);
     }
 
     void IncrementFailuresForMessage(string id)
