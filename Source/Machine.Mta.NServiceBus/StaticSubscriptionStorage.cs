@@ -73,7 +73,7 @@ namespace Machine.Mta
         var messageType = _mapper.GetMappedTypeFor(messageTypeName);
         foreach (var destiny in _routing.Subscribers(messageType))
         {
-          found.Add(destiny.ToNsbAddress());
+          found.Add(destiny.ToString());
         }
       }
       return found;

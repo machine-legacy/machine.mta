@@ -21,21 +21,9 @@ namespace Machine.Mta
       get { return new NServiceBusMessageBus(_routing, _messageBusFactory.CurrentBus()); }
     }
 
-    public IMessageBus AddSendOnlyMessageBus()
+    public IMessageBus AddMessageBus(BusProperties properties)
     {
-      var bus = _messageBusFactory.Create(new MsmqProperties());
-      return new NServiceBusMessageBus(_routing, bus);
-    }
-
-    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress)
-    {
-      var bus = _messageBusFactory.Create(new MsmqProperties() { ListenAddress = address, PoisonAddress = poisonAddress });
-      return new NServiceBusMessageBus(_routing, bus);
-    }
-
-    public IMessageBus AddMessageBus(EndpointAddress address, EndpointAddress poisonAddress, ThreadPoolConfiguration threadPoolConfiguration)
-    {
-      var bus = _messageBusFactory.Create(new MsmqProperties() { ListenAddress = address, PoisonAddress = poisonAddress });
+      var bus = _messageBusFactory.Create(properties);
       return new NServiceBusMessageBus(_routing, bus);
     }
 

@@ -27,6 +27,16 @@ namespace Machine.Mta
       _container = container;
     }
 
+    public IMessageBus AddMessageBus(BusProperties properties)
+    {
+      var bus = _messageBusFactory.CreateMessageBus(properties.ListenAddress, properties.PoisonAddress, new AllHandlersInContainer(_container), new ThreadPoolConfiguration(
+        properties.NumberOfWorkerThreads,
+        properties.NumberOfWorkerThreads
+      ));
+      _buses.Add(bus);
+      return bus;
+    }
+    /*
     public IMessageBus AddSendOnlyMessageBus()
     {
       throw new NotImplementedException();
@@ -48,7 +58,7 @@ namespace Machine.Mta
       _buses.Add(bus);
       return bus;
     }
-
+    */
     public void EachBus(Action<IMessageBus> action)
     {
       _buses.Each(action);

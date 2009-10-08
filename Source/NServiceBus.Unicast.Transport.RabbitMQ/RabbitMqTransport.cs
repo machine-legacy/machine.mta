@@ -258,7 +258,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     void Receive(MessageReceiveProperties messageContext)
     {
-      _log.Info("Receiving from " + _listenAddress);
+      _log.Debug("Receiving from " + _listenAddress);
       using (var connection = _connectionFactory.CreateConnection(_listenAddress.Broker))
       {
         using (var channel = connection.CreateModel())

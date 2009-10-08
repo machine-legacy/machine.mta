@@ -38,12 +38,12 @@ namespace Machine.Mta
 
     public void Send<T>(EndpointAddress destination, params T[] messages) where T : IMessage
     {
-      CurrentBus().Send(destination.ToNsbAddress(), messages.ToNsbMessages());
+      CurrentBus().Send(destination.ToString(), messages.ToNsbMessages());
     }
 
     public void Send<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
     {
-      CurrentBus().Send(destination.ToNsbAddress(), correlationId, messages.ToNsbMessages());
+      CurrentBus().Send(destination.ToString(), correlationId, messages.ToNsbMessages());
     }
 
     public void Send(EndpointAddress destination, MessagePayload payload)
@@ -88,7 +88,7 @@ namespace Machine.Mta
       return address.ToNameAndHost().ToNsbAddress();
     }
 
-    public static string ToNsbAddress(this NameAndHostAddress address)
+    static string ToNsbAddress(this NameAndHostAddress address)
     {
       return address.Name + "@" + address.Host;
     }
