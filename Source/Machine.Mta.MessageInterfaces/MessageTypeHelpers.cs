@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Machine.Mta.InterfacesAsMessages
+namespace Machine.Mta.MessageInterfaces
 {
   public static class MessageTypeHelpers
   {

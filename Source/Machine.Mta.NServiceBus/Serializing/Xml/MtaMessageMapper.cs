@@ -1,5 +1,5 @@
 using System;
-using Machine.Mta.InterfacesAsMessages;
+using Machine.Mta.MessageInterfaces;
 using NServiceBus.MessageInterfaces;
 
 namespace Machine.Mta.Serializing.Xml

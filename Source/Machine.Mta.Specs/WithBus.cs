@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Machine.Container;
 using Machine.Container.Services;
 using Machine.Mta.Dispatching;
-using Machine.Mta.InterfacesAsMessages;
+using Machine.Mta.MessageInterfaces;
 using Machine.Mta.Transports.Msmq;
 using Machine.Mta.Endpoints;
 using Machine.Mta.Sagas;

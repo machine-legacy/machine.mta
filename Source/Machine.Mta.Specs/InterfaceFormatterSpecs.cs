@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Machine.Mta.InterfacesAsMessages;
+using Machine.Mta.MessageInterfaces;
 
 namespace Machine.Mta.Specs
 {

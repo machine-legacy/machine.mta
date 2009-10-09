@@ -4,7 +4,7 @@ using System.Threading;
 
 using Machine.Core.Utility;
 
-namespace Machine.Mta.InterfacesAsMessages
+namespace Machine.Mta.MessageInterfaces
 {
   public class MessageInterfaceImplementations : IMessageInterfaceImplementationsLookup
   {

@@ -4,7 +4,7 @@ using Machine.Container.Plugins;
 
 using Machine.Mta.Dispatching;
 using Machine.Mta.Endpoints;
-using Machine.Mta.InterfacesAsMessages;
+using Machine.Mta.MessageInterfaces;
 using Machine.Mta.Sagas;
 
 namespace Machine.Mta

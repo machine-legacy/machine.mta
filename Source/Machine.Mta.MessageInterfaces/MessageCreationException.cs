@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Machine.Mta.InterfacesAsMessages
+namespace Machine.Mta.MessageInterfaces
 {
   [Serializable]
   public class MessageCreationException : Exception

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Machine.Mta.InterfacesAsMessages
+namespace Machine.Mta.MessageInterfaces
 {
   public class GeneratedMessage
   {

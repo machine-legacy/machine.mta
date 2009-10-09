@@ -3,7 +3,7 @@ using System.IO;
 
 using Newtonsoft.Json;
 
-namespace Machine.Mta.InterfacesAsMessages
+namespace Machine.Mta.MessageInterfaces
 {
   public class ExceptionJsonConverter : JsonConverter
   {

@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using log4net.Appender;
 using Machine.Container;
 using Machine.Container.Plugins.Disposition;
-using Machine.Mta.InterfacesAsMessages;
+using Machine.Mta.MessageInterfaces;
 using NServiceBus;
 
 namespace Machine.Mta.Specs
