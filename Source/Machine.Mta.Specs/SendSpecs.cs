@@ -16,7 +16,7 @@ namespace Machine.Mta.Specs
       var loggingConfiguration = new NameValueCollection();
       loggingConfiguration["configType"] = "EXTERNAL";
       Common.Logging.LogManager.Adapter = new Common.Logging.Log4Net.Log4NetLoggerFactoryAdapter(loggingConfiguration);
-      log4net.Config.BasicConfigurator.Configure(new OutputDebugStringAppender() { Layout = new log4net.Layout.PatternLayout("%-5p (%30.30c) %m%n") });
+      log4net.Config.BasicConfigurator.Configure(new OutputDebugStringAppender() { Layout = new log4net.Layout.PatternLayout("SPECIAL %-5p (%30.30c) %m%n") });
 
       var container = new MachineContainer();
       container.Initialize();
@@ -25,14 +25,15 @@ namespace Machine.Mta.Specs
       container.Register.Type<MessageDestinations>();
       container.Register.Type<MessageRegisterer>();
       container.Register.Type<NsbMessageBusFactory>();
-      // container.Register.Type<NsbMessageFactory>();
-      container.Register.Type<MessageFactory>();
       container.Register.Type<HelloHandler>();
       container.Register.Type<MessageBusProxy>();
       container.Register.Type<NsbMessageBusManager>();
-      container.Register.Type<MessageInterfaceImplementations>();
-      container.Register.Type<DefaultMessageInterfaceImplementationFactory>();
-      container.Register.Type<MessageDefinitionFactory>();
+
+      container.Register.Type<NsbMessageFactory>();
+      // container.Register.Type<MessageFactory>();
+      // container.Register.Type<MessageInterfaceImplementations>();
+      // container.Register.Type<DefaultMessageInterfaceImplementationFactory>();
+      // container.Register.Type<MessageDefinitionFactory>();
       container.Start();
       var routing = container.Resolve.Object<IMessageRouting>();
       routing.AssignOwner<IHelloMessage>(EndpointAddress.FromString("amqp://192.168.0.173//el.www/test1"));
@@ -76,7 +77,7 @@ namespace Machine.Mta.Specs
 
     public void Handle(IHelloMessage message)
     {
-      if (String.IsNullOrEmpty(message.Name)) throw new ArgumentException();
+      if (String.IsNullOrEmpty(message.Name)) return; // throw new ArgumentException();
       _log.Info("Hello " + message.Name + ": " + message.Age);
       if (message.Age > 0)
       {

@@ -16,8 +16,8 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 {
   public class RabbitMqTransport : ITransport
   {
+    static readonly ConnectionProvider _connectionProvider = new ConnectionProvider();
     readonly Common.Logging.ILog _log = Common.Logging.LogManager.GetLogger(typeof(RabbitMqTransport));
-    readonly ConnectionFactory _connectionFactory = new ConnectionFactory();
     readonly List<WorkerThread> _workers = new List<WorkerThread>();
     readonly ReaderWriterLockSlim _failuresPerMessageLocker = new ReaderWriterLockSlim();
     readonly IDictionary<string, Int32> _failuresPerMessage = new Dictionary<string, Int32>();
@@ -38,13 +38,6 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     [ThreadStatic]
     static MessageReceiveProperties _messageContext;
-
-    public RabbitMqTransport()
-    {
-      _connectionFactory.Parameters.UserName = ConnectionParameters.DefaultUser;
-      _connectionFactory.Parameters.Password = ConnectionParameters.DefaultPass;
-      _connectionFactory.Parameters.VirtualHost = ConnectionParameters.DefaultVHost;
-    }
 
     public void Start()
     {
@@ -83,25 +76,23 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       using (var stream = new MemoryStream())
       {
         this.MessageSerializer.Serialize(transportMessage.Body, stream);
-        using (var connection = _connectionFactory.CreateConnection(address.Broker))
+        using (var connection = _connectionProvider.Open(address.Broker, true))
         {
-          using (var channel = connection.CreateModel())
+          var channel = connection.Model();
+          var messageId = Guid.NewGuid().ToString();
+          var properties = channel.CreateBasicProperties();
+          properties.MessageId = messageId;
+          if (!String.IsNullOrEmpty(transportMessage.CorrelationId))
           {
-            var messageId = Guid.NewGuid().ToString();
-            var properties = channel.CreateBasicProperties();
-            properties.MessageId = messageId;
-            if (!String.IsNullOrEmpty(transportMessage.CorrelationId))
-            {
-              properties.CorrelationId = transportMessage.CorrelationId;
-            }
-            properties.Timestamp = DateTime.UtcNow.ToAmqpTimestamp();
-            properties.ReplyTo = this.ListenAddress;
-            properties.SetPersistent(transportMessage.Recoverable);
-            properties.Headers = transportMessage.Headers.ToDictionary(k => k.Key, v => v.Value);
-            channel.BasicPublish(address.Exchange, address.RoutingKey, properties, stream.ToArray());
-            transportMessage.Id = properties.MessageId;
-            _log.Info("Sent message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
+            properties.CorrelationId = transportMessage.CorrelationId;
           }
+          properties.Timestamp = DateTime.UtcNow.ToAmqpTimestamp();
+          properties.ReplyTo = this.ListenAddress;
+          properties.SetPersistent(transportMessage.Recoverable);
+          properties.Headers = transportMessage.Headers.ToDictionary(k => k.Key, v => v.Value);
+          channel.BasicPublish(address.Exchange, address.RoutingKey, properties, stream.ToArray());
+          transportMessage.Id = properties.MessageId;
+          _log.Info("Sent message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
         }
       }
     }
@@ -268,19 +259,15 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     void Receive(MessageReceiveProperties messageContext)
     {
       _log.Debug("Receiving from " + _listenAddress);
-      using (var connection = _connectionFactory.CreateConnection(_listenAddress.Broker))
+      using (var connection = _connectionProvider.Open(_listenAddress.Broker, true))
       {
-        using (var channel = connection.CreateModel())
+        var channel = connection.Model();
+        var consumer = new QueueingBasicConsumer(channel);
+        channel.BasicConsume(_listenAddress.RoutingKey, false, null, consumer);
+        var delivery = consumer.Receive(_receiveTimeout);
+        if (delivery != null)
         {
-          var consumer = new QueueingBasicConsumer(channel);
-          channel.BasicConsume(_listenAddress.RoutingKey, false, null, consumer);
-          {
-            var delivery = consumer.Receive(_receiveTimeout);
-            if (delivery != null)
-            {
-              DeliverMessage(channel, messageContext, delivery);
-            }
-          }
+          DeliverMessage(channel, messageContext, delivery);
         }
       }
     }
@@ -397,13 +384,11 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         _log.Info("Discarding " + delivery.BasicProperties.MessageId);
         return;
       }
-      using (var connection = _connectionFactory.CreateConnection(_poisonAddress.Broker))
+      using (var connection = _connectionProvider.Open(_listenAddress.Broker, false))
       {
-        using (var channel = connection.CreateModel())
-        {
-          _log.Info("Moving " + delivery.BasicProperties.MessageId + " to " + _poisonAddress);
-          channel.BasicPublish(_poisonAddress.Exchange, _poisonAddress.RoutingKey, delivery.BasicProperties, delivery.Body);
-        }
+        var channel = connection.Model();
+        _log.Info("Moving " + delivery.BasicProperties.MessageId + " to " + _poisonAddress);
+        channel.BasicPublish(_poisonAddress.Exchange, _poisonAddress.RoutingKey, delivery.BasicProperties, delivery.Body);
       }
     }
 
