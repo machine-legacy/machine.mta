@@ -38,7 +38,7 @@ namespace Machine.Mta.DotNetBinaryStorage
       List<ScheduledPublish> expired = new List<ScheduledPublish>();
       foreach (ScheduledPublish publish in new List<ScheduledPublish>(_cache))
       {
-        if (publish.PublishAt < ServerClock.Now())
+        if (publish.PublishAt < ServerClock.Now)
         {
           expired.Add(publish);
           _cache.Remove(publish);

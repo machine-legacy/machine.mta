@@ -66,7 +66,7 @@ namespace Machine.Mta.Timing
     public CronTrigger(SimpleCronEntry[] entries)
     {
       _entries = entries;
-      _lastRanAt = ServerClock.Now();
+      _lastRanAt = ServerClock.Now;
     }
 
     public bool IsFired()
@@ -74,9 +74,9 @@ namespace Machine.Mta.Timing
       foreach (SimpleCronEntry entry in _entries)
       {
         var nextOccurenceAfter = entry.NextOccurenceAfter(_lastRanAt);
-        if (nextOccurenceAfter < ServerClock.Now())
+        if (nextOccurenceAfter < ServerClock.Now)
         {
-          _lastRanAt = ServerClock.Now();
+          _lastRanAt = ServerClock.Now;
           return true;
         }
       }
@@ -101,7 +101,7 @@ namespace Machine.Mta.Timing
 
     public bool IsFired()
     {
-      return ServerClock.Now().Second % _interval == 0;
+      return ServerClock.Now.Second % _interval == 0;
     }
   }
 }

@@ -17,16 +17,19 @@ namespace Machine.Mta.Timing
       _nowFunc = null;
     }
 
-    public static DateTime Now()
+    public static DateTime Now
     {
-      if (_nowFunc == null)
-        throw new InvalidOperationException("No Now function has been assigned to the ServerClock. Please see ServerClock.SetNowFunc");
-      return _nowFunc();
+      get
+      {
+        if (_nowFunc == null)
+          throw new InvalidOperationException("No Now function has been assigned to the ServerClock. Please see ServerClock.SetNowFunc");
+        return _nowFunc();
+      }
     }
 
     public static DateTime Later(TimeSpan time)
     {
-      return Now() + time;
+      return Now + time;
     }
 
     public static DateTime SecondsLater(double seconds)

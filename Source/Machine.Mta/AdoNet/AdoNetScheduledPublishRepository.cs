@@ -65,7 +65,7 @@ namespace Machine.Mta.AdoNet
       using (IDbConnection connection = OpenConnection())
       {
         List<ScheduledPublish> scheduled = new List<ScheduledPublish>();
-        DateTime now = ServerClock.Now();
+        DateTime now = ServerClock.Now;
         IDbCommand command = CreateSelectCommand(connection);
         command.Parameter("Now").Value = now;
         command.Parameter("GroupName").Value = _groupNameProvider.GroupName;
