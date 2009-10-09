@@ -66,12 +66,7 @@ namespace Machine.Mta.MessageInterfaces
 
     private static string MakeImplementationName(Type type)
     {
-      string name = type.Name;
-      if (name.StartsWith("I"))
-      {
-        name = name.Substring(1);
-      }
-      return "A" + name;
+      return type.Namespace + ".__Impl." + type.Name;
     }
   }
 
