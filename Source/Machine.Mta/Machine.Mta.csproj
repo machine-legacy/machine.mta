@@ -95,15 +95,8 @@
     <Compile Include="Endpoints\IEndpointResolver.cs" />
     <Compile Include="Helpers\SagaRepositoryServices.cs" />
     <Compile Include="Errors\IErrorMessage.cs" />
-    <Compile Include="InterfacesAsMessages\DefaultMessageInterfaceImplementationFactory.cs" />
-    <Compile Include="InterfacesAsMessages\MessageCreationException.cs" />
-    <Compile Include="InterfacesAsMessages\MessageDefinitionFactory.cs" />
-    <Compile Include="InterfacesAsMessages\MessageInterfaceImplementationFactory.cs" />
-    <Compile Include="InterfacesAsMessages\MessageInterfaceSerializationBinder.cs" />
-    <Compile Include="InterfacesAsMessages\MessageTypeHelpers.cs" />
     <Compile Include="Endpoints\IEndpoint.cs" />
     <Compile Include="Endpoints\EndpointResolver.cs" />
-    <Compile Include="InterfacesAsMessages\ExceptionJsonConverter.cs" />
     <Compile Include="Helpers\MessageHandlerServices.cs" />
     <Compile Include="Helpers\MessageSetupHelpers.cs" />
     <Compile Include="Dispatching\IMessageDispatcher.cs" />
@@ -126,16 +119,6 @@
     <Compile Include="Sagas\Saga.cs" />
     <Compile Include="Sagas\SagaAspect.cs" />
     <Compile Include="Sagas\SagaException.cs" />
-    <Compile Include="Serializers.cs" />
-    <Compile Include="InterfacesAsMessages\MessageFactory.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="InterfacesAsMessages\MessageInterfaceImplementations.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="InterfacesAsMessages\MessageInterfaceTransportFormatter.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="MessageContexts.cs" />
     <Compile Include="IMessageBusFactory.cs" />
     <Compile Include="Dispatching\Invokers.cs" />
@@ -158,6 +141,10 @@
     <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">
       <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
       <Name>Machine.Mta.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Machine.Mta.MessageInterfaces\Machine.Mta.MessageInterfaces.csproj">
+      <Project>{06D7BAAD-7C1F-4782-B144-14BE178EE62A}</Project>
+      <Name>Machine.Mta.MessageInterfaces</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

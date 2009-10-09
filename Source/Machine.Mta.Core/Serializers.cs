@@ -7,8 +7,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using Newtonsoft.Json;
 
-using Machine.Mta.InterfacesAsMessages;
-
 namespace Machine.Mta
 {
   public class Serializers
@@ -22,8 +20,8 @@ namespace Machine.Mta
       _binaryFormatter.AssemblyFormat = FormatterAssemblyStyle.Simple;
       _binaryFormatter.Binder = new SerializationBinders(new TransportMessageBinder(), new GeneratedMessageTypeBinder());
       _jsonSerializer = new JsonSerializer();
-      _jsonSerializer.Converters.Add(new EndpointAddressJsonConverter());
-      _jsonSerializer.Converters.Add(new ExceptionJsonConverter());
+      // _jsonSerializer.Converters.Add(new EndpointAddressJsonConverter());
+      // _jsonSerializer.Converters.Add(new ExceptionJsonConverter());
     }
 
     public static BinaryFormatter Binary

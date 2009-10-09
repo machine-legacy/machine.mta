@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</ProjectGuid>
+    <ProjectGuid>{06D7BAAD-7C1F-4782-B144-14BE178EE62A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Machine.Mta</RootNamespace>
-    <AssemblyName>Machine.Mta.Core</AssemblyName>
+    <RootNamespace>Machine.Mta.MessageInterfaces</RootNamespace>
+    <AssemblyName>Machine.Mta.MessageInterfaces</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,17 +31,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Machine.Container, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5c474de7a495cff1, processorArchitecture=MSIL">
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Machine\Container\Machine.Container.dll</HintPath>
+      <HintPath>..\..\Libraries\Logging\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Machine.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5c474de7a495cff1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Machine\Container\Machine.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Machine.Utility.ThreadPool, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Machine\Machine.Utility.ThreadPool.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=3.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -51,10 +47,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\NServiceBus\NServiceBus.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceBus.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\NServiceBus\NServiceBus.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -63,32 +55,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CurrentMessageBus.cs" />
-    <Compile Include="CurrentMessageContext.cs" />
-    <Compile Include="Dispatching\AllHandlersInContainer.cs" />
-    <Compile Include="Dispatching\IProvideHandlerTypes.cs" />
-    <Compile Include="Dispatching\MessageHandlerType.cs" />
-    <Compile Include="EndpointAddress.cs" />
-    <Compile Include="IConsume.cs" />
-    <Compile Include="IMessage.cs" />
-    <Compile Include="IMessageBus.cs" />
-    <Compile Include="IMessageBusManager.cs" />
-    <Compile Include="IMessageDestinations.cs" />
-    <Compile Include="IMessageFactory.cs" />
-    <Compile Include="IMessageInterfaceImplementationsLookup.cs" />
-    <Compile Include="IMessageRegisterer.cs" />
-    <Compile Include="ITransportMessageBodyFormatter.cs" />
-    <Compile Include="MessageBusProxy.cs" />
-    <Compile Include="MessageDestinations.cs" />
-    <Compile Include="MessagePayload.cs" />
-    <Compile Include="MessageRegisterer.cs" />
+    <Compile Include="DefaultMessageInterfaceImplementationFactory.cs" />
+    <Compile Include="ExceptionJsonConverter.cs" />
+    <Compile Include="MessageCreationException.cs" />
+    <Compile Include="MessageDefinitionFactory.cs" />
+    <Compile Include="MessageFactory.cs" />
+    <Compile Include="MessageInterfaceImplementationFactory.cs" />
+    <Compile Include="MessageInterfaceImplementations.cs" />
+    <Compile Include="MessageInterfaceSerializationBinder.cs" />
+    <Compile Include="MessageInterfaceTransportFormatter.cs" />
+    <Compile Include="MessageTypeHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serializers.cs" />
-    <Compile Include="Timing\IOnceASecondTask.cs" />
-    <Compile Include="Timing\ServerClock.cs" />
-    <Compile Include="TransportMessage.cs" />
-    <Compile Include="TransportMessageBodySerializer.cs" />
-    <Compile Include="TypeHelpers.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">
+      <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
+      <Name>Machine.Mta.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
