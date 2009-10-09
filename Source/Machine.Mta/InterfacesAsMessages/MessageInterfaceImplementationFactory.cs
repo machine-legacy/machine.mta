@@ -11,7 +11,7 @@ namespace Machine.Mta.InterfacesAsMessages
     private AssemblyBuilder _assemblyBuilder;
     private ModuleBuilder _moduleBuilder;
 
-    public IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types)
+    public IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types, params Type[] extraInterfacesToAlwaysInclude)
     {
       AssemblyName assemblyName = new AssemblyName(AssemblyName);
       _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
@@ -27,12 +27,16 @@ namespace Machine.Mta.InterfacesAsMessages
       }
     }
 
-    private Type ImplementMessage(Type type)
+    private Type ImplementMessage(Type type, params Type[] extraInterfacesToAlwaysInclude)
     {
       string newTypeName = MakeImplementationName(type);
       TypeAttributes attributes = TypeAttributes.Public | TypeAttributes.Serializable;
       TypeBuilder typeBuilder = _moduleBuilder.DefineType(newTypeName, attributes);
       typeBuilder.AddInterfaceImplementation(type);
+      foreach (var extraInterface in extraInterfacesToAlwaysInclude)
+      {
+        typeBuilder.AddInterfaceImplementation(extraInterface);
+      }
       T state = ImplementMessage(typeBuilder, type, Properties(type));
       foreach (PropertyInfo property in Properties(type))
       {
@@ -73,6 +77,6 @@ namespace Machine.Mta.InterfacesAsMessages
 
   public interface IMessageInterfaceImplementationFactory
   {
-    IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types);
+    IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types, params Type[] extraInterfacesToAlwaysInclude);
   }
 }

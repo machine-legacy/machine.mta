@@ -1,5 +1,5 @@
 using System;
-
+using Machine.Mta.InterfacesAsMessages;
 using NServiceBus.MessageInterfaces;
 
 namespace Machine.Mta.Serializing.Xml
@@ -8,30 +8,30 @@ namespace Machine.Mta.Serializing.Xml
   {
     readonly IMessageRegisterer _registerer;
     readonly IMessageInterfaceImplementationsLookup _lookup;
-    readonly IMessageFactory _factory;
+    readonly OpaqueMessageFactory _opaqueMessageFactory;
 
-    public MtaMessageMapper(IMessageInterfaceImplementationsLookup lookup, IMessageFactory factory, IMessageRegisterer registerer)
+    public MtaMessageMapper(IMessageInterfaceImplementationsLookup lookup, IMessageRegisterer registerer, MessageDefinitionFactory messageDefiniionFactory, MessageInterfaceImplementations messageInterfaceImplementations)
     {
       _lookup = lookup;
       _registerer = registerer;
-      _factory = factory;
+      _opaqueMessageFactory = new OpaqueMessageFactory(messageInterfaceImplementations, messageDefiniionFactory);
     }
 
     public T CreateInstance<T>() where T : NServiceBus.IMessage
     {
-      return (T)_factory.Create(typeof(T));
+      return (T)_opaqueMessageFactory.Create(typeof(T));
     }
 
     public T CreateInstance<T>(Action<T> action) where T : NServiceBus.IMessage
     {
-      T message = (T)_factory.Create(typeof(T));
+      T message = (T)_opaqueMessageFactory.Create(typeof(T));
       action(message);
       return message;
     }
 
     public object CreateInstance(Type messageType)
     {
-      return _factory.Create(messageType);
+      return _opaqueMessageFactory.Create(messageType);
     }
 
     public void Initialize(params Type[] types)
@@ -62,7 +62,15 @@ namespace Machine.Mta.Serializing.Xml
         if (type.FullName == typeName)
           return type;
       }
-      return Type.GetType(typeName);
+      foreach (var permutation in new[] { typeName, typeName + ", NServiceBus.Core" })
+      {
+        var found = Type.GetType(permutation);
+        if (found != null)
+        {
+          return found;
+        }
+      }
+      return null;
     }
   }
 }

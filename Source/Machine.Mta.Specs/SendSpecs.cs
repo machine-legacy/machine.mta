@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using log4net.Appender;
 using Machine.Container;
 using Machine.Container.Plugins.Disposition;
+using Machine.Mta.InterfacesAsMessages;
 using NServiceBus;
 
 namespace Machine.Mta.Specs
@@ -24,27 +25,31 @@ namespace Machine.Mta.Specs
       container.Register.Type<MessageDestinations>();
       container.Register.Type<MessageRegisterer>();
       container.Register.Type<NsbMessageBusFactory>();
-      container.Register.Type<NsbMessageFactory>();
+      // container.Register.Type<NsbMessageFactory>();
+      container.Register.Type<MessageFactory>();
       container.Register.Type<HelloHandler>();
       container.Register.Type<MessageBusProxy>();
       container.Register.Type<NsbMessageBusManager>();
+      container.Register.Type<MessageInterfaceImplementations>();
+      container.Register.Type<DefaultMessageInterfaceImplementationFactory>();
+      container.Register.Type<MessageDefinitionFactory>();
       container.Start();
       var routing = container.Resolve.Object<IMessageRouting>();
-      routing.AssignOwner<IHelloMessage>(EndpointAddress.FromString("amqp://192.168.0.173//www/test1"));
+      routing.AssignOwner<IHelloMessage>(EndpointAddress.FromString("amqp://192.168.0.173//el.www/test1"));
       var registerer = container.Resolve.Object<IMessageRegisterer>();
       registerer.AddMessageTypes(new[] { typeof(IHelloMessage) });
       var messageFactory = container.Resolve.Object<IMessageFactory>();
       var factory = container.Resolve.Object<NsbMessageBusFactory>();
       var bus = factory.Create(new BusProperties() {
-        ListenAddress = EndpointAddress.FromString("amqp://192.168.0.173//www/test1"),
-        PoisonAddress = EndpointAddress.FromString("amqp://192.168.0.173//www/test1p"),
+        ListenAddress = EndpointAddress.FromString("amqp://192.168.0.173//el.www/el.www.test1"),
+        PoisonAddress = EndpointAddress.FromString("amqp://192.168.0.173//el.www/el.www.test1.poison"),
         TransportType = TransportType.RabbitMq
       });
       bus.Start();
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(1));
-      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Andy"; m.Age = 1; }));
-      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = ""; m.Age = 0; }));
-      bus.Bus.Send("amqp://192.168.0.173//www/test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Jacob"; m.Age = 0; }));
+      bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Andy"; m.Age = 1; }));
+      bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = ""; m.Age = 0; }));
+      bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Jacob"; m.Age = 0; }));
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(6));
       container.Dispose();
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));
