@@ -97,6 +97,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
             properties.Timestamp = DateTime.UtcNow.ToAmqpTimestamp();
             properties.ReplyTo = this.ListenAddress;
             properties.SetPersistent(transportMessage.Recoverable);
+            properties.Headers = transportMessage.Headers.ToDictionary(k => k.Key, v => v.Value);
             channel.BasicPublish(address.Exchange, address.RoutingKey, properties, stream.ToArray());
             transportMessage.Id = properties.MessageId;
             _log.Info("Sent message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
@@ -254,6 +255,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       }
       catch (Exception error)
       {
+        _log.Error(error);
         IncrementFailuresForMessage(_messageContext.MessageId);
         OnFailedMessageProcessing(error);
       }
@@ -319,7 +321,10 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       m.IdForCorrelation = delivery.BasicProperties.MessageId;
       m.ReturnAddress = delivery.BasicProperties.ReplyTo;
       m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
-      m.Headers = new List<HeaderInfo>();
+      m.Headers = delivery.BasicProperties.Headers.Keys.Cast<string>().Select(key => new HeaderInfo() {
+        Key = key,
+        Value = System.Text.Encoding.Default.GetString((byte[])delivery.BasicProperties.Headers[key])
+      }).ToList();
       m.Recoverable = delivery.BasicProperties.DeliveryMode == 2;
       var receivingError = OnTransportMessageReceived(m);
       var finishedProcessingError = OnFinishedMessageProcessing();

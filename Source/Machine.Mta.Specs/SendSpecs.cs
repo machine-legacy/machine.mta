@@ -5,7 +5,6 @@ using log4net.Appender;
 using Machine.Container;
 using Machine.Container.Plugins.Disposition;
 using NServiceBus;
-using NServiceBus.Unicast.Transport.RabbitMQ;
 
 namespace Machine.Mta.Specs
 {
