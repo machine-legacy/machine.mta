@@ -72,6 +72,7 @@
     <Compile Include="NsbBus.cs" />
     <Compile Include="NsbMessageBusManager.cs" />
     <Compile Include="NsbMessageFactory.cs" />
+    <Compile Include="NsbMessageHelpers.cs" />
     <Compile Include="NServiceBusMessageBus.cs" />
     <Compile Include="NsbMessageBusFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -81,7 +82,6 @@
     <Compile Include="Serializing\Xml\XmlTransportMessageBodyFormatter.cs" />
     <Compile Include="StaticSubscriptionStorage.cs" />
     <Compile Include="TypesScanner.cs" />
-    <Compile Include="UnicastBusProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">

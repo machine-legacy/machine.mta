@@ -68,18 +68,6 @@ namespace Machine.Mta
       CurrentBus().Publish(messages);
     }
 
-    /*
-    public EndpointAddress PoisonAddress
-    {
-      get { return CurrentBus().PoisonAddress; }
-    }
-
-    public EndpointAddress Address
-    {
-      get { return CurrentBus().Address; }
-    }
-    */
-
     private IMessageBus CurrentBus()
     {
       return CurrentMessageBus.Current ?? _messageBusManager.DefaultBus;

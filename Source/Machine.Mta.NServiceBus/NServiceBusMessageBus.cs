@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-
 using NServiceBus;
 
 namespace Machine.Mta
@@ -56,10 +54,6 @@ namespace Machine.Mta
       CurrentBus().SendLocal(messages.ToNsbMessages());
     }
 
-    public void Stop()
-    {
-    }
-
     public IRequestReplyBuilder Request<T>(params T[] messages) where T : IMessage
     {
       return new NServiceBusRequestReplyBuilder<T>(_routing, CurrentBus(), null, messages.ToNsbMessages());
@@ -74,23 +68,9 @@ namespace Machine.Mta
     {
       CurrentBus().Publish(messages.ToNsbMessages());
     }
-  }
 
-  public static class NsbMessageHelpers
-  {
-    public static NServiceBus.IMessage[] ToNsbMessages<T>(this T[] messages) where T : IMessage
+    public void Stop()
     {
-      return messages.Cast<NServiceBus.IMessage>().ToArray();
-    }
-
-    public static string ToNsbAddress(this EndpointAddress address)
-    {
-      return address.ToNameAndHost().ToNsbAddress();
-    }
-
-    static string ToNsbAddress(this NameAndHostAddress address)
-    {
-      return address.Name + "@" + address.Host;
     }
   }
 

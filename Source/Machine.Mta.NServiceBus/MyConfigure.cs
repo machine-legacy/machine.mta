@@ -10,7 +10,6 @@ using NServiceBus.Unicast;
 using NServiceBus.Unicast.Config;
 using NServiceBus.Unicast.Subscriptions.Msmq;
 using NServiceBus.Unicast.Transport.Msmq;
-using NServiceBus.Unicast.Transport.RabbitMQ;
 
 namespace Machine.Mta
 {

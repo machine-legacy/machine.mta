@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using Machine.Utility.ThreadPool;
-
 namespace Machine.Mta
 {
   public class NsbMessageBusManager : IMessageBusManager

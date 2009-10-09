@@ -17,44 +17,6 @@ namespace Machine.Mta
       _routing = routing;
       _mapper = mapper;
     }
-
-    /*
-    public void HandleSubscriptionMessage(NServiceBus.Unicast.Transport.TransportMessage msg)
-    {
-      NServiceBus.IMessage[] messages = msg.Body;
-      if ((messages != null) && (messages.Length == 1))
-      {
-        SubscriptionMessage subMessage = messages[0] as SubscriptionMessage;
-        if (subMessage != null)
-        {
-          if (subMessage.SubscriptionType == SubscriptionType.Add)
-          {
-            _log.Info("Add: " + subMessage.TypeName + " " + msg.ReturnAddress);
-          }
-          if (subMessage.SubscriptionType == SubscriptionType.Remove)
-          {
-            _log.Info("Remove: " + subMessage.TypeName + " " + msg.ReturnAddress);
-          }
-        }
-      }
-    }
-
-    public IList<string> GetSubscribersForMessage(Type messageType)
-    {
-      var found = new List<string>();
-      foreach (var destiny in _routing.Subscribers(messageType))
-      {
-        found.Add(destiny.ToNsbAddress());
-      }
-      return found;
-    }
-
-    public void Init(IList<Type> messageTypes)
-    {
-      _log.Info("Initialize: " + String.Join(", ", messageTypes.Select(type => type.Name).ToArray()));
-    }
-    */
-
     public void Subscribe(string client, IList<string> messageTypes)
     {
       _log.Info("Add: " + client + " " + String.Join(", ", messageTypes.ToArray()));
