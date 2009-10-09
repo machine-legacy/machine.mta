@@ -56,7 +56,7 @@ namespace Machine.Mta.Specs
     }
   }
 
-  public interface IHelloMessage : IMessage
+  public interface IHelloMessage : IMessage, NServiceBus.IMessage
   {
     string Name { get; set; }
     Int32 Age { get; set; }

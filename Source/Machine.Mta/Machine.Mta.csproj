@@ -51,14 +51,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Newtonsoft\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceBus, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\NServiceBus\NServiceBus.dll</HintPath>
-    </Reference>
-    <Reference Include="NServiceBus.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\NServiceBus\NServiceBus.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
@@ -101,6 +93,7 @@
     <Compile Include="Helpers\MessageSetupHelpers.cs" />
     <Compile Include="Dispatching\IMessageDispatcher.cs" />
     <Compile Include="Dispatching\BusWorker.cs" />
+    <Compile Include="InspectBusTypes.cs" />
     <Compile Include="ITransactionManager.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="MessageFailureManager.cs" />

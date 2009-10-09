@@ -1,20 +1,19 @@
 using System;
 using System.Reflection;
 
-using NServiceBus;
-
 using Machine.Container;
 using Machine.Container.Plugins;
-using Machine.Mta.Sagas;
 
 namespace Machine.Mta.Helpers
 {
   public class MessageHandlerServices : IServiceCollection
   {
+    readonly IInspectBusTypes _inspectBusTypes;
     readonly Assembly[] _assemblies;
 
-    public MessageHandlerServices(params Assembly[] assemblies)
+    public MessageHandlerServices(IInspectBusTypes inspectBusTypes, params Assembly[] assemblies)
     {
+      _inspectBusTypes = inspectBusTypes;
       _assemblies = assemblies;
     }
 
@@ -24,9 +23,9 @@ namespace Machine.Mta.Helpers
       {
         foreach (Type type in assembly.GetTypes())
         {
-          if (IsHandlerOrConsumer(type))
+          if (_inspectBusTypes.IsConsumer(type))
           {
-            if (IsSagaHandler(type))
+            if (_inspectBusTypes.IsSagaConsumer(type))
             {
               register.Type(type).AsTransient();
             }
@@ -37,16 +36,6 @@ namespace Machine.Mta.Helpers
           }
         }
       }
-    }
-
-    static bool IsHandlerOrConsumer(Type type)
-    {
-      return type.IsImplementationOfGenericType(typeof(IConsume<>)) || type.IsImplementationOfGenericType(typeof(IMessageHandler<>));
-    }
-
-    static bool IsSagaHandler(Type type)
-    {
-      return typeof(ISagaHandler).IsAssignableFrom(type) || typeof(NServiceBus.Saga.ISaga).IsAssignableFrom(type);
     }
   }
 }

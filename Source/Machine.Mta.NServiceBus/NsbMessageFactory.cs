@@ -23,7 +23,7 @@ namespace Machine.Mta
 
     public T Create<T>() where T : IMessage
     {
-      return _messageBusFactory.CurrentBus().Bus.CreateInstance<T>();
+      return (T)_messageBusFactory.CurrentBus().Bus.CreateInstance(typeof(T));
     }
 
     public T Create<T>(object value) where T : IMessage

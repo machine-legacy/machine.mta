@@ -28,7 +28,7 @@ namespace Machine.Mta
 
     public IMessageBus AddMessageBus(BusProperties properties)
     {
-      var bus = _messageBusFactory.CreateMessageBus(properties.ListenAddress, properties.PoisonAddress, new AllHandlersInContainer(_container), new ThreadPoolConfiguration(
+      var bus = _messageBusFactory.CreateMessageBus(properties.ListenAddress, properties.PoisonAddress, new AllHandlersInContainer(InspectBusTypes.Instance, _container), new ThreadPoolConfiguration(
         properties.NumberOfWorkerThreads,
         properties.NumberOfWorkerThreads
       ));

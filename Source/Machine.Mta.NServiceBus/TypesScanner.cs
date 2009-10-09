@@ -78,7 +78,7 @@ namespace Machine.Mta
 
     static IEnumerable<MessageHandlerType> AllMessageHandlerTypes(IMachineContainer container)
     {
-      foreach (var handlerType in new AllHandlersInContainer(container).HandlerTypes())
+      foreach (var handlerType in new AllHandlersInContainer(NsbInspectBusTypes.Instance, container).HandlerTypes())
       {
         var messageHandlers = handlerType.AllGenericVariations(typeof(IMessageHandler<>));
         foreach (var type in messageHandlers)
@@ -90,7 +90,7 @@ namespace Machine.Mta
 
     static IEnumerable<MessageHandlerType> AllConsumerTypes(IMachineContainer container)
     {
-      foreach (var handlerType in new AllHandlersInContainer(container).HandlerTypes())
+      foreach (var handlerType in new AllHandlersInContainer(NsbInspectBusTypes.Instance, container).HandlerTypes())
       {
         var consumers = handlerType.AllGenericVariations(typeof(IConsume<>));
         foreach (var type in consumers)

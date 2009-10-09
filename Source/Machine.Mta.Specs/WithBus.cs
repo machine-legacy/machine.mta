@@ -158,7 +158,7 @@ namespace Machine.Mta.Specs
       registerer.AddMessageTypes(typeof(IMessage), typeof(ISampleMessage), typeof(ISampleSagaMessage));
       MessageInterfaceImplementations messageInterfaceImplementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory(), registerer);
       TransportMessageBodySerializer transportMessageBodySerializer = new TransportMessageBodySerializer(new MessageInterfaceTransportFormatter(messageInterfaceImplementations));
-      dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container), new AllHandlersInContainer(container));
+      dispatcher = new MessageDispatcher(container, new DefaultMessageAspectsProvider(container), new AllHandlersInContainer(InspectBusTypes.Instance, container));
       messageFactory = new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
       bus = new MessageBus(endpointResolver, messageDestinations, transportMessageBodySerializer, dispatcher, listeningOnAddress, poisonAddress, new TransactionManager(), new MessageFailureManager(new FailureConfiguration(1)), ThreadPoolConfiguration.OneAndOne);
       message1 = messageFactory.Create<IMessage>();

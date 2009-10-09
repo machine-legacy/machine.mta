@@ -26,7 +26,7 @@ namespace Machine.Mta.Serializing.Xml
 
     public void Serialize(IMessage[] messages, Stream stream)
     {
-      _serializer.Serialize(messages, stream);
+      _serializer.Serialize(messages.Cast<NServiceBus.IMessage>().ToArray(), stream);
     }
 
     public IMessage[] Deserialize(Stream stream)

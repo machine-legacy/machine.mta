@@ -70,6 +70,7 @@
     <Compile Include="MtaNsbServices.cs" />
     <Compile Include="MyConfigure.cs" />
     <Compile Include="NsbBus.cs" />
+    <Compile Include="NsbInspectBusTypes.cs" />
     <Compile Include="NsbMessageBusManager.cs" />
     <Compile Include="NsbMessageFactory.cs" />
     <Compile Include="NsbMessageHelpers.cs" />

@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 using Machine.Container;
 
-using NServiceBus;
-
 namespace Machine.Mta.Dispatching
 {
   public class AllHandlersInContainer : IProvideHandlerTypes
   {
+    readonly IInspectBusTypes _inspectBusTypes;
     readonly IMachineContainer _container;
 
-    public AllHandlersInContainer(IMachineContainer container)
+    public AllHandlersInContainer(IInspectBusTypes inspectBusTypes, IMachineContainer container)
     {
+      _inspectBusTypes = inspectBusTypes;
       _container = container;
     }
 
@@ -21,7 +21,7 @@ namespace Machine.Mta.Dispatching
       foreach (var registration in _container.RegisteredServices)
       {
         var type = registration.ServiceType;
-        if (type.IsImplementationOfGenericType(typeof(IConsume<>)) || type.IsImplementationOfGenericType(typeof(IMessageHandler<>)))
+        if (_inspectBusTypes.IsConsumer(type))
         {
           yield return registration.ServiceType;
         }
