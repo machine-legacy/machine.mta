@@ -321,10 +321,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       m.IdForCorrelation = delivery.BasicProperties.MessageId;
       m.ReturnAddress = delivery.BasicProperties.ReplyTo;
       m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
-      m.Headers = delivery.BasicProperties.Headers.Keys.Cast<string>().Select(key => new HeaderInfo() {
-        Key = key,
-        Value = System.Text.Encoding.Default.GetString((byte[])delivery.BasicProperties.Headers[key])
-      }).ToList();
+      m.Headers = new List<HeaderInfo>();
       m.Recoverable = delivery.BasicProperties.DeliveryMode == 2;
       var receivingError = OnTransportMessageReceived(m);
       var finishedProcessingError = OnFinishedMessageProcessing();
