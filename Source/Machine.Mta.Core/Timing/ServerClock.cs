@@ -12,6 +12,11 @@ namespace Machine.Mta.Timing
       _nowFunc = nowFunc;
     }
 
+    public static void ResetNowFuncToUtc()
+    {
+      _nowFunc = () => DateTime.UtcNow;
+    }
+
     public static void ResetNowFunc()
     {
       _nowFunc = null;
