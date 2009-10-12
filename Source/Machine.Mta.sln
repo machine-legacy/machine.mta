@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Unicast.Transpo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machine.Mta.MessageInterfaces", "Machine.Mta.MessageInterfaces\Machine.Mta.MessageInterfaces.csproj", "{06D7BAAD-7C1F-4782-B144-14BE178EE62A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machine.Mta.Testing", "Machine.Mta.Testing\Machine.Mta.Testing.csproj", "{7EACD57C-D9F6-4438-8530-7725B9981D06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{06D7BAAD-7C1F-4782-B144-14BE178EE62A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06D7BAAD-7C1F-4782-B144-14BE178EE62A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06D7BAAD-7C1F-4782-B144-14BE178EE62A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EACD57C-D9F6-4438-8530-7725B9981D06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EACD57C-D9F6-4438-8530-7725B9981D06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EACD57C-D9F6-4438-8530-7725B9981D06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EACD57C-D9F6-4438-8530-7725B9981D06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
