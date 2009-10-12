@@ -182,7 +182,7 @@ namespace Machine.Mta.MessageInterfaces
     {
       MethodInfo dictionaryGetMethod = typeof(IDictionary<string, object>).GetMethod("get_Item");
       ConstructorBuilder ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] { typeof(IDictionary<string, object>) });
-      ctorBuilder.DefineParameter(0, ParameterAttributes.None, "dictionary");
+      ctorBuilder.DefineParameter(1, ParameterAttributes.None, "dictionary");
       ILGenerator il = ctorBuilder.GetILGenerator();
       foreach (KeyValuePair<string, FieldBuilder> property in generatedMessage.Fields)
       {
