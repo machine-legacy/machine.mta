@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Transactions;
 using log4net.Appender;
 using Machine.Container;
 using Machine.Container.Plugins.Disposition;
@@ -16,7 +17,7 @@ namespace Machine.Mta.Specs
       var loggingConfiguration = new NameValueCollection();
       loggingConfiguration["configType"] = "EXTERNAL";
       Common.Logging.LogManager.Adapter = new Common.Logging.Log4Net.Log4NetLoggerFactoryAdapter(loggingConfiguration);
-      log4net.Config.BasicConfigurator.Configure(new OutputDebugStringAppender() { Layout = new log4net.Layout.PatternLayout("SPECIAL %-5p (%30.30c) %m%n") });
+      log4net.Config.BasicConfigurator.Configure(new OutputDebugStringAppender() { Layout = new log4net.Layout.PatternLayout("SPECIAL %-5p [%-20thread] (%30.30c) %m%n") });
 
       var container = new MachineContainer();
       container.Initialize();
@@ -48,9 +49,13 @@ namespace Machine.Mta.Specs
       });
       bus.Start();
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(1));
-      bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Andy"; m.Age = 1; }));
-      bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = ""; m.Age = 0; }));
-      bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Jacob"; m.Age = 0; }));
+      using (var scope = new TransactionScope())
+      {
+        bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Andy"; m.Age = 1; }));
+        bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = ""; m.Age = 0; }));
+        bus.Bus.Send("amqp://192.168.0.173//el.www/el.www.test1", messageFactory.Create<IHelloMessage>(m => { m.Name = "Jacob"; m.Age = 0; }));
+        scope.Complete();
+      }
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(6));
       container.Dispose();
       System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));

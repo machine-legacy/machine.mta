@@ -7,23 +7,37 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 {
   public class RabbitMqEnlistment : IEnlistmentNotification
   {
+    readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(RabbitMqEnlistment));
+    readonly OpenedSession _openedSession;
+
+    public RabbitMqEnlistment(OpenedSession openedSession)
+    {
+      _openedSession = openedSession;
+    }
+
     public void Prepare(PreparingEnlistment preparingEnlistment)
     {
+      _log.Info("Prepared");
       preparingEnlistment.Prepared();
     }
 
     public void Commit(Enlistment enlistment)
     {
+      _log.Info("Commit");
+      _openedSession.Dispose();
       enlistment.Done();
     }
 
     public void Rollback(Enlistment enlistment)
     {
+      _log.Info("Rollback");
+      _openedSession.Dispose();
       enlistment.Done();
     }
 
     public void InDoubt(Enlistment enlistment)
     {
+      _log.Info("Doubt");
     }
   }
 
@@ -63,6 +77,11 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         _log.Debug("Closing " + brokerAddress);
         _state.Remove(brokerAddress);
       };
+      if (Transaction.Current != null)
+      {
+        Transaction.Current.EnlistVolatile(new RabbitMqEnlistment(opened), EnlistmentOptions.None);
+        opened.AddRef();
+      }
       return opened.AddRef();
     }
 
