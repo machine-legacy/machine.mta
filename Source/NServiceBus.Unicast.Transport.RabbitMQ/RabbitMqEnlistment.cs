@@ -17,27 +17,27 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public void Prepare(PreparingEnlistment preparingEnlistment)
     {
-      _log.Info("Prepared");
+      _log.Debug("Prepared");
       preparingEnlistment.Prepared();
     }
 
     public void Commit(Enlistment enlistment)
     {
-      _log.Info("Commit");
+      _log.Debug("Commit");
       _openedSession.Dispose();
       enlistment.Done();
     }
 
     public void Rollback(Enlistment enlistment)
     {
-      _log.Info("Rollback");
+      _log.Debug("Rollback");
       _openedSession.Dispose();
       enlistment.Done();
     }
 
     public void InDoubt(Enlistment enlistment)
     {
-      _log.Info("Doubt");
+      _log.Debug("Doubt");
     }
   }
 
