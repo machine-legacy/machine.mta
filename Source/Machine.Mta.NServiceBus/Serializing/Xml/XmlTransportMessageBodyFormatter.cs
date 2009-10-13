@@ -7,13 +7,11 @@ namespace Machine.Mta.Serializing.Xml
 {
   public class XmlTransportMessageBodyFormatter : ITransportMessageBodyFormatter
   {
-    readonly IMessageRegisterer _registerer;
     readonly XmlMessageSerializer _serializer;
     readonly MtaMessageMapper _messageMapper;
 
-    public XmlTransportMessageBodyFormatter(IMessageRegisterer registerer, MtaMessageMapper messageMapper)
+    public XmlTransportMessageBodyFormatter(MtaMessageMapper messageMapper)
     {
-      _registerer = registerer;
       _messageMapper = messageMapper;
       _serializer = new XmlMessageSerializer();
     }
@@ -21,7 +19,6 @@ namespace Machine.Mta.Serializing.Xml
     public void Initialize()
     {
       _serializer.MessageMapper = _messageMapper;
-      _serializer.Initialize(_registerer.MessageTypes.ToArray());
     }
 
     public void Serialize(IMessage[] messages, Stream stream)

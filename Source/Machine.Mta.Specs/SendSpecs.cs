@@ -7,6 +7,7 @@ using Machine.Container;
 using Machine.Container.Plugins.Disposition;
 using Machine.Mta.MessageInterfaces;
 using NServiceBus;
+using NServiceBus.Unicast.Transport;
 
 namespace Machine.Mta.Specs
 {
@@ -39,7 +40,7 @@ namespace Machine.Mta.Specs
       var routing = container.Resolve.Object<IMessageRouting>();
       routing.AssignOwner<IHelloMessage>(EndpointAddress.FromString("amqp://192.168.0.173//el.www/test1"));
       var registerer = container.Resolve.Object<IMessageRegisterer>();
-      registerer.AddMessageTypes(new[] { typeof(IHelloMessage) });
+      registerer.AddMessageTypes(new[] { typeof(IHelloMessage), typeof(CompletionMessage) });
       var messageFactory = container.Resolve.Object<IMessageFactory>();
       var factory = container.Resolve.Object<NsbMessageBusFactory>();
       var bus = factory.Create(new BusProperties() {

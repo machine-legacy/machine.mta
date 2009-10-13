@@ -9,7 +9,7 @@ using System.Text;
 using System.Xml;
 
 using Common.Logging;
-
+using NServiceBus.Encryption;
 using NServiceBus.MessageInterfaces;
 using NServiceBus.Serialization;
 
@@ -39,16 +39,27 @@ namespace Machine.Mta.Serializing.Xml
       set { _additionalTypes = value; }
     }
 
-    public void Initialize(params Type[] types)
+    private List<Type> _messageTypes;
+
+    public List<Type> MessageTypes
     {
-      if (_additionalTypes == null)
-        _additionalTypes = new List<Type>();
-
-      _additionalTypes.AddRange(types);
-      this.MessageMapper.Initialize(_additionalTypes.ToArray());
-
-      foreach (Type type in _additionalTypes)
-        InitType(type);
+      get { return _messageTypes; }
+      set
+      {
+        _messageTypes = value;
+        if (!_messageTypes.Contains(typeof(EncryptedValue)))
+        {
+          _messageTypes.Add(typeof(EncryptedValue));
+        }
+        if (this.MessageMapper != null)
+        {
+          this.MessageMapper.Initialize(_messageTypes.ToArray());
+        }
+        foreach (Type t in _messageTypes)
+        {
+          this.InitType(t);
+        }
+      }
     }
 
     public void InitType(Type type)
@@ -456,6 +467,11 @@ namespace Machine.Mta.Serializing.Xml
     {
       if (obj == null)
         return;
+
+      if (!_typeToProperties.ContainsKey(t))
+      {
+        throw new InvalidOperationException("No registered message type: " + t);
+      }
 
       foreach (var prop in _typeToProperties[t])
       {

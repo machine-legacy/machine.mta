@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Machine.Mta.MessageInterfaces;
 using NServiceBus.MessageInterfaces;
 
@@ -34,7 +35,7 @@ namespace Machine.Mta.Serializing.Xml
       return _opaqueMessageFactory.Create(messageType);
     }
 
-    public void Initialize(params Type[] types)
+    public void Initialize(IEnumerable<Type> types)
     {
     }
 

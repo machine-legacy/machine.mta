@@ -118,10 +118,12 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       }
     }
 
+    /*
     public IList<Type> MessageTypesToBeReceived
     {
       set { this.MessageSerializer.Initialize(GetExtraTypes(value)); }
     }
+    */
 
     public Int32 NumberOfWorkerThreads
     {

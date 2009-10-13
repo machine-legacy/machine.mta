@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using NServiceBus.MessageInterfaces;
@@ -9,12 +10,12 @@ namespace Machine.Mta.Serializing.Xml
 {
   public class MessageMapper : IMessageMapper
   {
-    public void Initialize(params Type[] types)
+    public void Initialize(IEnumerable<Type> types)
     {
-      if (types == null || types.Length == 0)
+      if (types == null || !types.Any())
         return;
 
-      string name = types[0].Namespace + SUFFIX;
+      string name = types.First().Namespace + SUFFIX;
 
       AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
           new AssemblyName(name),
