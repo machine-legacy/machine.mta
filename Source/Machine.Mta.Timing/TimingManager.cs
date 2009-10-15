@@ -13,7 +13,7 @@ namespace Machine.Mta.Timing
     readonly static TimeSpan OnceSecond = TimeSpan.FromSeconds(1.0);
     readonly List<IOnceASecondTask> _tasks = new List<IOnceASecondTask>();
     readonly Thread _thread;
-    bool _running = true;
+    bool _running;
 
     public TimingManager()
     {
@@ -22,6 +22,7 @@ namespace Machine.Mta.Timing
 
     public void Start()
     {
+      _running = true;
       _thread.Start();
     }
 
@@ -37,7 +38,10 @@ namespace Machine.Mta.Timing
     public void Dispose()
     {
       _running = false;
-      _thread.Join();
+      if (_thread.IsAlive)
+      {
+        _thread.Join();
+      }
     }
 
     private void ThreadMain()
