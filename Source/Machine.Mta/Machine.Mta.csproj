@@ -72,7 +72,6 @@
     <Compile Include="AdoNet\IAdoNetConnectionString.cs" />
     <Compile Include="AdoNet\IGroupNameProvider.cs" />
     <Compile Include="Batching.cs" />
-    <Compile Include="Configuration\MessageBusConfigurationSection.cs" />
     <Compile Include="Dispatching\DefaultMessageAspectsProvider.cs" />
     <Compile Include="Dispatching\EndpointHandlerRules.cs" />
     <Compile Include="Dispatching\HandlerDiscoverer.cs" />
@@ -93,8 +92,6 @@
     <Compile Include="Errors\IErrorMessage.cs" />
     <Compile Include="Endpoints\IEndpoint.cs" />
     <Compile Include="Endpoints\EndpointResolver.cs" />
-    <Compile Include="Helpers\MessageHandlerServices.cs" />
-    <Compile Include="Helpers\MessageSetupHelpers.cs" />
     <Compile Include="Dispatching\IMessageDispatcher.cs" />
     <Compile Include="Dispatching\BusWorker.cs" />
     <Compile Include="InspectBusTypes.cs" />

@@ -52,6 +52,7 @@
       <HintPath>..\..\Libraries\NServiceBus\NServiceBus.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -59,12 +60,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\MessageBusConfigurationSection.cs" />
     <Compile Include="CurrentMessageBus.cs" />
     <Compile Include="CurrentMessageContext.cs" />
     <Compile Include="Dispatching\AllHandlersInContainer.cs" />
     <Compile Include="Dispatching\IProvideHandlerTypes.cs" />
     <Compile Include="Dispatching\MessageHandlerType.cs" />
     <Compile Include="EndpointAddress.cs" />
+    <Compile Include="Helpers\MessageHandlerServices.cs" />
+    <Compile Include="Helpers\MessageSetupHelpers.cs" />
     <Compile Include="IConsume.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IMessageBus.cs" />
