@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
-using log4net.Appender;
+
 using Machine.Container;
-using Machine.Container.Plugins.Disposition;
 using Machine.Core;
 using Machine.Mta.Config;
 
 using NServiceBus;
 using NServiceBus.Grid.MessageHandlers;
 using NServiceBus.Sagas.Impl;
-using NServiceBus.Unicast.Transport.RabbitMQ;
 using NServiceBus.Unicast.Transport.RabbitMQ.Config;
 using Configure = NServiceBus.Configure;
 

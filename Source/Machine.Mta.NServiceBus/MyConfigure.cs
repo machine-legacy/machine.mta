@@ -117,7 +117,7 @@ namespace Machine.Mta
       }
       foreach (var entry in _messageOwners)
       {
-        _log.Info("Configured: " + entry.Key + " to " + entry.Value);
+        _log.Debug("Configured: " + entry.Key + " to " + entry.Value);
       }
       _config.ConfigureProperty(b => b.MessageOwners, _messageOwners);
 
