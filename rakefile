@@ -43,6 +43,7 @@ end
 
 namespace :specs do
   task :view => :run do
+    mkdir "Specs"
     system "start Specs/#{project}.Specs.html"
   end
 
