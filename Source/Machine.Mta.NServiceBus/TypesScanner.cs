@@ -14,25 +14,6 @@ namespace Machine.Mta
 {
   public static class TypesScanner
   {
-    public static IEnumerable<Type> MessagesFrom(params Assembly[] messageAssemblies)
-    {
-      return PossiblyDuplicateMessagesFrom(messageAssemblies).Distinct();
-    }
-
-    static IEnumerable<Type> PossiblyDuplicateMessagesFrom(params Assembly[] messageAssemblies)
-    {
-      foreach (var assembly in messageAssemblies)
-      {
-        foreach (var type in assembly.GetTypes())
-        {
-          if (typeof(IMessage).IsAssignableFrom(type))
-          {
-            yield return type;
-          }
-        }
-      }
-    }
-
     public static IEnumerable<Type> Sagas(this IMachineContainer container)
     {
       foreach (ServiceRegistration registration in container.RegisteredServices)
@@ -55,7 +36,7 @@ namespace Machine.Mta
       }
     }
 
-    private static bool IsAllowableImplementationOf(Type type, Type source)
+    static bool IsAllowableImplementationOf(Type type, Type source)
     {
       return (((source.IsAssignableFrom(type) && (type != source)) && (!type.IsAbstract && !type.IsInterface)) && !type.IsGenericType);
     }

@@ -10,7 +10,8 @@ namespace Machine.Mta
 
     public bool IsConsumer(Type type)
     {
-      return type.IsImplementationOfGenericType(typeof(IConsume<>)) || type.IsImplementationOfGenericType(typeof(IMessageHandler<>));
+      return type.IsImplementationOfGenericType(typeof(IConsume<>)) ||
+             type.IsImplementationOfGenericType(typeof(IMessageHandler<>));
     }
 
     public bool IsSagaConsumer(Type type)
