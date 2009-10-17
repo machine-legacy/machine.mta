@@ -77,7 +77,7 @@
     <Compile Include="IMessageInterfaceImplementationsLookup.cs" />
     <Compile Include="IMessageRegisterer.cs" />
     <Compile Include="IInspectBusTypes.cs" />
-    <Compile Include="ITransportMessageBodyFormatter.cs" />
+    <Compile Include="ITransportMessageSerializer.cs" />
     <Compile Include="MessageBusProxy.cs" />
     <Compile Include="MessageDestinations.cs" />
     <Compile Include="MessagePayload.cs" />
@@ -86,8 +86,7 @@
     <Compile Include="Serializers.cs" />
     <Compile Include="Timing\IOnceASecondTask.cs" />
     <Compile Include="Timing\ServerClock.cs" />
-    <Compile Include="TransportMessage.cs" />
-    <Compile Include="TransportMessageBodySerializer.cs" />
+    <Compile Include="MessagePayloadSerializer.cs" />
     <Compile Include="TypeHelpers.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

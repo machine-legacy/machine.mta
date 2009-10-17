@@ -15,29 +15,13 @@ namespace Machine.Mta
     { 
       _binaryFormatter = new BinaryFormatter();
       _binaryFormatter.AssemblyFormat = FormatterAssemblyStyle.Simple;
-      _binaryFormatter.Binder = new SerializationBinders(new TransportMessageBinder(), new GeneratedMessageTypeBinder());
+      _binaryFormatter.Binder = new SerializationBinders(new GeneratedMessageTypeBinder());
     }
 
     public static BinaryFormatter Binary
     {
       get { return _binaryFormatter; }
       set { _binaryFormatter = value; }
-    }
-  }
-
-  public class TransportMessageBinder : SerializationBinder
-  {
-    public override Type BindToType(string assemblyName, string typeName)
-    {
-      if (typeName == typeof(TransportMessage).FullName)
-      {
-        return typeof(TransportMessage);
-      }
-      if (typeName == typeof(EndpointAddress).FullName)
-      {
-        return typeof(EndpointAddress);
-      }
-      return null;
     }
   }
 

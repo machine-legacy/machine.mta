@@ -8,13 +8,13 @@ namespace Machine.Mta.Timing
     readonly IMessageFactory _messageFactory;
     readonly IMessageBus _bus;
     readonly IMessageDestinations _messageDestinations;
-    readonly TransportMessageBodySerializer _transportMessageBodySerializer;
+    readonly MessagePayloadSerializer _messagePayloadSerializer;
 
-    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, IMessageDestinations messageDestinations, TransportMessageBodySerializer transportMessageBodySerializer)
+    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, IMessageDestinations messageDestinations, MessagePayloadSerializer messagePayloadSerializer)
     {
       _messageFactory = messageFactory;
       _messageDestinations = messageDestinations;
-      _transportMessageBodySerializer = transportMessageBodySerializer;
+      _messagePayloadSerializer = messagePayloadSerializer;
       _bus = bus;
     }
 
@@ -34,7 +34,7 @@ namespace Machine.Mta.Timing
       ISchedulePublishMessage message = _messageFactory.Create<ISchedulePublishMessage>();
       message.PublishAddresses = destinations.Select(d => d.ToString()).ToArray();
       message.PublishAt = publishAt;
-      message.MessagePayload = _transportMessageBodySerializer.Serialize(messages).ToByteArray();
+      message.MessagePayload = _messagePayloadSerializer.Serialize(messages).ToByteArray();
       _bus.Send(message);
     }
   }

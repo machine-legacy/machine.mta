@@ -48,11 +48,6 @@ namespace Machine.Mta
       return Open(returnAddress, _current.CorrelationId);
     }
 
-    public static CurrentMessageContext Open(TransportMessage transportMessage)
-    {
-      return Open(transportMessage.ReturnAddress, transportMessage.CorrelationId);
-    }
-
     public static CurrentMessageContext Current
     {
       get { return _current; }

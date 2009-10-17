@@ -80,7 +80,7 @@
     <Compile Include="Serializing\Xml\MessageMapper.cs" />
     <Compile Include="Serializing\Xml\MtaMessageMapper.cs" />
     <Compile Include="Serializing\Xml\XmlMessageSerializer.cs" />
-    <Compile Include="Serializing\Xml\XmlTransportMessageBodyFormatter.cs" />
+    <Compile Include="Serializing\Xml\XmlTransportMessageSerializer.cs" />
     <Compile Include="StaticSubscriptionStorage.cs" />
     <Compile Include="TypesScanner.cs" />
   </ItemGroup>

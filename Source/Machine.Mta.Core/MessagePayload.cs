@@ -32,33 +32,25 @@ namespace Machine.Mta
   public class MessagePayload
   {
     readonly byte[] _data;
-    readonly string _label;
 
     public byte[] ToByteArray()
     {
       return _data;
     }
 
-    public string Label
-    {
-      get { return _label; }
-    }
-
-    public MessagePayload(byte[] data, string label)
+    public MessagePayload(byte[] data)
     {
       _data = data;
-      _label = label;
     }
 
     public string MakeString()
     {
-      return Convert.ToBase64String(ToByteArray()) + "," + this.Label;
+      return Convert.ToBase64String(ToByteArray());
     }
 
     public static MessagePayload FromString(string value)
     {
-      string[] tokens = value.Split(',');
-      return new MessagePayload(Convert.FromBase64String(tokens[0]), tokens[1]);
+      return new MessagePayload(Convert.FromBase64String(value));
     }
   }
 }

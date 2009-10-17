@@ -11,8 +11,12 @@ namespace Machine.Mta.Timing
 
     public void Consume(ISchedulePublishMessage message)
     {
-      ScheduledPublish scheduled = new ScheduledPublish(message.PublishAt, message.MessagePayload, message.PublishAddresses, CurrentSagaContext.CurrentIds(false));
-      _scheduledPublishRepository.Add(scheduled);
+      _scheduledPublishRepository.Add(
+        new ScheduledPublish(message.PublishAt,
+        message.MessagePayload,
+        message.PublishAddresses,
+        CurrentSagaContext.CurrentIds(false))
+      );
     }
   }
 }

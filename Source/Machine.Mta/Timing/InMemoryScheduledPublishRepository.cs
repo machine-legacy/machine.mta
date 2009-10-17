@@ -28,9 +28,9 @@ namespace Machine.Mta.Timing
     {
       lock (_lock)
       {
-        DateTime now = ServerClock.Now;
-        List<ScheduledPublish> expired = new List<ScheduledPublish>();
-        foreach (ScheduledPublish schedule in new List<ScheduledPublish>(_scheduled))
+        var now = ServerClock.Now;
+        var expired = new List<ScheduledPublish>();
+        foreach (var schedule in _scheduled.ToArray())
         {
           if (schedule.PublishAt < now)
           {
