@@ -136,7 +136,7 @@ namespace Machine.Mta.AdoNet
   {
     public static string MakeString(this Guid[] guids)
     {
-      return guids.Select(x => x.ToString()).Join(",");
+      return String.Join(",", guids.Select(x => x.ToString()).ToArray());
     }
 
     public static Guid[] ToGuidArray(this string value)
