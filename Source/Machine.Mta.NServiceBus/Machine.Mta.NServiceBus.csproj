@@ -67,6 +67,7 @@
     <Compile Include="MachineObjectBuilder.cs" />
     <Compile Include="Config\MachineObjectBuilderConfig.cs" />
     <Compile Include="MessageHandlerProxies.cs" />
+    <Compile Include="MtaCompatibilityHeadersSerializer.cs" />
     <Compile Include="MyConfigure.cs" />
     <Compile Include="NsbBus.cs" />
     <Compile Include="NsbInspectBusTypes.cs" />
