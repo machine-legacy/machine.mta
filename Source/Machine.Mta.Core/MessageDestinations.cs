@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 using Machine.Core.Utility;
-using System.Linq;
+using Machine.Mta.Configuration;
 
 namespace Machine.Mta
 {
@@ -140,6 +141,28 @@ namespace Machine.Mta
       {
         return _owners.Keys.Union(_subscriptions.Keys).ToArray();
       }
+    }
+  }
+
+  public class MessageRoutingWithConfiguration : IMessageRoutingWithConfiguration
+  {
+    readonly IMessageRouting _routing;
+    readonly MessageBusConfigurationSection _configuration;
+
+    public MessageRoutingWithConfiguration(IMessageRouting routing)
+    {
+      _routing = routing;
+      _configuration = MessageBusConfigurationSection.Read();
+    }
+
+    public void SubscribeTo<T>(params string[] addresses)
+    {
+      _routing.SubscribeTo<T>(addresses.Select(address => _configuration.Lookup(address).Single()).ToArray());
+    }
+
+    public void AssignOwner<T>(string address)
+    {
+      _routing.AssignOwner<T>(_configuration.Lookup(address).Single());
     }
   }
 }

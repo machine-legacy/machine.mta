@@ -19,4 +19,10 @@ namespace Machine.Mta
     EndpointAddress Owner(Type messageType);
     IEnumerable<Type> MessageTypes();
   }
+
+  public interface IMessageRoutingWithConfiguration
+  {
+    void SubscribeTo<T>(params string[] addresses);
+    void AssignOwner<T>(string address);
+  }
 }
