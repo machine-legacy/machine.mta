@@ -57,6 +57,7 @@ namespace Machine.Mta
 
     public void RecordSuccess(TransportMessage transportMessage)
     {
+      if (transportMessage == null) return;
       string id = transportMessage.Id;
       using (RWLock.AsReader(_lock))
       {
@@ -69,6 +70,7 @@ namespace Machine.Mta
 
     public virtual bool IsPoison(TransportMessage transportMessage)
     {
+      if (transportMessage == null) return false;
       string id = transportMessage.Id;
       using (RWLock.AsReader(_lock))
       {
