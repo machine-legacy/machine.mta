@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 using Machine.Core.Utility;
+using System.Linq;
 
 namespace Machine.Mta.MessageInterfaces
 {
@@ -71,7 +72,7 @@ namespace Machine.Mta.MessageInterfaces
       if (RWLock.UpgradeToWriterIf(_lock, () => !_generated))
       {
         _log.Info("Generating");
-        foreach (KeyValuePair<Type, Type> generated in _messageInterfaceImplementationFactory.ImplementMessageInterfaces(_registerer.MessageTypes))
+        foreach (var generated in _messageInterfaceImplementationFactory.ImplementMessageInterfaces(_registerer.MessageTypes.Where(type => type.IsInterface)))
         {
           _interfaceToClass[generated.Key] = generated.Value;
           _classToInterface[generated.Value] = generated.Key;

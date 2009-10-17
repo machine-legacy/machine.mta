@@ -20,7 +20,7 @@ namespace Machine.Mta.MessageInterfaces
       {
         if (!type.IsInterface)
         {
-          throw new InvalidOperationException();
+          throw new InvalidOperationException(type + " is NOT and interface!");
         }
         Type generatedType = ImplementMessage(type);
         yield return new KeyValuePair<Type, Type>(type, generatedType);
