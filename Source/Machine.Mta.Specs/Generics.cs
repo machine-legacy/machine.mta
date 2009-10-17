@@ -140,11 +140,15 @@ namespace Machine.Mta.Specs.Generics
     It should_even_smaller_message_after_getting_those_that_are_bigger = () =>
       new[] {
         typeof(Ignore<IMessage>),
-        typeof(Ignore<ISagaMessage>),
+        typeof(Ignore<IAnotherSagaMessage>),
         typeof(Ignore<IAmSmallerMessage>),
         typeof(Ignore<IAmEvenSmallerMessage>)
       }.BiggerThan(typeof(Ignore<IAmEvenSmallerMessage>)).SmallerType().ShouldEqual(typeof(Ignore<IAmEvenSmallerMessage>));
   }
 
   public interface Ignore<A> { }
+
+  public interface IAnotherSagaMessage : IMessage
+  {
+  }
 }

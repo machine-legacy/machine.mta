@@ -72,52 +72,20 @@
     <Compile Include="AdoNet\IAdoNetConnectionString.cs" />
     <Compile Include="AdoNet\IGroupNameProvider.cs" />
     <Compile Include="Batching.cs" />
-    <Compile Include="Dispatching\DefaultMessageAspectsProvider.cs" />
-    <Compile Include="Dispatching\EndpointHandlerRules.cs" />
-    <Compile Include="Dispatching\HandlerDiscoverer.cs" />
-    <Compile Include="Dispatching\HandlerInvocation.cs" />
-    <Compile Include="Dispatching\IEndpointHandlerRules.cs" />
-    <Compile Include="Dispatching\IMessageAspect.cs" />
-    <Compile Include="Dispatching\IMessageAspectsProvider.cs" />
-    <Compile Include="Dispatching\IMessageModule.cs" />
-    <Compile Include="Dispatching\StaticHandlerTypes.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinarySagaStateRepository.cs" />
     <Compile Include="DotNetBinaryStorage\DotNetBinaryScheduledPublishRepository.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatBinaryFileConfiguration.cs" />
     <Compile Include="DotNetBinaryStorage\IFlatFileSystem.cs" />
-    <Compile Include="EndpointAddressJsonConverter.cs" />
-    <Compile Include="Endpoints\IEndpointFactory.cs" />
-    <Compile Include="Endpoints\IEndpointResolver.cs" />
-    <Compile Include="Helpers\SagaRepositoryServices.cs" />
-    <Compile Include="Errors\IErrorMessage.cs" />
-    <Compile Include="Endpoints\IEndpoint.cs" />
-    <Compile Include="Endpoints\EndpointResolver.cs" />
-    <Compile Include="Dispatching\IMessageDispatcher.cs" />
-    <Compile Include="Dispatching\BusWorker.cs" />
     <Compile Include="InspectBusTypes.cs" />
-    <Compile Include="ITransactionManager.cs" />
-    <Compile Include="Logging.cs" />
-    <Compile Include="MessageFailureManager.cs" />
-    <Compile Include="RetryAttemptsAttribute.cs" />
-    <Compile Include="ReturnAddressProvider.cs" />
-    <Compile Include="IProvideHandlerOrder.cs">
+    <Compile Include="Sagas\Saga.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TimeToBeReceivedAttribute.cs" />
-    <Compile Include="MessageBusFactory.cs" />
-    <Compile Include="RequestReply.cs" />
-    <Compile Include="MtaServices.cs" />
-    <Compile Include="Sagas\ISagaMessage.cs" />
+    <Compile Include="Sagas\SagaException.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sagas\ISagaState.cs" />
     <Compile Include="Sagas\ISagaStateRepository.cs" />
-    <Compile Include="Sagas\Saga.cs" />
-    <Compile Include="Sagas\SagaAspect.cs" />
-    <Compile Include="Sagas\SagaException.cs" />
     <Compile Include="IMessageBusFactory.cs" />
-    <Compile Include="Dispatching\Invokers.cs" />
-    <Compile Include="Dispatching\MessageDispatcher.cs" />
-    <Compile Include="MessageBus.cs" />
-    <Compile Include="MessageBusManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Timing\InMemoryScheduledPublishRepository.cs" />
     <Compile Include="Timing\IScheduledPublishRepository.cs" />

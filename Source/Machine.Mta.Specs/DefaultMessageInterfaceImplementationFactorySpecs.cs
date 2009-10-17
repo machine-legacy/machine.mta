@@ -308,4 +308,8 @@ namespace Machine.Mta.Specs
     Int32 Integer { get; }
     DayOfWeek DayOfWeek { get; }
   }
+
+  public interface ISampleMessage : IMessage
+  {
+  }
 }
