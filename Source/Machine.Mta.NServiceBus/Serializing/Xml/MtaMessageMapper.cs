@@ -7,6 +7,7 @@ namespace Machine.Mta.Serializing.Xml
 {
   public class MtaMessageMapper : IMessageMapper
   {
+    readonly static log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MtaMessageMapper));
     readonly IMessageRegisterer _registerer;
     readonly IMessageInterfaceImplementationsLookup _lookup;
     readonly OpaqueMessageFactory _opaqueMessageFactory;
@@ -63,12 +64,25 @@ namespace Machine.Mta.Serializing.Xml
         if (type.FullName == typeName)
           return type;
       }
-      foreach (var permutation in new[] { typeName, typeName + ", NServiceBus.Core" })
+      var permutations = new[] {typeName};
+      if (!typeName.Contains(","))
       {
-        var found = Type.GetType(permutation);
-        if (found != null)
+        permutations = new[] { typeName, typeName + ", NServiceBus.Core" };
+      }
+      foreach (var permutation in permutations)
+      {
+        try
         {
-          return found;
+          var found = Type.GetType(permutation);
+          if (found != null)
+          {
+            return found;
+          }
+        }
+        catch (Exception)
+        {
+          _log.Error("Error resolving: " + permutation);
+          return null;
         }
       }
       return null;
