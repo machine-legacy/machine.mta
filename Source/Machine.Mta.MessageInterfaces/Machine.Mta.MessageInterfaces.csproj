@@ -56,14 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DefaultMessageInterfaceImplementationFactory.cs" />
-    <Compile Include="ExceptionJsonConverter.cs" />
     <Compile Include="MessageCreationException.cs" />
     <Compile Include="MessageDefinitionFactory.cs" />
     <Compile Include="MessageFactory.cs" />
     <Compile Include="MessageInterfaceImplementationFactory.cs" />
     <Compile Include="MessageInterfaceImplementations.cs" />
     <Compile Include="MessageInterfaceSerializationBinder.cs" />
-    <Compile Include="MessageInterfaceTransportFormatter.cs" />
     <Compile Include="MessageTypeHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
