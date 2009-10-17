@@ -61,7 +61,10 @@ namespace Machine.Mta
 
     public void Reply<T>(params T[] messages) where T : IMessage
     {
-      CurrentBus().Reply(messages.ToNsbMessages());
+      using (CurrentSagaContext.OpenForReply())
+      {
+        CurrentBus().Reply(messages.ToNsbMessages());
+      }
     }
 
     public void Publish<T>(params T[] messages) where T : IMessage

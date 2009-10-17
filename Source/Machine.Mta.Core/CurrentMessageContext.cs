@@ -8,18 +8,12 @@ namespace Machine.Mta
     static CurrentMessageContext _current;
     readonly EndpointAddress _returnAddress;
     readonly string _correlationId;
-    readonly Guid[] _sagaIds;
     readonly CurrentMessageContext _parentContext;
     bool _stopDispatching;
 
     public EndpointAddress ReturnAddress
     {
       get { return _returnAddress; }
-    }
-
-    public Guid[] SagaIds
-    {
-      get { return _sagaIds; }
     }
 
     public string CorrelationId
@@ -37,27 +31,26 @@ namespace Machine.Mta
       _stopDispatching = true;
     }
 
-    public CurrentMessageContext(EndpointAddress returnAddress, string correlationId, Guid[] sagaIds, CurrentMessageContext parentContext)
+    public CurrentMessageContext(EndpointAddress returnAddress, string correlationId, CurrentMessageContext parentContext)
     {
       _returnAddress = returnAddress;
-      _sagaIds = sagaIds;
       _correlationId = correlationId;
       _parentContext = parentContext;
     }
 
-    public static CurrentMessageContext Open(EndpointAddress returnAddress, string correlationId, Guid[] sagaIds)
+    public static CurrentMessageContext Open(EndpointAddress returnAddress, string correlationId)
     {
-      return _current = new CurrentMessageContext(returnAddress, correlationId, sagaIds, _current);
+      return _current = new CurrentMessageContext(returnAddress, correlationId, _current);
     }
 
     public static CurrentMessageContext SendRepliesTo(EndpointAddress returnAddress)
     {
-      return Open(returnAddress, _current.CorrelationId, _current.SagaIds);
+      return Open(returnAddress, _current.CorrelationId);
     }
 
     public static CurrentMessageContext Open(TransportMessage transportMessage)
     {
-      return Open(transportMessage.ReturnAddress, transportMessage.CorrelationId, transportMessage.SagaIds);
+      return Open(transportMessage.ReturnAddress, transportMessage.CorrelationId);
     }
 
     public static CurrentMessageContext Current

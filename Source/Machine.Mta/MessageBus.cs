@@ -129,13 +129,19 @@ namespace Machine.Mta
 
     public void Reply<T>(params T[] messages) where T : IMessage
     {
-      Reply(CurrentMessageContext.Current.ReturnAddress, CurrentMessageContext.Current.CorrelationId, messages);
+      using (CurrentSagaContext.OpenForReply())
+      {
+        Reply(CurrentMessageContext.Current.ReturnAddress, CurrentMessageContext.Current.CorrelationId, messages);
+      }
     }
 
     public void Reply<T>(EndpointAddress destination, string correlationId, params T[] messages) where T : IMessage
     {
-      Logging.Reply(messages);
-      SendTransportMessageOnlyTo(new[] { destination }, CreateTransportMessage(correlationId, true, messages));
+      using (CurrentSagaContext.OpenForReply())
+      {
+        Logging.Reply(messages);
+        SendTransportMessageOnlyTo(new[] {destination}, CreateTransportMessage(correlationId, true, messages));
+      }
     }
 
     public void Publish<T>(params T[] messages) where T : IMessage
@@ -159,7 +165,7 @@ namespace Machine.Mta
     private TransportMessage CreateTransportMessage(string correlationId, MessagePayload payload, bool forReply)
     {
       return TransportMessage.For(_returnAddressProvider.GetReturnAddress(_listeningOnAddress), correlationId,
-        CurrentSagaContext.CurrentSagaIds(forReply), payload);
+        CurrentSagaContext.CurrentIds(forReply), payload);
     }
   }
 

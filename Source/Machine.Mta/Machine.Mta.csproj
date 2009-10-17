@@ -113,7 +113,6 @@
     <Compile Include="Sagas\Saga.cs" />
     <Compile Include="Sagas\SagaAspect.cs" />
     <Compile Include="Sagas\SagaException.cs" />
-    <Compile Include="MessageContexts.cs" />
     <Compile Include="IMessageBusFactory.cs" />
     <Compile Include="Dispatching\Invokers.cs" />
     <Compile Include="Dispatching\MessageDispatcher.cs" />

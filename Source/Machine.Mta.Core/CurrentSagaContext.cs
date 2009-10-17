@@ -15,6 +15,12 @@ namespace Machine.Mta
     {
       _previous = previous;
       _sagaIds = sagaIds;
+      Setup();
+    }
+
+    void Setup()
+    {
+      CurrentSagaIds.UseOutgoing(_sagaIds);
     }
 
     public IEnumerable<Guid> SagaIds
@@ -40,13 +46,18 @@ namespace Machine.Mta
       return _current = new CurrentSagaContext(_current, sagaIds);
     }
 
-    public static Guid[] CurrentSagaIds(bool propogateCurrentMessageIds)
+    public static CurrentSagaContext OpenForReply()
+    {
+      return _current = new CurrentSagaContext(_current, CurrentSagaIds.IncomingIds);
+    }
+
+    public static Guid[] CurrentIds(bool propogateCurrentMessageIds)
     {
       if (_current == null)
       {
-        if (CurrentMessageContext.Current != null && propogateCurrentMessageIds)
+        if (propogateCurrentMessageIds)
         {
-          return CurrentMessageContext.Current.SagaIds;
+          return CurrentSagaIds.IncomingIds;
         }
         return new Guid[0];
       }
@@ -55,6 +66,11 @@ namespace Machine.Mta
 
     public void Dispose()
     {
+      CurrentSagaIds.Reset();
+      if (_previous != null)
+      {
+        _previous.Setup();
+      }
       _current = _previous;
     }
   }

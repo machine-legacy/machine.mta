@@ -63,6 +63,8 @@
     <Compile Include="Configuration\MessageBusConfigurationSection.cs" />
     <Compile Include="CurrentMessageBus.cs" />
     <Compile Include="CurrentMessageContext.cs" />
+    <Compile Include="CurrentSagaContext.cs" />
+    <Compile Include="CurrentSagaIds.cs" />
     <Compile Include="Dispatching\AllHandlersInContainer.cs" />
     <Compile Include="Dispatching\IProvideHandlerTypes.cs" />
     <Compile Include="Dispatching\MessageHandlerType.cs" />

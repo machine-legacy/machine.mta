@@ -131,11 +131,7 @@ namespace Machine.Mta.Sagas
       {
         return new[] { invocation.SagaMessage().SagaId };
       }
-      if (CurrentMessageContext.Current != null)
-      {
-        return CurrentMessageContext.Current.SagaIds;
-      }
-      return new Guid[0];
+      return CurrentSagaIds.IncomingIds;
     }
     
     public static ISagaMessage SagaMessage(this HandlerInvocation invocation)

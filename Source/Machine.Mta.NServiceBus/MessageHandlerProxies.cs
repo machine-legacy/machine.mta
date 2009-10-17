@@ -21,7 +21,7 @@ namespace Machine.Mta
     {
       var bus = _messageBusFactory.CurrentBus().Bus;
       var nsbContext = bus.CurrentMessageContext;
-      using (var cmc =  CurrentMessageContext.Open(nsbContext.ReturnAddress.ToEndpointAddress(), nsbContext.Id, new Guid[0]))
+      using (CurrentMessageContext.Open(nsbContext.ReturnAddress.ToEndpointAddress(), nsbContext.Id))
       {
         _log.Info("Consuming: " + message);
         _target.Consume(message);
