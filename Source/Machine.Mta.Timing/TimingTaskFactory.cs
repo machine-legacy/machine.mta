@@ -21,6 +21,11 @@ namespace Machine.Mta.Timing
       return _container.Resolve.Object<T>();
     }
 
+    public IOnceASecondTask SendLocalMessage<T>(ITrigger trigger) where T : class, IMessage
+    {
+      return new SendLocalEmptyMessageTask<T>(_bus, _factory, trigger);
+    }
+
     public IOnceASecondTask PublishMessage<T>(ITrigger trigger) where T : class, IMessage
     {
       return new PublishEmptyMessageTask<T>(_bus, _factory, trigger);
@@ -28,7 +33,7 @@ namespace Machine.Mta.Timing
 
     public IOnceASecondTask PublishMessage<T>(ITrigger trigger, Func<IMessageFactory, T> ctor) where T : class, IMessage
     {
-      return new PublishFuncMessageTask<T>(_bus, _factory, trigger, ctor);
+      return new CreateMessageAndActOnItTask<T>(_bus, _factory, trigger, ctor, (b, m) => b.Publish(m));
     }
 
     public IOnceASecondTask PublishMessage<T>(ITrigger trigger, object value) where T : class, IMessage
