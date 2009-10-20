@@ -32,7 +32,6 @@ namespace Machine.Mta
     public static Configure XmlSerializer(this Configure config)
     {
       var messageTypes = Configure.TypesToScan.Where(t => typeof(NServiceBus.IMessage).IsAssignableFrom(t)).ToList();
-      config.Configurer.ConfigureComponent<MessageMapper>(ComponentCallModelEnum.Singleton);
       config.Configurer.ConfigureComponent<XmlMessageSerializer>(ComponentCallModelEnum.Singleton).
                         ConfigureProperty(serializer => serializer.MessageTypes, messageTypes);
       return config;
