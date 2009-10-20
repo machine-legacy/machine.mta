@@ -68,14 +68,22 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       }
       if (_state.ContainsKey(brokerAddress))
       {
-        return _state[brokerAddress].AddRef();
+        var existing = _state[brokerAddress].AddRef();
+        if (existing.IsActive)
+        {
+          return existing;
+        }
+        _state.Remove(brokerAddress);
       }
       _log.Debug("Opening " + brokerAddress);
       var opened = _state[brokerAddress] = OpenNew(brokerAddress);
       opened.Disposed += (sender, e) =>
       {
         _log.Debug("Closing " + brokerAddress);
-        _state.Remove(brokerAddress);
+        if (_state != null)
+        {
+          _state.Remove(brokerAddress);
+        }
       };
       if (Transaction.Current != null)
       {
@@ -99,6 +107,11 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     readonly IModel _model;
     Int32 _refs;
     public event EventHandler Disposed;
+
+    public bool IsActive
+    {
+      get { return _refs > 0; }
+    }
 
     public OpenedSession(IConnection connection, IModel model)
     {
