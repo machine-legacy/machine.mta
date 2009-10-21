@@ -8,10 +8,10 @@ namespace Machine.Mta.Timing
   {
     readonly IMessageFactory _messageFactory;
     readonly IMessageBus _bus;
-    readonly IMessageRouting _routing;
     readonly MessagePayloadSerializer _messagePayloadSerializer;
+    readonly IMessageRouting _routing;
 
-    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, IMessageRouting routing, MessagePayloadSerializer messagePayloadSerializer)
+    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, MessagePayloadSerializer messagePayloadSerializer, IMessageRouting routing)
     {
       _messageFactory = messageFactory;
       _routing = routing;
@@ -19,19 +19,18 @@ namespace Machine.Mta.Timing
       _bus = bus;
     }
 
+    public void SendAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
+    {
+      _bus.Send(_messageFactory.Create<ISchedulePublishMessage>(m => {
+        m.PublishAddresses = new[] { destination }.Select(d => d.ToString()).ToArray();
+        m.PublishAt = publishAt;
+        m.MessagePayload = _messagePayloadSerializer.Serialize(messages).ToByteArray();
+      }));
+    }
+
     public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage
     {
-      var destination = _routing.Owner(typeof(T));
-      PublishAt(publishAt, destination, messages);
-    }
-
-    public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
-    {
-      PublishAt(publishAt, new[] { destination }, messages);
-    }
-
-    void PublishAt<T>(DateTime publishAt, IEnumerable<EndpointAddress> destinations, params T[] messages) where T : IMessage
-    {
+      var destinations = _routing.Subscribers(typeof(T));
       _bus.Send(_messageFactory.Create<ISchedulePublishMessage>(m => {
         m.PublishAddresses = destinations.Select(d => d.ToString()).ToArray();
         m.PublishAt = publishAt;
@@ -42,18 +41,18 @@ namespace Machine.Mta.Timing
 
   public class NullScheduleFutureMessages : IScheduleFutureMessages
   {
-    public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage
+    public void SendAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
     {
     }
 
-    public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
+    public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage
     {
     }
   }
 
   public interface IScheduleFutureMessages
   {
+    void SendAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage;
     void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage;
-    void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage;
   }
 }
