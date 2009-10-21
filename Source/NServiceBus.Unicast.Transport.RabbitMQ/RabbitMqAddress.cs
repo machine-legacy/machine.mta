@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace NServiceBus.Unicast.Transport.RabbitMQ
 {
   [Serializable]
-  public class AmqpAddress
+  public class RabbitMqAddress
   {
     readonly string _broker;
     readonly string _exchange;
@@ -25,14 +25,14 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       get { return _routingKey; }
     }
 
-    public AmqpAddress(string broker, string exchange, string routingKey)
+    public RabbitMqAddress(string broker, string exchange, string routingKey)
     {
       _broker = broker;
       _exchange = exchange;
       _routingKey = routingKey;
     }
 
-    public bool Equals(AmqpAddress other)
+    public bool Equals(RabbitMqAddress other)
     {
       if (ReferenceEquals(null, other)) return false;
       if (ReferenceEquals(this, other)) return true;
@@ -43,8 +43,8 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     {
       if (ReferenceEquals(null, obj)) return false;
       if (ReferenceEquals(this, obj)) return true;
-      if (obj.GetType() != typeof (AmqpAddress)) return false;
-      return Equals((AmqpAddress) obj);
+      if (obj.GetType() != typeof (RabbitMqAddress)) return false;
+      return Equals((RabbitMqAddress) obj);
     }
 
     public override Int32 GetHashCode()
@@ -57,15 +57,15 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public override string ToString()
     {
-      return "amqp://" + _broker + "//" + _exchange + "/" + _routingKey;
+      return "rmq://" + _broker + "//" + _exchange + "/" + _routingKey;
     }
 
-    public static AmqpAddress FromString(string value)
+    public static RabbitMqAddress FromString(string value)
     {
       var fields = value.Split('/');
       if (fields.Length != 6)
-        throw new FormatException("AMQP publication address was badly formatted: " + value);
-      return new AmqpAddress(fields[2], fields[4], fields[5]);
+        throw new FormatException("RabbitMQ publication address was badly formatted: " + value);
+      return new RabbitMqAddress(fields[2], fields[4], fields[5]);
     }
   }
 }

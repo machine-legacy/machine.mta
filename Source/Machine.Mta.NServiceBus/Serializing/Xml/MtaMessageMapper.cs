@@ -12,11 +12,11 @@ namespace Machine.Mta.Serializing.Xml
     readonly IMessageInterfaceImplementationsLookup _lookup;
     readonly OpaqueMessageFactory _opaqueMessageFactory;
 
-    public MtaMessageMapper(IMessageInterfaceImplementationsLookup lookup, IMessageRegisterer registerer, MessageDefinitionFactory messageDefiniionFactory, MessageInterfaceImplementations messageInterfaceImplementations)
+    public MtaMessageMapper(IMessageInterfaceImplementationsLookup lookup, IMessageRegisterer registerer, MessageDefinitionFactory messageDefinitionFactory, MessageInterfaceImplementations messageInterfaceImplementations)
     {
       _lookup = lookup;
       _registerer = registerer;
-      _opaqueMessageFactory = new OpaqueMessageFactory(messageInterfaceImplementations, messageDefiniionFactory);
+      _opaqueMessageFactory = new OpaqueMessageFactory(messageInterfaceImplementations, messageDefinitionFactory);
     }
 
     public T CreateInstance<T>() where T : NServiceBus.IMessage

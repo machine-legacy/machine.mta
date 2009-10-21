@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -21,8 +21,8 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     readonly List<WorkerThread> _workers = new List<WorkerThread>();
     readonly ReaderWriterLockSlim _failuresPerMessageLocker = new ReaderWriterLockSlim();
     readonly IDictionary<string, Int32> _failuresPerMessage = new Dictionary<string, Int32>();
-    AmqpAddress _listenAddress;
-    AmqpAddress _poisonAddress;
+    RabbitMqAddress _listenAddress;
+    RabbitMqAddress _poisonAddress;
     IMessageSerializer _messageSerializer;
     Int32 _numberOfWorkerThreads;
     Int32 _maximumNumberOfRetries;
@@ -72,7 +72,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public void Send(TransportMessage transportMessage, string destination)
     {
-      var address = AmqpAddress.FromString(destination);
+      var address = RabbitMqAddress.FromString(destination);
       using (var stream = new MemoryStream())
       {
         this.MessageSerializer.Serialize(transportMessage.Body, stream);
@@ -172,13 +172,13 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     public string ListenAddress
     {
       get { return _listenAddress.ToString(); }
-      set { _listenAddress = String.IsNullOrEmpty(value) ? null : AmqpAddress.FromString(value); }
+      set { _listenAddress = String.IsNullOrEmpty(value) ? null : RabbitMqAddress.FromString(value); }
     }
 
     public string PoisonAddress
     {
       get { return _poisonAddress.ToString(); }
-      set { _poisonAddress = String.IsNullOrEmpty(value) ? null : AmqpAddress.FromString(value); }
+      set { _poisonAddress = String.IsNullOrEmpty(value) ? null : RabbitMqAddress.FromString(value); }
     }
 
     public IMessageSerializer MessageSerializer

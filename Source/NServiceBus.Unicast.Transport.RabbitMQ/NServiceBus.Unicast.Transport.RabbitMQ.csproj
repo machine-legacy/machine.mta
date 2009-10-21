@@ -56,7 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AmqpAddress.cs" />
+    <Compile Include="RabbitMqAddress.cs" />
     <Compile Include="Config\ConfigureAmqp.cs" />
     <Compile Include="MessageHandlingException.cs" />
     <Compile Include="RabbitMqEnlistment.cs" />
