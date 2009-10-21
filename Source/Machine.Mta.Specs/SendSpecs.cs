@@ -24,7 +24,7 @@ namespace Machine.Mta.Specs
       container.Initialize();
       container.AddPlugin(new DisposablePlugin());
       container.PrepareForServices();
-      container.Register.Type<MessageDestinations>();
+      container.Register.Type<MessageRouting>();
       container.Register.Type<MessageRegisterer>();
       container.Register.Type<NsbMessageBusFactory>();
       container.Register.Type<HelloHandler>();

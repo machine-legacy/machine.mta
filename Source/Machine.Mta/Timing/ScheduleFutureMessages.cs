@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Machine.Mta.Timing
@@ -7,21 +8,21 @@ namespace Machine.Mta.Timing
   {
     readonly IMessageFactory _messageFactory;
     readonly IMessageBus _bus;
-    readonly IMessageDestinations _messageDestinations;
+    readonly IMessageRouting _routing;
     readonly MessagePayloadSerializer _messagePayloadSerializer;
 
-    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, IMessageDestinations messageDestinations, MessagePayloadSerializer messagePayloadSerializer)
+    public ScheduleFutureMessages(IMessageFactory messageFactory, IMessageBus bus, IMessageRouting routing, MessagePayloadSerializer messagePayloadSerializer)
     {
       _messageFactory = messageFactory;
-      _messageDestinations = messageDestinations;
+      _routing = routing;
       _messagePayloadSerializer = messagePayloadSerializer;
       _bus = bus;
     }
 
     public void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage
     {
-      EndpointAddress[] destinations = _messageDestinations.LookupEndpointsFor(typeof(T), true).ToArray();
-      PublishAt(publishAt, destinations, messages);
+      var destination = _routing.Owner(typeof(T));
+      PublishAt(publishAt, destination, messages);
     }
 
     public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
@@ -29,13 +30,13 @@ namespace Machine.Mta.Timing
       PublishAt(publishAt, new[] { destination }, messages);
     }
 
-    public void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : IMessage
+    void PublishAt<T>(DateTime publishAt, IEnumerable<EndpointAddress> destinations, params T[] messages) where T : IMessage
     {
-      ISchedulePublishMessage message = _messageFactory.Create<ISchedulePublishMessage>();
-      message.PublishAddresses = destinations.Select(d => d.ToString()).ToArray();
-      message.PublishAt = publishAt;
-      message.MessagePayload = _messagePayloadSerializer.Serialize(messages).ToByteArray();
-      _bus.Send(message);
+      _bus.Send(_messageFactory.Create<ISchedulePublishMessage>(m => {
+        m.PublishAddresses = destinations.Select(d => d.ToString()).ToArray();
+        m.PublishAt = publishAt;
+        m.MessagePayload = _messagePayloadSerializer.Serialize(messages).ToByteArray();
+      }));
     }
   }
 
@@ -48,16 +49,11 @@ namespace Machine.Mta.Timing
     public void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage
     {
     }
-
-    public void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : IMessage
-    {
-    }
   }
 
   public interface IScheduleFutureMessages
   {
     void PublishAt<T>(DateTime publishAt, params T[] messages) where T : IMessage;
     void PublishAt<T>(DateTime publishAt, EndpointAddress destination, params T[] messages) where T : IMessage;
-    void PublishAt<T>(DateTime publishAt, EndpointAddress[] destinations, params T[] messages) where T : IMessage;
   }
 }

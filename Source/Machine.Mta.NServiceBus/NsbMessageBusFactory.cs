@@ -18,13 +18,13 @@ namespace Machine.Mta
   {
     readonly IMachineContainer _container;
     readonly IMessageRegisterer _registerer;
-    readonly IMessageDestinations _messageDestinations;
+    readonly IMessageRouting _messageRouting;
     readonly List<NsbBus> _all = new List<NsbBus>();
 
-    public NsbMessageBusFactory(IMachineContainer container, IMessageRegisterer registerer, IMessageDestinations messageDestinations)
+    public NsbMessageBusFactory(IMachineContainer container, IMessageRegisterer registerer, IMessageRouting messageRouting)
     {
       _container = container;
-      _messageDestinations = messageDestinations;
+      _messageRouting = messageRouting;
       _registerer = registerer;
     }
 
@@ -45,7 +45,7 @@ namespace Machine.Mta
         .Sagas()
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
-          .WithMessageRoutes(_messageDestinations);
+          .WithMessageRoutes(_messageRouting);
       return Add(configure.CreateBus());
     }
 
@@ -66,7 +66,7 @@ namespace Machine.Mta
         .Sagas()
         .UnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
-          .WithMessageRoutes(_messageDestinations);
+          .WithMessageRoutes(_messageRouting);
       return Add(configure.CreateBus());
     }
 

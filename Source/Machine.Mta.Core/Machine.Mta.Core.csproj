@@ -79,7 +79,7 @@
     <Compile Include="IInspectBusTypes.cs" />
     <Compile Include="ITransportMessageSerializer.cs" />
     <Compile Include="MessageBusProxy.cs" />
-    <Compile Include="MessageDestinations.cs" />
+    <Compile Include="MessageRouting.cs" />
     <Compile Include="MessagePayload.cs" />
     <Compile Include="MessageRegisterer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
