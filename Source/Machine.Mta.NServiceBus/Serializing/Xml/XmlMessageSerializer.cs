@@ -406,11 +406,13 @@ namespace Machine.Mta.Serializing.Xml
           return list;
       }
 
-      if (n.ChildNodes.Count == 0)
+      if (n.ChildNodes.Count == 0 && xsiType == null)
+      {
         if (type == typeof(string))
           return string.Empty;
         else
           return null;
+      }
 
 
       return GetObjectOfTypeFromNode(type, n);
