@@ -21,11 +21,11 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       _connectionFactory.Parameters.VirtualHost = ConnectionParameters.DefaultVHost;
     }
 
-    public OpenedSession Open(string brokerAddress, bool transactional)
+    public OpenedSession Open(string protocolName, string brokerAddress, bool transactional)
     {
       if (!transactional)
       {
-        return OpenNew(brokerAddress);
+        return OpenNew(protocolName, brokerAddress);
       }
       if (_state == null)
       {
@@ -41,7 +41,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         _state.Remove(brokerAddress);
       }
       _log.Debug("Opening " + brokerAddress);
-      var opened = _state[brokerAddress] = OpenNew(brokerAddress);
+      var opened = _state[brokerAddress] = OpenNew(protocolName, brokerAddress);
       opened.Disposed += (sender, e) => {
         _log.Debug("Closing " + brokerAddress);
         if (_state != null)
@@ -57,11 +57,21 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       return opened.AddRef();
     }
 
-    OpenedSession OpenNew(string brokerAddress)
+    OpenedSession OpenNew(string protocolName, string brokerAddress)
     {
-      var connection = _connectionFactory.CreateConnection(brokerAddress);
+      var protocol = GetProtocol(protocolName);
+      var connection = _connectionFactory.CreateConnection(protocol, brokerAddress);
       var model = connection.CreateModel();
       return new OpenedSession(connection, model);
+    }
+
+    static IProtocol GetProtocol(string protocolName)
+    {
+      if (String.IsNullOrEmpty(protocolName))
+      {
+        return Protocols.FromConfiguration();
+      }
+      return Protocols.SafeLookup(protocolName);
     }
   }
 }

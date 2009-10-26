@@ -76,7 +76,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       using (var stream = new MemoryStream())
       {
         this.MessageSerializer.Serialize(transportMessage.Body, stream);
-        using (var connection = _connectionProvider.Open(address.Broker, true))
+        using (var connection = _connectionProvider.Open(this.ProtocolName, address.Broker, true))
         {
           var channel = connection.Model();
           var messageId = Guid.NewGuid().ToString();
@@ -117,13 +117,6 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         _messageContext.NeedToAbort = true;
       }
     }
-
-    /*
-    public IList<Type> MessageTypesToBeReceived
-    {
-      set { this.MessageSerializer.Initialize(GetExtraTypes(value)); }
-    }
-    */
 
     public Int32 NumberOfWorkerThreads
     {
@@ -193,6 +186,8 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       set { _isolationLevel = value; }
     }
 
+    public string ProtocolName { get; set; }
+
     public TimeSpan TransactionTimeout
     {
       get { return _transactionTimeout; }
@@ -203,16 +198,6 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     {
       get { return _receiveTimeout; }
       set { _receiveTimeout = value; }
-    }
-
-    static Type[] GetExtraTypes(IEnumerable<Type> value)
-    {
-      var types = value.ToList();
-      if (!types.Contains(typeof(List<object>)))
-      {
-        types.Add(typeof(List<object>));
-      }
-      return types.ToArray();
     }
 
     WorkerThread AddWorkerThread()
@@ -261,7 +246,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     void Receive(MessageReceiveProperties messageContext)
     {
       _log.Debug("Receiving from " + _listenAddress);
-      using (var connection = _connectionProvider.Open(_listenAddress.Broker, true))
+      using (var connection = _connectionProvider.Open(this.ProtocolName, _listenAddress.Broker, true))
       {
         var channel = connection.Model();
         var consumer = new QueueingBasicConsumer(channel);
@@ -386,7 +371,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         _log.Info("Discarding " + delivery.BasicProperties.MessageId);
         return;
       }
-      using (var connection = _connectionProvider.Open(_listenAddress.Broker, false))
+      using (var connection = _connectionProvider.Open(this.ProtocolName, _listenAddress.Broker, false))
       {
         var channel = connection.Model();
         _log.Info("Moving " + delivery.BasicProperties.MessageId + " to " + _poisonAddress);
