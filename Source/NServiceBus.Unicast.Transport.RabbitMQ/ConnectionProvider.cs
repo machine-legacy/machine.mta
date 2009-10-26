@@ -16,17 +16,23 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     public ConnectionProvider()
     {
       _connectionFactory = new ConnectionFactory();
-      _connectionFactory.Parameters.UserName = ConnectionParameters.DefaultUser;
-      _connectionFactory.Parameters.Password = ConnectionParameters.DefaultPass;
-      _connectionFactory.Parameters.VirtualHost = ConnectionParameters.DefaultVHost;
     }
 
     public OpenedSession Open(string protocolName, string brokerAddress, bool transactional)
     {
       if (!transactional)
       {
-        return OpenNew(protocolName, brokerAddress);
+        var opened = OpenNew(protocolName, brokerAddress);
+        opened.Disposed += (sender, e) => {
+          _log.Debug("Closing " + brokerAddress);
+        };
+        return opened;
       }
+      return OpenTransactional(protocolName, brokerAddress);
+    }
+
+    OpenedSession OpenTransactional(string protocolName, string brokerAddress)
+    {
       if (_state == null)
       {
         _state = new Dictionary<string, OpenedSession>();
@@ -40,7 +46,6 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
         }
         _state.Remove(brokerAddress);
       }
-      _log.Debug("Opening " + brokerAddress);
       var opened = _state[brokerAddress] = OpenNew(protocolName, brokerAddress);
       opened.Disposed += (sender, e) => {
         _log.Debug("Closing " + brokerAddress);
@@ -49,11 +54,13 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           _state.Remove(brokerAddress);
         }
       };
+      /*
       if (Transaction.Current != null)
       {
         Transaction.Current.EnlistVolatile(new RabbitMqEnlistment(opened), EnlistmentOptions.None);
         opened.AddRef();
       }
+      */
       return opened.AddRef();
     }
 
@@ -62,6 +69,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       var protocol = GetProtocol(protocolName);
       var connection = _connectionFactory.CreateConnection(protocol, brokerAddress);
       var model = connection.CreateModel();
+      _log.Debug("Opening " + brokerAddress + " using " + protocol.ApiName);
       return new OpenedSession(connection, model);
     }
 

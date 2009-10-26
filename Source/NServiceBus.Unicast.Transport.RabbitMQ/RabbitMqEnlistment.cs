@@ -68,7 +68,9 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     {
       if (--_refs == 0)
       {
+        _model.Close(200, "Ok");
         _model.Dispose();
+        _connection.Close();
         _connection.Dispose();
         Disposed(this, EventArgs.Empty);
       }

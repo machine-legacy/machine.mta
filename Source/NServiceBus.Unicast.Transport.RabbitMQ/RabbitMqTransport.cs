@@ -16,7 +16,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 {
   public class RabbitMqTransport : ITransport
   {
-    static readonly ConnectionProvider _connectionProvider = new ConnectionProvider();
+    readonly ConnectionProvider _connectionProvider = new ConnectionProvider();
     readonly Common.Logging.ILog _log = Common.Logging.LogManager.GetLogger(typeof(RabbitMqTransport));
     readonly List<WorkerThread> _workers = new List<WorkerThread>();
     readonly ReaderWriterLockSlim _failuresPerMessageLocker = new ReaderWriterLockSlim();
@@ -28,7 +28,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     Int32 _maximumNumberOfRetries;
     IsolationLevel _isolationLevel;
     TimeSpan _transactionTimeout = TimeSpan.FromMinutes(5);
-    TimeSpan _receiveTimeout = TimeSpan.FromSeconds(2);
+    TimeSpan _receiveTimeout = TimeSpan.FromSeconds(1);
  
     class MessageReceiveProperties
     {
@@ -90,9 +90,9 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           properties.ReplyTo = this.ListenAddress;
           properties.SetPersistent(transportMessage.Recoverable);
           properties.Headers = transportMessage.Headers.ToDictionary(k => k.Key, v => v.Value);
+          _log.Info("Sending message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
           channel.BasicPublish(address.Exchange, address.RoutingKey, properties, stream.ToArray());
           transportMessage.Id = properties.MessageId;
-          _log.Info("Sent message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
         }
       }
     }
