@@ -24,6 +24,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     RabbitMqAddress _listenAddress;
     RabbitMqAddress _poisonAddress;
     IMessageSerializer _messageSerializer;
+    IHeadersSerializer _headersSerializer;
     Int32 _numberOfWorkerThreads;
     Int32 _maximumNumberOfRetries;
     IsolationLevel _isolationLevel;
@@ -89,8 +90,14 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
           properties.Timestamp = DateTime.UtcNow.ToAmqpTimestamp();
           properties.ReplyTo = this.ListenAddress;
           properties.SetPersistent(transportMessage.Recoverable);
-          properties.Headers = transportMessage.Headers.ToDictionary(k => k.Key, v => v.Value);
-          _log.Info("Sending message " + transportMessage.Id + " to " + destination + " of " + transportMessage.Body[0].GetType().Name);
+          var headers = _headersSerializer.Serialize(transportMessage.Headers);
+          if (headers != null && headers.Length > 0)
+          {
+            var dictionary = new Dictionary<string, object>();
+            dictionary["NSB"] = headers;
+            properties.Headers = dictionary;
+          }
+          _log.Info("Sending message " + destination + " of " + transportMessage.Body[0].GetType().Name);
           channel.BasicPublish(address.Exchange, address.RoutingKey, properties, stream.ToArray());
           transportMessage.Id = properties.MessageId;
         }
@@ -178,6 +185,12 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     {
       get { return _messageSerializer; }
       set { _messageSerializer = value; }
+    }
+
+    public IHeadersSerializer HeadersSerializer
+    {
+      get { return _headersSerializer; }
+      set { _headersSerializer = value; }
     }
 
     public IsolationLevel IsolationLevel
@@ -295,7 +308,15 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
       m.IdForCorrelation = delivery.BasicProperties.MessageId;
       m.ReturnAddress = delivery.BasicProperties.ReplyTo;
       m.TimeSent = delivery.BasicProperties.Timestamp.ToDateTime();
-      m.Headers = new List<HeaderInfo>();
+      if (delivery.BasicProperties.Headers != null && delivery.BasicProperties.Headers.Contains("NSB"))
+      {
+        var headers = (byte[])delivery.BasicProperties.Headers["NSB"];
+        m.Headers = _headersSerializer.Deserialize(headers).ToList();
+      }
+      else
+      {
+        m.Headers = new List<HeaderInfo>();
+      }
       m.Recoverable = delivery.BasicProperties.DeliveryMode == 2;
       var receivingError = OnTransportMessageReceived(m);
       var finishedProcessingError = OnFinishedMessageProcessing();
