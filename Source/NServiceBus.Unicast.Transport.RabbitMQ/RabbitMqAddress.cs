@@ -57,15 +57,15 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
 
     public override string ToString()
     {
-      return "rmq://" + _broker + "//" + _exchange + "/" + _routingKey;
+      return "rmq://" + _broker + "/" + _exchange + "/" + _routingKey;
     }
 
     public static RabbitMqAddress FromString(string value)
     {
       var fields = value.Split('/');
-      if (fields.Length != 6)
+      if (fields.Length != 5)
         throw new FormatException("RabbitMQ publication address was badly formatted: " + value);
-      return new RabbitMqAddress(fields[2], fields[4], fields[5]);
+      return new RabbitMqAddress(fields[2], fields[3], fields[4]);
     }
   }
 }
