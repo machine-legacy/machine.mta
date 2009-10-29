@@ -17,6 +17,7 @@ namespace Machine.Mta
       _routing = routing;
       _mapper = mapper;
     }
+
     public void Subscribe(string client, IList<string> messageTypes)
     {
       _log.Info("Add: " + client + " " + String.Join(", ", messageTypes.ToArray()));
