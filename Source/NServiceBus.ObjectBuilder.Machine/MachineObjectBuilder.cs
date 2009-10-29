@@ -6,10 +6,9 @@ using System.Threading;
 using Machine.Container;
 using Machine.Core.Utility;
 
-using NServiceBus.ObjectBuilder;
 using NServiceBus.ObjectBuilder.Common;
 
-namespace Machine.Mta
+namespace NServiceBus.ObjectBuilder.Machine
 {
   public class MachineObjectBuilder : IContainer
   {

@@ -2,11 +2,9 @@ using System;
 
 using Machine.Container;
 
-using NServiceBus;
-using NServiceBus.ObjectBuilder;
 using NServiceBus.ObjectBuilder.Common.Config;
 
-namespace Machine.Mta.Config
+namespace NServiceBus.ObjectBuilder.Machine.Config
 {
   public static class MachineObjectBuilderConfig
   {

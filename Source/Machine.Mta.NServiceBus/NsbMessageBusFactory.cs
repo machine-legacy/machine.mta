@@ -4,10 +4,10 @@ using System.Linq;
 
 using Machine.Container;
 using Machine.Core;
-using Machine.Mta.Config;
 
 using NServiceBus;
 using NServiceBus.Grid.MessageHandlers;
+using NServiceBus.ObjectBuilder.Machine.Config;
 using NServiceBus.Sagas.Impl;
 using NServiceBus.Unicast.Transport.RabbitMQ.Config;
 using Configure = NServiceBus.Configure;

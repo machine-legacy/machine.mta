@@ -64,8 +64,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MachineObjectBuilder.cs" />
-    <Compile Include="Config\MachineObjectBuilderConfig.cs" />
     <Compile Include="MessageHandlerProxies.cs" />
     <Compile Include="MtaCompatibilityHeadersSerializer.cs" />
     <Compile Include="MyConfigure.cs" />
@@ -93,6 +91,14 @@
     <ProjectReference Include="..\Machine.Mta.MessageInterfaces\Machine.Mta.MessageInterfaces.csproj">
       <Project>{06D7BAAD-7C1F-4782-B144-14BE178EE62A}</Project>
       <Name>Machine.Mta.MessageInterfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NServiceBus.ObjectBuilder.Machine\NServiceBus.ObjectBuilder.Machine.csproj">
+      <Project>{C99F6DF8-1F8E-46C0-A909-D18564B5C379}</Project>
+      <Name>NServiceBus.ObjectBuilder.Machine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NServiceBus.Unicast.Subscriptions.AdoDotNet\NServiceBus.Unicast.Subscriptions.AdoDotNet.csproj">
+      <Project>{AC931A1F-EA83-46F0-841F-3A31A859D944}</Project>
+      <Name>NServiceBus.Unicast.Subscriptions.AdoDotNet</Name>
     </ProjectReference>
     <ProjectReference Include="..\NServiceBus.Unicast.Transport.RabbitMQ\NServiceBus.Unicast.Transport.RabbitMQ.csproj">
       <Project>{53178951-1270-4BAC-B52D-07BEE2197BC9}</Project>
