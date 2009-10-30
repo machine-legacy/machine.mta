@@ -2,19 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using NServiceBus.MessageInterfaces;
 
 namespace Machine.Mta.Serializing.Xml
 {
   public class XmlTransportMessageSerializer : ITransportMessageSerializer
   {
-    readonly XmlMessageSerializer _serializer;
-    readonly MessageMapper _mapper;
+    readonly IMessageMapper _mapper;
     readonly IMessageRegisterer _registrar;
+    readonly XmlMessageSerializer _serializer;
 
-    public XmlTransportMessageSerializer(MessageMapper messageMapper, IMessageRegisterer messageRegisterer, XmlMessageSerializer serializer)
+    public XmlTransportMessageSerializer(IMessageMapper mapper, IMessageRegisterer registerer, XmlMessageSerializer serializer)
     {
-      _mapper = messageMapper;
-      _registrar = messageRegisterer;
+      _mapper = mapper;
+      _registrar = registerer;
       _serializer = serializer;
     }
 

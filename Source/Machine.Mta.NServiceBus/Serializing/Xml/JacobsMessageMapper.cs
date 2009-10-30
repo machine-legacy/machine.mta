@@ -8,7 +8,7 @@ using NServiceBus.MessageInterfaces;
 
 namespace Machine.Mta.Serializing.Xml
 {
-  public class MessageMapper : IMessageMapper
+  public class JacobsMessageMapper : IMessageMapper
   {
     public void Initialize(IEnumerable<Type> types)
     {
