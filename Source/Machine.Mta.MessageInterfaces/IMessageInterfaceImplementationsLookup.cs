@@ -1,6 +1,6 @@
 using System;
 
-namespace Machine.Mta
+namespace Machine.Mta.MessageInterfaces
 {
   public interface IMessageInterfaceImplementationsLookup
   {
