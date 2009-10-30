@@ -56,7 +56,7 @@ namespace NServiceBus.Unicast.Subscriptions.AdoDotNet
             {
               while (reader.Read())
               {
-                subscribers.Add(reader.GetString(1));
+                subscribers.Add(reader.GetString(0));
               }
               reader.Close();
             }
