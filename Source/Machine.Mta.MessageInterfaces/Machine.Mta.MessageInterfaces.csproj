@@ -56,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DefaultMessageInterfaceImplementationFactory.cs" />
-    <Compile Include="IMessageInterfaceImplementationsLookup.cs" />
     <Compile Include="MessageCreationException.cs" />
     <Compile Include="MessageDefinitionFactory.cs" />
     <Compile Include="MessageInterfaceImplementationFactory.cs" />

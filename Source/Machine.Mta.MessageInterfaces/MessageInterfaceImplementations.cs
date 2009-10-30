@@ -7,7 +7,7 @@ using Machine.Core.Utility;
 
 namespace Machine.Mta.MessageInterfaces
 {
-  public class MessageInterfaceImplementations : IMessageInterfaceImplementationsLookup
+  public class MessageInterfaceImplementations
   {
     readonly Dictionary<Type, Type> _interfaceToClass = new Dictionary<Type, Type>();
     readonly Dictionary<Type, Type> _classToInterface = new Dictionary<Type, Type>();
