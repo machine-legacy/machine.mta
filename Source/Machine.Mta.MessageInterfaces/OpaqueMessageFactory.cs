@@ -4,36 +4,6 @@ using System.Text;
 
 namespace Machine.Mta.MessageInterfaces
 {
-  public class MessageFactory : IMessageFactory
-  {
-    readonly OpaqueMessageFactory _opaqueMessageFactory;
-
-    public MessageFactory(MessageInterfaceImplementations messageInterfaceImplementor, MessageDefinitionFactory messageDefinitionFactory)
-    {
-      _opaqueMessageFactory = new OpaqueMessageFactory(messageInterfaceImplementor, messageDefinitionFactory);
-    }
-
-    public IMessage Create(Type type, params object[] parameters)
-    {
-      return (IMessage)_opaqueMessageFactory.Create(type, parameters);
-    }
-
-    public T Create<T>() where T : IMessage
-    {
-      return (T)_opaqueMessageFactory.Create(typeof(T));
-    }
-
-    public T Create<T>(object value) where T : IMessage
-    {
-      return (T)_opaqueMessageFactory.Create<T>(value);
-    }
-
-    public T Create<T>(Action<T> factory) where T : IMessage
-    {
-      return (T)_opaqueMessageFactory.Create<T>(factory);
-    }
-  }
-
   public class OpaqueMessageFactory
   {
     readonly MessageInterfaceImplementations _messageInterfaceImplementor;
@@ -43,6 +13,11 @@ namespace Machine.Mta.MessageInterfaces
     {
       _messageInterfaceImplementor = messageInterfaceImplementor;
       _messageDefinitionFactory = messageDefinitionFactory;
+    }
+
+    public void Initialize(IEnumerable<Type> types)
+    {
+      _messageInterfaceImplementor.Initialize(types);
     }
 
     public object Create(Type type, params object[] parameters)
@@ -61,23 +36,23 @@ namespace Machine.Mta.MessageInterfaces
 
     public object Create<T>(object value)
     {
-      IDictionary<string, object> dictionary = value as IDictionary<string, object> ?? value.ToDictionary();
+      var dictionary = value as IDictionary<string, object> ?? value.ToDictionary();
       CheckForErrors(typeof(T), dictionary);
       return (T)Create(typeof(T), dictionary);
     }
 
     public object Create<T>(Action<T> factory)
     {
-      object message = Create(typeof(T));
+      var message = Create(typeof(T));
       factory((T)message);
       return message;
     }
 
     void CheckForErrors(Type messageType, IDictionary<string, object> dictionary)
     {
-      StringBuilder sb = new StringBuilder();
-      MessageDefinition definition = _messageDefinitionFactory.CreateDefinition(messageType);
-      foreach (MessagePropertyError error in definition.VerifyDictionaryAndReturnMissingProperties(dictionary))
+      var sb = new StringBuilder();
+      var definition = _messageDefinitionFactory.CreateDefinition(messageType);
+      foreach (var error in definition.VerifyDictionaryAndReturnMissingProperties(dictionary))
       {
         sb.AppendLine(error.Type + " " + messageType.Name + "." + error.Name);
       }

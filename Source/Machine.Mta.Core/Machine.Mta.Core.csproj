@@ -74,7 +74,6 @@
     <Compile Include="IMessageBusManager.cs" />
     <Compile Include="IMessageDestinations.cs" />
     <Compile Include="IMessageFactory.cs" />
-    <Compile Include="IMessageInterfaceImplementationsLookup.cs" />
     <Compile Include="IMessageRegisterer.cs" />
     <Compile Include="IInspectBusTypes.cs" />
     <Compile Include="ITransportMessageSerializer.cs" />
@@ -88,6 +87,12 @@
     <Compile Include="Timing\ServerClock.cs" />
     <Compile Include="MessagePayloadSerializer.cs" />
     <Compile Include="TypeHelpers.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Machine.Mta.MessageInterfaces\Machine.Mta.MessageInterfaces.csproj">
+      <Project>{06D7BAAD-7C1F-4782-B144-14BE178EE62A}</Project>
+      <Name>Machine.Mta.MessageInterfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

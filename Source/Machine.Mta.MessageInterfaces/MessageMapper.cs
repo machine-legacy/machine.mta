@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
-using Machine.Mta.MessageInterfaces;
+
 using NServiceBus.MessageInterfaces;
 
-namespace Machine.Mta.Serializing.Xml
+namespace Machine.Mta.MessageInterfaces
 {
-  public class MtaMessageMapper : IMessageMapper
+  public class MessageMapper : IMessageMapper
   {
-    readonly static log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MtaMessageMapper));
-    readonly IMessageRegisterer _registerer;
-    readonly IMessageInterfaceImplementationsLookup _lookup;
+    readonly static log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageMapper));
+    readonly MessageInterfaceImplementations implementations;
     readonly OpaqueMessageFactory _opaqueMessageFactory;
+    IEnumerable<Type> _types;
 
-    public MtaMessageMapper(IMessageInterfaceImplementationsLookup lookup, IMessageRegisterer registerer, MessageDefinitionFactory messageDefinitionFactory, MessageInterfaceImplementations messageInterfaceImplementations)
+    public MessageMapper()
     {
-      _lookup = lookup;
-      _registerer = registerer;
-      _opaqueMessageFactory = new OpaqueMessageFactory(messageInterfaceImplementations, messageDefinitionFactory);
+      implementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory());
+      _opaqueMessageFactory = new OpaqueMessageFactory(implementations, new MessageDefinitionFactory());
     }
 
     public T CreateInstance<T>() where T : NServiceBus.IMessage
@@ -38,28 +37,30 @@ namespace Machine.Mta.Serializing.Xml
 
     public void Initialize(IEnumerable<Type> types)
     {
+      _types = types;
+      _opaqueMessageFactory.Initialize(types);
     }
 
     public Type GetMappedTypeFor(Type type)
     {
       if (type.IsClass)
       {
-        if (_lookup.IsClassOrInterface(type))
+        if (implementations.IsClassOrInterface(type))
         {
-          return _lookup.GetClassOrInterfaceFor(type);
+          return implementations.GetClassOrInterfaceFor(type);
         }
         return type;
       }
-      if (_lookup.IsClassOrInterface(type))
+      if (implementations.IsClassOrInterface(type))
       {
-        return _lookup.GetClassOrInterfaceFor(type);
+        return implementations.GetClassOrInterfaceFor(type);
       }
       return null;
     }
 
     public Type GetMappedTypeFor(string typeName)
     {
-      foreach (var type in _registerer.MessageTypes)
+      foreach (var type in _types)
       {
         if (type.FullName == typeName)
           return type;

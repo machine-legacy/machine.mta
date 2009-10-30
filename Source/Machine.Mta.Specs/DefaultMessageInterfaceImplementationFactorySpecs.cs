@@ -277,8 +277,7 @@ namespace Machine.Mta.Specs
       factory = new DefaultMessageInterfaceImplementationFactory();
       MessageRegisterer registerer = new MessageRegisterer();
       registerer.AddMessageTypes(typeof(IAmAMessage), typeof(IHaveAChildMessage), typeof(ISampleMessage), typeof(IComplexMessage), typeof(IAnotherMessage));
-      MessageInterfaceImplementations implementations = new MessageInterfaceImplementations(factory, registerer);
-      messageFactory = new MessageFactory(implementations, new MessageDefinitionFactory());
+      messageFactory = new MessageFactory();
     };
   }
 

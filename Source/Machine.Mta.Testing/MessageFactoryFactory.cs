@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-using Machine.Mta.MessageInterfaces;
-
 namespace Machine.Mta.Testing
 {
   public static class MessageFactoryFactory
@@ -14,8 +12,9 @@ namespace Machine.Mta.Testing
       var registerer = new MessageRegisterer();
       registerer.AddMessageTypes(typeof(IMessage));
       registerer.AddMessageTypes(messageTypes);
-      var messageInterfaceImplementations = new MessageInterfaceImplementations(new DefaultMessageInterfaceImplementationFactory(), registerer);
-      return new MessageFactory(messageInterfaceImplementations, new MessageDefinitionFactory());
+      var factory = new MessageFactory();
+      factory.Initialize(messageTypes);
+      return factory;
     }
 
     public static IMessageFactory NewFactoryForMessagesInAssemblies(params Assembly[] assemblies)

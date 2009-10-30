@@ -7,38 +7,38 @@ namespace Machine.Mta.MessageInterfaces
 {
   public abstract class MessageInterfaceImplementationFactory<T> : IMessageInterfaceImplementationFactory
   {
-    static readonly string AssemblyName = "Messages";
+    readonly static string AssemblyName = "Messages";
     private AssemblyBuilder _assemblyBuilder;
     private ModuleBuilder _moduleBuilder;
 
     public IEnumerable<KeyValuePair<Type, Type>> ImplementMessageInterfaces(IEnumerable<Type> types, params Type[] extraInterfacesToAlwaysInclude)
     {
-      AssemblyName assemblyName = new AssemblyName(AssemblyName);
+      var assemblyName = new AssemblyName(AssemblyName);
       _assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
       _moduleBuilder = _assemblyBuilder.DefineDynamicModule(AssemblyName, AssemblyName + ".dll");
-      foreach (Type type in types)
+      foreach (var type in types)
       {
         if (!type.IsInterface)
         {
           throw new InvalidOperationException(type + " is NOT and interface!");
         }
-        Type generatedType = ImplementMessage(type);
+        var generatedType = ImplementMessage(type);
         yield return new KeyValuePair<Type, Type>(type, generatedType);
       }
     }
 
     private Type ImplementMessage(Type type, params Type[] extraInterfacesToAlwaysInclude)
     {
-      string newTypeName = MakeImplementationName(type);
-      TypeAttributes attributes = TypeAttributes.Public | TypeAttributes.Serializable;
-      TypeBuilder typeBuilder = _moduleBuilder.DefineType(newTypeName, attributes);
+      var newTypeName = MakeImplementationName(type);
+      var attributes = TypeAttributes.Public | TypeAttributes.Serializable;
+      var typeBuilder = _moduleBuilder.DefineType(newTypeName, attributes);
       typeBuilder.AddInterfaceImplementation(type);
       foreach (var extraInterface in extraInterfacesToAlwaysInclude)
       {
         typeBuilder.AddInterfaceImplementation(extraInterface);
       }
       T state = ImplementMessage(typeBuilder, type, Properties(type));
-      foreach (PropertyInfo property in Properties(type))
+      foreach (var property in Properties(type))
       {
         ImplementProperty(typeBuilder, property, state);
       }
@@ -47,9 +47,9 @@ namespace Machine.Mta.MessageInterfaces
 
     protected virtual IEnumerable<PropertyInfo> Properties(Type type)
     {
-      foreach (Type interfaceType in MessageTypeHelpers.TypesToGenerateForType(type))
+      foreach (var interfaceType in MessageTypeHelpers.TypesToGenerateForType(type))
       {
-        foreach (PropertyInfo property in interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+        foreach (var property in interfaceType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
         {
           if (!property.CanRead)
           {

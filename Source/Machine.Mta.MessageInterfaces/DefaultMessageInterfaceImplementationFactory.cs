@@ -40,15 +40,15 @@ namespace Machine.Mta.MessageInterfaces
   {
     protected override GeneratedMessage ImplementMessage(TypeBuilder typeBuilder, Type type, IEnumerable<PropertyInfo> properties)
     {
-      GeneratedMessage generatedMessage = new GeneratedMessage(type);
-      foreach (PropertyInfo property in properties)
+      var generatedMessage = new GeneratedMessage(type);
+      foreach (var property in properties)
       {
-        FieldBuilder fieldBuilder = typeBuilder.DefineField(MakeFieldName(property), property.PropertyType, FieldAttributes.Private);
+        var fieldBuilder = typeBuilder.DefineField(MakeFieldName(property), property.PropertyType, FieldAttributes.Private);
         generatedMessage.AddField(property.Name, fieldBuilder);
       }
       {
-        ConstructorBuilder ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[0]);
-        ILGenerator il = ctorBuilder.GetILGenerator();
+        var ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[0]);
+        var il = ctorBuilder.GetILGenerator();
         il.Emit(OpCodes.Ret);
       }
       GenerateDictionaryConstructor(typeBuilder, generatedMessage);
@@ -59,12 +59,12 @@ namespace Machine.Mta.MessageInterfaces
 
     protected void GenerateEquals(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
     {
-      Type type = generatedMessage.MessageType;
-      MethodInfo arrayEquals = typeof(ArrayHelpers).GetMethod("AreArraysEqual", new[] { typeof(Array), typeof(Array) });
-      MethodInfo objectEquals = typeof(Object).GetMethod("Equals", new [] { typeof(Object), typeof(Object) });
-      MethodBuilder method = typeBuilder.DefineMethod("Equals", MethodAttributes.Virtual | MethodAttributes.Public, typeof (bool), new[] { typeof (Object) });
-      ILGenerator il = method.GetILGenerator();
-      LocalBuilder local = il.DeclareLocal(type);
+      var type = generatedMessage.MessageType;
+      var arrayEquals = typeof(ArrayHelpers).GetMethod("AreArraysEqual", new[] { typeof(Array), typeof(Array) });
+      var objectEquals = typeof(Object).GetMethod("Equals", new [] { typeof(Object), typeof(Object) });
+      var method = typeBuilder.DefineMethod("Equals", MethodAttributes.Virtual | MethodAttributes.Public, typeof (bool), new[] { typeof (Object) });
+      var il = method.GetILGenerator();
+      var local = il.DeclareLocal(type);
       il.Emit(OpCodes.Ldarg_1);
       il.Emit(OpCodes.Isinst, type);
       il.Emit(OpCodes.Stloc_0);
@@ -75,8 +75,8 @@ namespace Machine.Mta.MessageInterfaces
       });
       foreach (var pair in generatedMessage.Fields)
       {
-        FieldInfo field = pair.Value;
-        Label label = il.DefineLabel();
+        var field = pair.Value;
+        var label = il.DefineLabel();
         if (field.FieldType.IsArray)
         {
           il.Emit(OpCodes.Ldarg_0);
@@ -87,7 +87,7 @@ namespace Machine.Mta.MessageInterfaces
         }
         else if (field.FieldType.IsValueType && !field.FieldType.IsEnum && !field.FieldType.IsNullableType())
         {
-          MethodInfo valueEquals = field.FieldType.GetMethod("Equals", new [] { field.FieldType });
+          var valueEquals = field.FieldType.GetMethod("Equals", new [] { field.FieldType });
           il.Emit(OpCodes.Ldarg_0);
           il.Emit(OpCodes.Ldflda, field);
           il.Emit(OpCodes.Ldloc_0);
@@ -121,15 +121,15 @@ namespace Machine.Mta.MessageInterfaces
 
     protected void GenerateGetHashCode(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
     {
-      MethodInfo arrayGetHashCode = typeof(ArrayHelpers).GetMethod("GetHashCode", new[] { typeof(Array) });
-      MethodBuilder method = typeBuilder.DefineMethod("GetHashCode", MethodAttributes.Virtual | MethodAttributes.Public, typeof(Int32), new Type[0]);
-      ILGenerator il = method.GetILGenerator();
+      var arrayGetHashCode = typeof(ArrayHelpers).GetMethod("GetHashCode", new[] { typeof(Array) });
+      var method = typeBuilder.DefineMethod("GetHashCode", MethodAttributes.Virtual | MethodAttributes.Public, typeof(Int32), new Type[0]);
+      var il = method.GetILGenerator();
 
-      bool hasState = false;
+      var hasState = false;
       foreach (var pair in generatedMessage.Fields)
       {
-        FieldInfo field = pair.Value;
-        MethodInfo getHashCode = field.FieldType.GetMethod("GetHashCode", new Type[0]);
+        var field = pair.Value;
+        var getHashCode = field.FieldType.GetMethod("GetHashCode", new Type[0]);
         if (getHashCode == null)
         {
           getHashCode = typeof(Object).GetMethod("GetHashCode", new Type[0]);
@@ -180,11 +180,11 @@ namespace Machine.Mta.MessageInterfaces
 
     protected static void GenerateDictionaryConstructor(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
     {
-      MethodInfo dictionaryGetMethod = typeof(IDictionary<string, object>).GetMethod("get_Item");
-      ConstructorBuilder ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] { typeof(IDictionary<string, object>) });
+      var dictionaryGetMethod = typeof(IDictionary<string, object>).GetMethod("get_Item");
+      var ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] { typeof(IDictionary<string, object>) });
       ctorBuilder.DefineParameter(1, ParameterAttributes.None, "dictionary");
-      ILGenerator il = ctorBuilder.GetILGenerator();
-      foreach (KeyValuePair<string, FieldBuilder> property in generatedMessage.Fields)
+      var il = ctorBuilder.GetILGenerator();
+      foreach (var property in generatedMessage.Fields)
       {
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Ldarg_1);
@@ -205,10 +205,10 @@ namespace Machine.Mta.MessageInterfaces
 
     protected override void ImplementProperty(TypeBuilder typeBuilder, PropertyInfo property, GeneratedMessage state)
     {
-      FieldBuilder fieldBuilder = state[property.Name];
-      PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(property.Name, PropertyAttributes.None, property.PropertyType, new Type[0]);
-      MethodBuilder getMethod = typeBuilder.DefineMethod("get_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, property.PropertyType, new Type[0]);
-      ILGenerator ilGet = getMethod.GetILGenerator();
+      var fieldBuilder = state[property.Name];
+      var propertyBuilder = typeBuilder.DefineProperty(property.Name, PropertyAttributes.None, property.PropertyType, new Type[0]);
+      var getMethod = typeBuilder.DefineMethod("get_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, property.PropertyType, new Type[0]);
+      var ilGet = getMethod.GetILGenerator();
       ilGet.Emit(OpCodes.Ldarg_0);
       ilGet.Emit(OpCodes.Ldfld, fieldBuilder);
       ilGet.Emit(OpCodes.Ret);
@@ -216,9 +216,9 @@ namespace Machine.Mta.MessageInterfaces
       propertyBuilder.SetGetMethod(getMethod);
       typeBuilder.DefineMethodOverride(getMethod, property.GetGetMethod());
 
-      MethodBuilder setMethod = typeBuilder.DefineMethod("set_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, typeof(void), new[] { property.PropertyType });
+      var setMethod = typeBuilder.DefineMethod("set_" + propertyBuilder.Name, MethodAttributes.Virtual | MethodAttributes.Public, typeof(void), new[] { property.PropertyType });
       setMethod.DefineParameter(0, ParameterAttributes.None, "value");
-      ILGenerator ilSet = setMethod.GetILGenerator();
+      var ilSet = setMethod.GetILGenerator();
       ilSet.Emit(OpCodes.Ldarg_0);
       ilSet.Emit(OpCodes.Ldarg_1);
       ilSet.Emit(OpCodes.Stfld, fieldBuilder);
@@ -238,7 +238,7 @@ namespace Machine.Mta.MessageInterfaces
     
     private static void ReturnIfNull(ILGenerator il, Action ifNull)
     {
-      Label nope = il.DefineLabel();
+      var nope = il.DefineLabel();
       il.Emit(OpCodes.Brtrue, nope);
       ifNull();
       il.MarkLabel(nope);
@@ -246,8 +246,8 @@ namespace Machine.Mta.MessageInterfaces
 
     private static void IfNull(ILGenerator il, Action isTrue, Action isFalse)
     {
-      Label nope = il.DefineLabel();
-      Label done = il.DefineLabel();
+      var nope = il.DefineLabel();
+      var done = il.DefineLabel();
       il.Emit(OpCodes.Ldnull);
       il.Emit(OpCodes.Ceq); // Has 1 if NULL
       il.Emit(OpCodes.Ldc_I4_0);
@@ -265,7 +265,7 @@ namespace Machine.Mta.MessageInterfaces
   {
     public static bool IsNullableType(this Type type)
     {
-      return type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>);
+      return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
     }
   }
 
@@ -287,7 +287,7 @@ namespace Machine.Mta.MessageInterfaces
     public static Int32 GetHashCode(Array array)
     {
       if (array == null) return 0;
-      Int32 code = 0;
+      var code = 0;
       for (var i = 0; i < array.Length; ++i)
       {
         object value = array.GetValue(i);

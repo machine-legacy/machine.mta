@@ -26,8 +26,8 @@ namespace Machine.Mta.MessageInterfaces
 
     public IEnumerable<MessagePropertyError> VerifyDictionaryAndReturnMissingProperties(IDictionary<string, object> dictionary)
     {
-      List<string> given = new List<string>(dictionary.Keys);
-      foreach (MessageProperty property in _properties)
+      var given = new List<string>(dictionary.Keys);
+      foreach (var property in _properties)
       {
         given.Remove(property.Name);
         if (!dictionary.ContainsKey(property.Name))
@@ -35,17 +35,19 @@ namespace Machine.Mta.MessageInterfaces
           yield return new MessagePropertyError(property.Name, MessagePropertyErrorType.Missing);
         }
       }
-      foreach (string name in given)
+      foreach (var name in given)
       {
         yield return new MessagePropertyError(name, MessagePropertyErrorType.Extra);
       }
     }
   }
+  
   public enum MessagePropertyErrorType
   {
     Missing,
     Extra
   }
+  
   public class MessagePropertyError
   {
     readonly string _name;
@@ -67,6 +69,7 @@ namespace Machine.Mta.MessageInterfaces
       _type = type;
     }
   }
+  
   public class MessageProperty
   {
     readonly string _name;
@@ -95,14 +98,15 @@ namespace Machine.Mta.MessageInterfaces
       _type = type;
     }
   }
+  
   public class MessageDefinitionFactory
   {
     public MessageDefinition CreateDefinition(Type messageType)
     {
-      MessageDefinition definition = new MessageDefinition(messageType);
-      foreach (Type type in MessageTypeHelpers.TypesToGenerateForType(messageType))
+      var definition = new MessageDefinition(messageType);
+      foreach (var type in MessageTypeHelpers.TypesToGenerateForType(messageType))
       {
-        foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
         {
           if (!property.CanRead)
           {

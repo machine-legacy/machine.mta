@@ -8,7 +8,7 @@ namespace Machine.Mta.MessageInterfaces
   {
     public static IEnumerable<Type> TypesToGenerateForType(Type type)
     {
-      foreach (Type interfaceType in type.FindInterfaces((ignored, data) => true, null))
+      foreach (var interfaceType in type.FindInterfaces((ignored, data) => true, null))
       {
         yield return interfaceType;
       }
@@ -17,8 +17,8 @@ namespace Machine.Mta.MessageInterfaces
 
     public static IDictionary<string, object> ToDictionary(this object source)
     {
-      Dictionary<string, object> dictionary = new Dictionary<string, object>();
-      foreach (PropertyInfo property in source.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+      var dictionary = new Dictionary<string, object>();
+      foreach (var property in source.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
       {
         dictionary[property.Name] = property.GetValue(source, null);
       }

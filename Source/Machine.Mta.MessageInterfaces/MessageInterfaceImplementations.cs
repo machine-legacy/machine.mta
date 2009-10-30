@@ -1,26 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Linq;
 
 using Machine.Core.Utility;
-using System.Linq;
 
 namespace Machine.Mta.MessageInterfaces
 {
   public class MessageInterfaceImplementations : IMessageInterfaceImplementationsLookup
   {
-    static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MessageInterfaceImplementations));
     readonly Dictionary<Type, Type> _interfaceToClass = new Dictionary<Type, Type>();
     readonly Dictionary<Type, Type> _classToInterface = new Dictionary<Type, Type>();
     readonly IMessageInterfaceImplementationFactory _messageInterfaceImplementationFactory;
-    readonly IMessageRegisterer _registerer;
     readonly ReaderWriterLock _lock = new ReaderWriterLock();
     bool _generated;
 
-    public MessageInterfaceImplementations(IMessageInterfaceImplementationFactory messageInterfaceImplementationFactory, IMessageRegisterer registerer)
+    public MessageInterfaceImplementations(IMessageInterfaceImplementationFactory messageInterfaceImplementationFactory)
     {
       _messageInterfaceImplementationFactory = messageInterfaceImplementationFactory;
-      _registerer = registerer;
     }
 
     public Type GetClassFor(Type type)
@@ -67,12 +64,15 @@ namespace Machine.Mta.MessageInterfaces
       }
     }
 
-    void GenerateIfNecessary()
+    static void GenerateIfNecessary()
+    {
+    }
+
+    public void Initialize(IEnumerable<Type> messageTypes)
     {
       if (RWLock.UpgradeToWriterIf(_lock, () => !_generated))
       {
-        _log.Info("Generating");
-        foreach (var generated in _messageInterfaceImplementationFactory.ImplementMessageInterfaces(_registerer.MessageTypes.Where(type => type.IsInterface)))
+        foreach (var generated in _messageInterfaceImplementationFactory.ImplementMessageInterfaces(messageTypes.Where(type => type.IsInterface)))
         {
           _interfaceToClass[generated.Key] = generated.Value;
           _classToInterface[generated.Value] = generated.Key;

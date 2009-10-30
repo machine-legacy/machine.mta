@@ -77,7 +77,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResetContextMessageModule.cs" />
     <Compile Include="Serializing\Xml\MessageMapper.cs" />
-    <Compile Include="Serializing\Xml\MtaMessageMapper.cs" />
     <Compile Include="Serializing\Xml\XmlMessageSerializer.cs" />
     <Compile Include="Serializing\Xml\XmlTransportMessageSerializer.cs" />
     <Compile Include="StaticSubscriptionStorage.cs" />

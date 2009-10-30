@@ -8,20 +8,21 @@ namespace Machine.Mta.Serializing.Xml
   public class XmlTransportMessageSerializer : ITransportMessageSerializer
   {
     readonly XmlMessageSerializer _serializer;
-    readonly MtaMessageMapper _messageMapper;
-    readonly IMessageRegisterer _messageRegisterer;
+    readonly MessageMapper _mapper;
+    readonly IMessageRegisterer _registrar;
 
-    public XmlTransportMessageSerializer(MtaMessageMapper messageMapper, IMessageRegisterer messageRegisterer, XmlMessageSerializer serializer)
+    public XmlTransportMessageSerializer(MessageMapper messageMapper, IMessageRegisterer messageRegisterer, XmlMessageSerializer serializer)
     {
-      _messageMapper = messageMapper;
-      _messageRegisterer = messageRegisterer;
+      _mapper = messageMapper;
+      _registrar = messageRegisterer;
       _serializer = serializer;
     }
 
     public void Initialize()
     {
-      _serializer.MessageMapper = _messageMapper;
-      _serializer.MessageTypes = _messageRegisterer.MessageTypes.ToList();
+      _mapper.Initialize(_registrar.MessageTypes);
+      _serializer.MessageMapper = _mapper;
+      _serializer.MessageTypes = _registrar.MessageTypes.ToList();
     }
 
     public void Serialize(IMessage[] messages, Stream stream)
