@@ -38,7 +38,6 @@ namespace Machine.Mta
       var configure = Configure
         .With(types)
         .MachineBuilder(_container)
-        .StaticSubscriptionStorage()
         .XmlSerializer()
         .MsmqTransport()
           .On(properties.ListenAddress, properties.PoisonAddress)
@@ -59,7 +58,6 @@ namespace Machine.Mta
       var configure = Configure
         .With(types)
         .MachineBuilder(_container)
-        .StaticSubscriptionStorage()
         .XmlSerializer()
         .AmqpTransport()
           .On(properties.ListenAddress.ToString(), properties.PoisonAddress.ToString())
