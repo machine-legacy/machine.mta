@@ -25,6 +25,7 @@ namespace Machine.Mta.MessageInterfaces
         var generatedType = ImplementMessage(type);
         yield return new KeyValuePair<Type, Type>(type, generatedType);
       }
+      _assemblyBuilder.Save("Messages.dll");
     }
 
     private Type ImplementMessage(Type type, params Type[] extraInterfacesToAlwaysInclude)

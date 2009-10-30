@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
 using Machine.Mta.MessageInterfaces;
 using Machine.Specifications;
 
@@ -92,6 +92,9 @@ namespace Machine.Mta.Specs
 
     It should_have_same_hash_code = () =>
       message1.GetHashCode().ShouldEqual(message2.GetHashCode());
+
+    It should_generate_expected_string = () =>
+      message1.ToString().ShouldEqual("IAmAMessage<ObjectId=" + objectId + ", Name=Jacob>");
   }
 
   [Subject("Message Interfaces")]
@@ -214,10 +217,10 @@ namespace Machine.Mta.Specs
   {
     static IComplexMessage message1;
     static IComplexMessage message2;
+    static DateTime now = DateTime.UtcNow;
 
     Because of = () =>
     {
-      var now = DateTime.UtcNow;
       message1 = messageFactory.Create<IComplexMessage>(new {
         Id = objectId,
         Integer = 1,
@@ -239,6 +242,44 @@ namespace Machine.Mta.Specs
 
     It should_have_the_same_hash_code = () =>
       message1.GetHashCode().ShouldEqual(message2.GetHashCode());
+
+    It should_generate_an_awesome_string = () =>
+      message1.ToString().ShouldEqual("IComplexMessage<Id=" + objectId + ", Integer=1, DateTime=" + now + ", NullableDateTime=" + now + ", ArrayOfEnums=[Tuesday]>");
+  }
+
+  [Subject("Message Interfaces")]
+  public class with_a_message_with_nullable_types_that_are_null : DefaultMessageInterfaceImplementationFactorySpecs
+  {
+    static IComplexMessage message1;
+    static IComplexMessage message2;
+    static DateTime now = DateTime.UtcNow;
+
+    Because of = () =>
+    {
+      message1 = messageFactory.Create<IComplexMessage>(m => {
+        m.Id = objectId;
+        m.Integer = 1;
+        m.DateTime = now;
+        m.NullableDateTime = null;
+        m.ArrayOfEnums = new [] { DayOfWeek.Tuesday };
+      });
+      message2 = messageFactory.Create<IComplexMessage>(m => {
+        m.Id = objectId;
+        m.Integer = 1;
+        m.DateTime = now;
+        m.NullableDateTime = null;
+        m.ArrayOfEnums = new [] { DayOfWeek.Tuesday };
+      });
+    };
+
+    It should_be_equal = () =>
+      message1.ShouldEqual(message2);
+
+    It should_have_the_same_hash_code = () =>
+      message1.GetHashCode().ShouldEqual(message2.GetHashCode());
+
+    It should_generate_an_awesome_string = () =>
+      message1.ToString().ShouldEqual("IComplexMessage<Id=" + objectId + ", Integer=1, DateTime=" + now + ", NullableDateTime=(null), ArrayOfEnums=[Tuesday]>");
   }
 
   [Subject("Message Interfaces")]
@@ -274,10 +315,8 @@ namespace Machine.Mta.Specs
 
     Establish context = () =>
     {
-      factory = new DefaultMessageInterfaceImplementationFactory();
-      MessageRegisterer registerer = new MessageRegisterer();
-      registerer.AddMessageTypes(typeof(IAmAMessage), typeof(IHaveAChildMessage), typeof(ISampleMessage), typeof(IComplexMessage), typeof(IAnotherMessage));
       messageFactory = new MessageFactory();
+      messageFactory.Initialize(new[] { typeof(IAmAMessage), typeof(IHaveAChildMessage), typeof(ISampleMessage), typeof(IComplexMessage), typeof(IAnotherMessage) });
     };
   }
 

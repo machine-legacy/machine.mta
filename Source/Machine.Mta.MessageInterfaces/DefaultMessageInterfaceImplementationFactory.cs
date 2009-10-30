@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 
 namespace Machine.Mta.MessageInterfaces
 {
@@ -54,6 +55,7 @@ namespace Machine.Mta.MessageInterfaces
       GenerateDictionaryConstructor(typeBuilder, generatedMessage);
       GenerateEquals(typeBuilder, generatedMessage);
       GenerateGetHashCode(typeBuilder, generatedMessage);
+      GenerateToString(typeBuilder, generatedMessage);
       return generatedMessage;
     }
 
@@ -119,6 +121,92 @@ namespace Machine.Mta.MessageInterfaces
       il.Emit(OpCodes.Ret);
     }
 
+    protected void GenerateToString(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
+    {
+      var ctor = typeof(StringBuilder).GetConstructor(new Type[0]);
+      var objectToString = typeof(Object).GetMethod("ToString");
+      var appendObject = typeof(StringBuilder).GetMethod("Append", new[] { typeof(object) });
+      var arrayToString = typeof(ArrayHelpers).GetMethod("ToString", new[] { typeof(Array) });
+      var method = typeBuilder.DefineMethod("ToString", MethodAttributes.Virtual | MethodAttributes.Public, typeof(string), new Type[0]);
+      var il = method.GetILGenerator();
+      var local = il.DeclareLocal(typeof(StringBuilder));
+      var first = true;
+
+      il.Emit(OpCodes.Newobj, ctor);
+      il.Emit(OpCodes.Stloc_0);
+      il.Emit(OpCodes.Ldloc_0);
+      il.Emit(OpCodes.Ldstr, generatedMessage.MessageType.Name + "<");
+      il.Emit(OpCodes.Callvirt, appendObject);
+      il.Emit(OpCodes.Pop);
+
+      foreach (var pair in generatedMessage.Fields)
+      {
+        var field = pair.Value;
+        il.Emit(OpCodes.Ldloc_0);
+        il.Emit(OpCodes.Ldstr, (first ? "" : ", ") + pair.Key + "=");
+        il.Emit(OpCodes.Callvirt, appendObject);
+        il.Emit(OpCodes.Pop);
+
+        var toString = field.FieldType.GetMethod("ToString", new Type[0]);
+        if (toString == null)
+        {
+          toString = typeof(Object).GetMethod("ToString", new Type[0]);
+        }
+        il.Emit(OpCodes.Ldloc_0);
+        il.Emit(OpCodes.Ldarg_0);
+        if (field.FieldType.IsArray)
+        {
+          il.Emit(OpCodes.Ldfld, field);
+          il.Emit(OpCodes.Call, arrayToString);
+        }
+        else if (field.FieldType.IsValueType)
+        {
+          if (field.FieldType.IsEnum)
+          {
+            il.Emit(OpCodes.Ldfld, field);
+            il.Emit(OpCodes.Box, field.FieldType);
+            il.Emit(OpCodes.Callvirt, toString);
+          }
+          else
+          {
+            if (field.FieldType.IsNullableType())
+            {
+              il.Emit(OpCodes.Ldflda, field);
+              il.Emit(OpCodes.Call, field.FieldType.GetMethod("get_HasValue"));
+              IfFalse(il, delegate() { il.Emit(OpCodes.Ldstr, "(null)"); }, delegate() {
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldflda, field);
+                il.Emit(OpCodes.Callvirt, toString);
+              });
+            }
+            else
+            {
+              il.Emit(OpCodes.Ldflda, field);
+              il.Emit(OpCodes.Call, toString);
+            }
+          }
+        }
+        else
+        {
+          il.Emit(OpCodes.Ldfld, field);
+          IfNull(il, delegate() { il.Emit(OpCodes.Ldstr, "(null)"); }, delegate() {
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, field);
+            il.Emit(OpCodes.Callvirt, toString);
+          });
+        }
+        il.Emit(OpCodes.Callvirt, appendObject);
+        il.Emit(OpCodes.Pop);
+        first = false;
+      }
+
+      il.Emit(OpCodes.Ldloc_0);
+      il.Emit(OpCodes.Ldstr, ">");
+      il.Emit(OpCodes.Callvirt, appendObject);
+      il.Emit(OpCodes.Callvirt, objectToString);
+      il.Emit(OpCodes.Ret);
+    }
+
     protected void GenerateGetHashCode(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
     {
       var arrayGetHashCode = typeof(ArrayHelpers).GetMethod("GetHashCode", new[] { typeof(Array) });
@@ -178,7 +266,7 @@ namespace Machine.Mta.MessageInterfaces
       il.Emit(OpCodes.Ret);
     }
 
-    protected static void GenerateDictionaryConstructor(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
+    static void GenerateDictionaryConstructor(TypeBuilder typeBuilder, GeneratedMessage generatedMessage)
     {
       var dictionaryGetMethod = typeof(IDictionary<string, object>).GetMethod("get_Item");
       var ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] { typeof(IDictionary<string, object>) });
@@ -231,17 +319,29 @@ namespace Machine.Mta.MessageInterfaces
       }
     }
 
-    private static string MakeFieldName(PropertyInfo property)
+    static string MakeFieldName(PropertyInfo property)
     {
       return "_" + property.Name;
     }
     
-    private static void ReturnIfNull(ILGenerator il, Action ifNull)
+    static void ReturnIfNull(ILGenerator il, Action ifNull)
     {
       var nope = il.DefineLabel();
       il.Emit(OpCodes.Brtrue, nope);
       ifNull();
       il.MarkLabel(nope);
+    }
+
+    private static void IfFalse(ILGenerator il, Action isTrue, Action isFalse)
+    {
+      var yep = il.DefineLabel();
+      var done = il.DefineLabel();
+      il.Emit(OpCodes.Brtrue, yep);
+      isTrue();
+      il.Emit(OpCodes.Br, done);
+      il.MarkLabel(yep);
+      isFalse();
+      il.MarkLabel(done);
     }
 
     private static void IfNull(ILGenerator il, Action isTrue, Action isFalse)
@@ -290,13 +390,50 @@ namespace Machine.Mta.MessageInterfaces
       var code = 0;
       for (var i = 0; i < array.Length; ++i)
       {
-        object value = array.GetValue(i);
+        var value = array.GetValue(i);
         if (value != null)
         {
           code ^= value.GetHashCode();
         }
       }
       return code;
+    }
+
+    public static string ToString(Array array)
+    {
+      if (array == null) return "(null)";
+      var sb = new StringBuilder();
+      sb.Append("[");
+      for (var i = 0; i < array.Length; ++i)
+      {
+        if (i != 0)
+        {
+          sb.Append(", ");
+        }
+        var value = array.GetValue(i);
+        if (value != null)
+        {
+          sb.Append(value.ToString());
+        }
+        else
+        {
+          sb.Append("(null)");
+        }
+      }
+      sb.Append("]");
+      return sb.ToString();
+    }
+  }
+
+  public class Blah
+  {
+    public void Run()
+    {
+      DateTime? value = null;
+      if (value != null)
+      {
+        Console.WriteLine(value.Value);
+      }
     }
   }
 }
