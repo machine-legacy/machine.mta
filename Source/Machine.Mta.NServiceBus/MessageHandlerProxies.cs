@@ -23,9 +23,7 @@ namespace Machine.Mta
       var nsbContext = bus.CurrentMessageContext;
       using (CurrentMessageContext.Open(nsbContext.ReturnAddress.ToEndpointAddress(), nsbContext.Id))
       {
-        _log.Info("Consuming: " + message);
         _target.Consume(message);
-        _log.Info("Done consuming: " + message);
       }
     }
 
