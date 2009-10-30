@@ -16,6 +16,7 @@ namespace NServiceBus.Unicast.Transport.RabbitMQ
     public ConnectionProvider()
     {
       _connectionFactory = new ConnectionFactory();
+      _connectionFactory.Parameters.RequestedHeartbeat = 0;
     }
 
     public OpenedSession Open(string protocolName, string brokerAddress, bool transactional)
