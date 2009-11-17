@@ -15,21 +15,21 @@ namespace Machine.Mta
 {
   public static class MyConfigure
   {
-    public static MyConfigMsmqTransport MsmqTransport(this Configure config)
+    public static MyConfigMsmqTransport CustomizedMsmqTransport(this Configure config)
     {
       var cfg = new MyConfigMsmqTransport();
       cfg.Configure(config);
       return cfg;
     }
 
-    public static MyConfigUnicastBus UnicastBus(this Configure config)
+    public static MyConfigUnicastBus CustomizedUnicastBus(this Configure config)
     {
       var cfg = new MyConfigUnicastBus();
       cfg.Configure(config);
       return cfg;
     }
 
-    public static Configure XmlSerializer(this Configure config)
+    public static Configure CustomizedXmlSerializer(this Configure config)
     {
       var messageTypes = Configure.TypesToScan.Where(t => typeof(NServiceBus.IMessage).IsAssignableFrom(t)).ToList();
       config.Configurer.ConfigureComponent<XmlMessageSerializer>(ComponentCallModelEnum.Singleton).
@@ -37,14 +37,14 @@ namespace Machine.Mta
       return config;
     }
 
-    public static MyConfigMsmqSubscriptionStorage MsmqSubscriptionStorage(this Configure config)
+    public static MyConfigMsmqSubscriptionStorage CustomizedMsmqSubscriptionStorage(this Configure config)
     {
       var cfg = new MyConfigMsmqSubscriptionStorage();
       cfg.Configure(config);
       return cfg;
     }
 
-    public static Configure StaticSubscriptionStorage(this Configure config)
+    public static Configure CustomizedStaticSubscriptionStorage(this Configure config)
     {
       var cfg = new MyConfigStaticSubscriptionStorage();
       cfg.Configure(config);

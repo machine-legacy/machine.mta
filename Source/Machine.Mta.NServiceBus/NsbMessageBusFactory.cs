@@ -38,11 +38,11 @@ namespace Machine.Mta
       var configure = Configure
         .With(types)
         .MachineBuilder(_container)
-        .XmlSerializer()
-        .MsmqTransport()
+        .CustomizedXmlSerializer()
+        .CustomizedMsmqTransport()
           .On(properties.ListenAddress, properties.PoisonAddress)
         .Sagas()
-        .UnicastBus()
+        .CustomizedUnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageRouting);
       return Add(configure.CreateBus());
@@ -58,11 +58,11 @@ namespace Machine.Mta
       var configure = Configure
         .With(types)
         .MachineBuilder(_container)
-        .XmlSerializer()
+        .CustomizedXmlSerializer()
         .AmqpTransport()
           .On(properties.ListenAddress.ToString(), properties.PoisonAddress.ToString())
         .Sagas()
-        .UnicastBus()
+        .CustomizedUnicastBus()
           .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageRouting);
       return Add(configure.CreateBus());
