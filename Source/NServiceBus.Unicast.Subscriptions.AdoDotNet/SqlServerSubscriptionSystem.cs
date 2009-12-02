@@ -3,11 +3,11 @@ using System.Data.SqlClient;
 
 namespace NServiceBus.Unicast.Subscriptions.AdoDotNet
 {
-  public class SqlServerSubscrtipionSystem : IAdoNetSubscriptionSystem
+  public class SqlServerSubscriptionSystem : IAdoNetSubscriptionSystem
   {
     readonly string _connectionString;
 
-    public SqlServerSubscrtipionSystem(string connectionString)
+    public SqlServerSubscriptionSystem(string connectionString)
     {
       _connectionString = connectionString;
     }
