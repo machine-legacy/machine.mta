@@ -18,17 +18,17 @@ namespace Machine.Mta
       _mapper = mapper;
     }
 
-    public void Subscribe(string client, IList<string> messageTypes)
+    public void Subscribe(string client, IEnumerable<string> messageTypes)
     {
       _log.Info("Add: " + client + " " + String.Join(", ", messageTypes.ToArray()));
     }
 
-    public void Unsubscribe(string client, IList<string> messageTypes)
+    public void Unsubscribe(string client, IEnumerable<string> messageTypes)
     {
       _log.Info("Remove: " + client + " " + String.Join(", ", messageTypes.ToArray()));
     }
 
-    public IList<string> GetSubscribersForMessage(IList<string> messageTypes)
+    public IEnumerable<string> GetSubscribersForMessage(IEnumerable<string> messageTypes)
     {
       var found = new List<string>();
       foreach (var messageTypeName in messageTypes)

@@ -1,3 +1,5 @@
+using NServiceBus;
+
 namespace Machine.Mta.Timing
 {
   public class PublishEmptyMessageTask<T> : CreateMessageAndActOnItTask<T> where T : class, IMessage

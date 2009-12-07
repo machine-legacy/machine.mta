@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Machine.Mta.MessageInterfaces;
 using Machine.Specifications;
+using NServiceBus;
 
 namespace Machine.Mta.Specs
 {

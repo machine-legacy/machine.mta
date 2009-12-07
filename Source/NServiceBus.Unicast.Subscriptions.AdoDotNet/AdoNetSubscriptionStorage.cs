@@ -15,7 +15,7 @@ namespace NServiceBus.Unicast.Subscriptions.AdoDotNet
       _subscriptionSystem = subscriptionSystem;
     }
 
-    public void Subscribe(string address, IList<string> messageTypes)
+    public void Subscribe(string address, IEnumerable<string> messageTypes)
     {
       _log.Info("Subscribing " + address + " to " + String.Join(", ", messageTypes.ToArray()));
       using (var connection = CreateConnection())
@@ -30,7 +30,7 @@ namespace NServiceBus.Unicast.Subscriptions.AdoDotNet
       }
     }
 
-    public void Unsubscribe(string address, IList<string> messageTypes)
+    public void Unsubscribe(string address, IEnumerable<string> messageTypes)
     {
       _log.Info("Unsubscribing " + address + " to " + String.Join(", ", messageTypes.ToArray()));
       using (var connection = CreateConnection())
@@ -42,7 +42,7 @@ namespace NServiceBus.Unicast.Subscriptions.AdoDotNet
       }
     }
 
-    public IList<string> GetSubscribersForMessage(IList<string> messageTypes)
+    public IEnumerable<string> GetSubscribersForMessage(IEnumerable<string> messageTypes)
     {
       var subscribers = new List<string>();
       using (var connection = CreateConnection())

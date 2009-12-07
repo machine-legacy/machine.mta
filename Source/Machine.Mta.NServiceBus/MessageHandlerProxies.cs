@@ -4,7 +4,7 @@ using NServiceBus;
 
 namespace Machine.Mta
 {
-  public class MessageHandlerProxy<T, K> : IMessageHandler<T> where T : class, NServiceBus.IMessage, Machine.Mta.IMessage where K: Machine.Mta.IConsume<T>
+  public class MessageHandlerProxy<T, K> : IMessageHandler<T> where T : class, NServiceBus.IMessage where K: Machine.Mta.IConsume<T>
   {
     readonly log4net.ILog _log;
     readonly INsbMessageBusFactory _messageBusFactory;

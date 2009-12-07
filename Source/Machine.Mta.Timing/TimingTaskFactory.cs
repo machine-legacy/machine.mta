@@ -1,5 +1,6 @@
 using System;
 using Machine.Container;
+using NServiceBus;
 
 namespace Machine.Mta.Timing
 {

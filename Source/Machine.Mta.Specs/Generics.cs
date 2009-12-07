@@ -4,6 +4,7 @@ using System.Linq;
 
 using Machine.Mta.Sagas;
 using Machine.Specifications;
+using NServiceBus;
 
 namespace Machine.Mta.Specs.Generics
 {

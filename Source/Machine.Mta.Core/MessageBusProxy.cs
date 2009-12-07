@@ -1,5 +1,5 @@
 using System;
-using System.Runtime.Remoting.Messaging;
+using NServiceBus;
 
 namespace Machine.Mta
 {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Machine.Mta.MessageInterfaces;
+using NServiceBus;
 
 namespace Machine.Mta
 {

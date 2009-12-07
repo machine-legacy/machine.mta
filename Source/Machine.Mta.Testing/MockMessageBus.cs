@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Machine.Specifications;
+using NServiceBus;
 
 namespace Machine.Mta.Testing
 {

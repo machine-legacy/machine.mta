@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Machine.Mta.Timing;
 using Machine.Specifications;
-
+using NServiceBus;
 using Rhino.Mocks;
 
 namespace Machine.Mta.Specs.Timing.PublishMessageTaskSpecs

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using NServiceBus;
 using NServiceBus.MessageInterfaces;
 
 namespace Machine.Mta.Serializing.Xml
@@ -28,12 +29,12 @@ namespace Machine.Mta.Serializing.Xml
 
     public void Serialize(IMessage[] messages, Stream stream)
     {
-      _serializer.Serialize(messages.Cast<NServiceBus.IMessage>().ToArray(), stream);
+      _serializer.Serialize(messages.ToArray(), stream);
     }
 
     public IMessage[] Deserialize(Stream stream)
     {
-      return _serializer.Deserialize(stream).Cast<Machine.Mta.IMessage>().ToArray();
+      return _serializer.Deserialize(stream).ToArray();
     }
   }
 }
