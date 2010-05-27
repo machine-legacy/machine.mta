@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Unicast.Subscri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.ObjectBuilder.Machine", "NServiceBus.ObjectBuilder.Machine\NServiceBus.ObjectBuilder.Machine.csproj", "{C99F6DF8-1F8E-46C0-A909-D18564B5C379}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Machine.MessageInterfaces", "Machine.MessageInterfaces\Machine.MessageInterfaces.csproj", "{2CC3B78E-69D2-459E-B28B-82180B5C5348}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{C99F6DF8-1F8E-46C0-A909-D18564B5C379}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C99F6DF8-1F8E-46C0-A909-D18564B5C379}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C99F6DF8-1F8E-46C0-A909-D18564B5C379}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CC3B78E-69D2-459E-B28B-82180B5C5348}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CC3B78E-69D2-459E-B28B-82180B5C5348}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CC3B78E-69D2-459E-B28B-82180B5C5348}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CC3B78E-69D2-459E-B28B-82180B5C5348}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

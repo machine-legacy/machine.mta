@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
 
-using Machine.Core.Utility;
-
 namespace Machine.Mta.MessageInterfaces
 {
   public class MessageInterfaceImplementations

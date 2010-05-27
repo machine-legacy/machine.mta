@@ -62,9 +62,12 @@ namespace Machine.Mta
     {
       using (RWLock.AsReader(_lock))
       {
-        if (_owners.ContainsKey(messageType))
+        foreach (var owner in _owners)
         {
-          return _owners[messageType];
+          if (owner.Key.IsAssignableFrom(messageType))
+          {
+            return owner.Value;
+          }
         }
         return null;
       }

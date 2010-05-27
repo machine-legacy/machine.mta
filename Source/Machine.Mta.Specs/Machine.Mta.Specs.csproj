@@ -81,6 +81,10 @@
     <Compile Include="Timing\SimpleCronEntrySpecs.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Machine.MessageInterfaces\Machine.MessageInterfaces.csproj">
+      <Project>{2CC3B78E-69D2-459E-B28B-82180B5C5348}</Project>
+      <Name>Machine.MessageInterfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Machine.Mta.Core\Machine.Mta.Core.csproj">
       <Project>{9C7A8E98-28A6-4C32-B704-B3644925A08E}</Project>
       <Name>Machine.Mta.Core</Name>

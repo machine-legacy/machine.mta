@@ -35,15 +35,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\Logging\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Machine.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5c474de7a495cff1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Libraries\Machine\Container\Machine.Core.dll</HintPath>
-    </Reference>
     <Reference Include="NServiceBus, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\NServiceBus\NServiceBus.dll</HintPath>
     </Reference>
-    <Reference Include="NServiceBus.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
+    <Reference Include="NServiceBus.Core, Version=2.1.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libraries\NServiceBus\NServiceBus.Core.dll</HintPath>
     </Reference>
@@ -55,15 +51,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultMessageInterfaceImplementationFactory.cs" />
-    <Compile Include="MessageCreationException.cs" />
-    <Compile Include="MessageDefinitionFactory.cs" />
-    <Compile Include="MessageInterfaceImplementationFactory.cs" />
-    <Compile Include="MessageInterfaceImplementations.cs" />
-    <Compile Include="MessageTypeHelpers.cs" />
     <Compile Include="MessageMapper.cs" />
-    <Compile Include="OpaqueMessageFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Machine.MessageInterfaces\Machine.MessageInterfaces.csproj">
+      <Project>{2CC3B78E-69D2-459E-B28B-82180B5C5348}</Project>
+      <Name>Machine.MessageInterfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
