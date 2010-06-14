@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 
-using Machine.Container;
-
 namespace Machine.Mta.Timing
 {
-  public class TimingManager : IStartable, IDisposable
+  public class TimingManager : IDisposable
   {
     static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(TimingManager));
     readonly static TimeSpan OnceSecond = TimeSpan.FromSeconds(1.0);

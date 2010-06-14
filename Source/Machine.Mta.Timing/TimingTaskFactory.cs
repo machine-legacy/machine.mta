@@ -1,25 +1,22 @@
 using System;
-using Machine.Container;
 using NServiceBus;
 
 namespace Machine.Mta.Timing
 {
   public class TimingTaskFactory
   {
-    readonly IMachineContainer _container;
     readonly IMessageBus _bus;
     readonly IMessageFactory _factory;
 
-    public TimingTaskFactory(IMessageBus bus, IMessageFactory factory, IMachineContainer container)
+    public TimingTaskFactory(IMessageBus bus, IMessageFactory factory)
     {
       _bus = bus;
-      _container = container;
       _factory = factory;
     }
 
     public IOnceASecondTask Task<T>() where T : IOnceASecondTask
     {
-      return _container.Resolve.Object<T>();
+      return Microsoft.Practices.ServiceLocation.ServiceLocator.Current.GetInstance<T>();
     }
 
     public IOnceASecondTask SendLocalMessage<T>(ITrigger trigger) where T : class, IMessage

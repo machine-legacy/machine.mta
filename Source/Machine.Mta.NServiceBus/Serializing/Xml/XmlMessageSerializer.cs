@@ -17,10 +17,19 @@ namespace Machine.Mta.Serializing.Xml
 {
   public class XmlMessageSerializer : IMessageSerializer
   {
+    IMessageMapper _messageMapper;
+
     public IMessageMapper MessageMapper
     {
-      get;
-      set;
+      get { return _messageMapper; }
+      set
+      {
+        _messageMapper = value;
+        if (_messageTypes != null)
+        {
+          _messageMapper.Initialize(_messageTypes);
+        }
+      }
     }
 
     private string _nameSpace = "http://tempuri.net";

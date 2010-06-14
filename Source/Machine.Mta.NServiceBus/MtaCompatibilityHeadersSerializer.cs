@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NServiceBus;
+using NServiceBus.ObjectBuilder;
 using NServiceBus.Unicast.Transport;
+using NServiceBus.Unicast.Transport.Msmq.Config;
 
 namespace Machine.Mta
 {
@@ -38,6 +41,20 @@ namespace Machine.Mta
         CurrentSagaIds.UseIncoming(guids);
       }
       return headers;
+    }
+  }
+
+  public static class ConfigureMtaCompatibilityHeadersSerializer
+  {
+    public static MyConfigMsmqTransport MtaHeaderSerializer(this MyConfigMsmqTransport configure)
+    {
+      configure.Configurer.ConfigureComponent<MtaCompatibilityHeadersSerializer>(ComponentCallModelEnum.Singleton);
+      return configure;
+    }
+    public static ConfigMsmqTransport MtaHeaderSerializer(this ConfigMsmqTransport configure)
+    {
+      configure.Configurer.ConfigureComponent<MtaCompatibilityHeadersSerializer>(ComponentCallModelEnum.Singleton);
+      return configure;
     }
   }
 }

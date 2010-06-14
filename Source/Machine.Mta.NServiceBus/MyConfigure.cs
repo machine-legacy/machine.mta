@@ -10,6 +10,7 @@ using NServiceBus.Unicast;
 using NServiceBus.Unicast.Config;
 using NServiceBus.Unicast.Subscriptions.Msmq;
 using NServiceBus.Unicast.Transport.Msmq;
+using NServiceBus.Unicast.Queueing.Msmq.Config;
 
 namespace Machine.Mta
 {
@@ -32,6 +33,7 @@ namespace Machine.Mta
     public static Configure CustomizedXmlSerializer(this Configure config)
     {
       var messageTypes = Configure.TypesToScan.Where(t => typeof(NServiceBus.IMessage).IsAssignableFrom(t)).ToList();
+      config.Configurer.ConfigureComponent<Machine.Mta.MessageInterfaces.MessageMapper>(ComponentCallModelEnum.Singleton);
       config.Configurer.ConfigureComponent<XmlMessageSerializer>(ComponentCallModelEnum.Singleton).
                         ConfigureProperty(serializer => serializer.MessageTypes, messageTypes);
       return config;
@@ -60,6 +62,8 @@ namespace Machine.Mta
     {
       this.Builder = config.Builder;
       this.Configurer = config.Configurer;
+
+      config.MsmqMessageQueue();
 
       _config = Configurer.ConfigureComponent<MsmqTransport>(ComponentCallModelEnum.Singleton);
       _config.ConfigureProperty(t => t.IsTransactional, true);
