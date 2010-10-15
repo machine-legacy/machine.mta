@@ -40,10 +40,10 @@ namespace Machine.Mta
         .MachineBuilder(_container)
         .CustomizedXmlSerializer()
         .CustomizedMsmqTransport()
-          .On(properties.ListenAddress, properties.PoisonAddress)
+          .On(properties.ListenAddress, properties.PoisonAddress, properties.NumberOfWorkerThreads)
         .Sagas()
         .CustomizedUnicastBus()
-          .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
+          .LoadMessageHandlers(properties, First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageRouting);
       return Add(configure.CreateBus());
     }
@@ -63,7 +63,7 @@ namespace Machine.Mta
           .On(properties.ListenAddress.ToString(), properties.PoisonAddress.ToString())
         .Sagas()
         .CustomizedUnicastBus()
-          .LoadMessageHandlers(First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
+          .LoadMessageHandlers(properties, First<GridInterceptingMessageHandler>.Then<SagaMessageHandler>())
           .WithMessageRoutes(_messageRouting);
       return Add(configure.CreateBus());
     }

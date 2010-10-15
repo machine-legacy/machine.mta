@@ -68,12 +68,13 @@ namespace Machine.Mta
       _config.ConfigureProperty(t => t.MaxRetries, 3);
     }
 
-    public MyConfigMsmqTransport On(EndpointAddress listenAddress, EndpointAddress poisonAddress)
+    public MyConfigMsmqTransport On(EndpointAddress listenAddress, EndpointAddress poisonAddress, Int32 numberOfWorkerThreads)
     {
       if (listenAddress != EndpointAddress.Null)
         _config.ConfigureProperty(t => t.InputQueue, listenAddress.ToNsbAddress());
       if (poisonAddress != EndpointAddress.Null)
         _config.ConfigureProperty(t => t.ErrorQueue, poisonAddress.ToNsbAddress());
+      _config.ConfigureProperty(t => t.NumberOfWorkerThreads, numberOfWorkerThreads);
       return this;
     }
   }
@@ -128,7 +129,7 @@ namespace Machine.Mta
       return ConfigureMessageHandlersIn(NServiceBus.Configure.TypesToScan);
     }
 
-    public MyConfigUnicastBus LoadMessageHandlers<T>(First<T> order)
+    public MyConfigUnicastBus LoadMessageHandlers<T>(BusProperties properties, First<T> order)
     {
       var types = new List<Type>(NServiceBus.Configure.TypesToScan);
       foreach (var type in order.Types)
@@ -136,7 +137,7 @@ namespace Machine.Mta
         types.Remove(type);
       }
       types.InsertRange(0, order.Types);
-      return ConfigureMessageHandlersIn(types);
+      return ConfigureMessageHandlersIn(properties.OrderHandlers(types));
     }
 
     MyConfigUnicastBus ConfigureMessageHandlersIn(IEnumerable<Type> types)

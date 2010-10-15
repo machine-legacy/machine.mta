@@ -20,6 +20,7 @@ namespace Machine.Mta
     public IEnumerable<Type> AdditionalTypes { get; set; }
     public Int32 NumberOfWorkerThreads { get; set; }
     public TransportType TransportType { get; set; }
+    public Func<IEnumerable<Type>, IEnumerable<Type>> OrderHandlers { get; set; }
 
     public BusProperties()
     {
@@ -28,6 +29,7 @@ namespace Machine.Mta
       this.AdditionalTypes = new Type[0];
       this.NumberOfWorkerThreads = 1;
       this.TransportType = TransportType.Msmq;
+      this.OrderHandlers = x => x;
     }
   }
 
